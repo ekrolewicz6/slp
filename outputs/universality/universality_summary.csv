@@ -1,0 +1,4 @@
+test,relative_residual,mean_cosine_per_PC,median_top5_overlap,verdict,n_pairs,mean_signed_cos,fraction_positive,ratio_median_pwa_to_chi,median_chi_nn,median_ab_nn
+T1_procrustes,1.1340195895423945e-15,1.0,0.5,high_invariance,,,,,,
+T2_direction,,,,null,23.0,0.03351897178916021,0.6956521739130435,,,
+T3_manifold,,,,off_manifold,,,,5.384765135606316,1.2863766066844116,6.926835902933778

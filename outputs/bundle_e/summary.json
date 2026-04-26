@@ -1,0 +1,7 @@
+{
+  "n": 7483,
+  "coverage_target": 0.8,
+  "coverage_observed": 0.6598957637311239,
+  "median_mae_months": 7.616378483867794,
+  "mean_interval_width_months": 20.531814057109273
+}

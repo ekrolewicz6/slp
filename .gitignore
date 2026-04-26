@@ -1,0 +1,30 @@
+# Environments and caches
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.DS_Store
+
+# Secrets
+.env
+
+# Raw / intermediate / feature data — too large to commit, and raw
+# AphasiaBank / CHILDES transcripts have data-sharing restrictions
+# (TalkBank Approved-Access agreement). Keep these local.
+data/raw/
+data/parsed/
+data/features/
+data/audio/
+data/
+
+# Large model checkpoints
+*.bin
+*.safetensors
+
+# Outputs are committed (small CSVs + PNGs from analyses)
+# but skip any oversize artifacts
+*.parquet
+*.zip
+*.tar.gz

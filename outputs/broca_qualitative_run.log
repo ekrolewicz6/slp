@@ -1,0 +1,67 @@
+Common features: 55 raw → 41 after dropping 14 corpus-asymmetric extraction artifacts:
+    DROPPED: filler_per_utt
+    DROPPED: pause_per_utt
+    DROPPED: pos_coord_frac
+    DROPPED: pos_mod_frac
+    DROPPED: pos_neg_frac
+    DROPPED: rel_COMP_frac
+    DROPPED: rel_COORD_frac
+    DROPPED: rel_JCT_frac
+    DROPPED: rel_MOD_frac
+    DROPPED: rel_NEG_frac
+    DROPPED: rel_POBJ_frac
+    DROPPED: rel_PRED_frac
+    DROPPED: rel_SUBJ_frac
+    DROPPED: repetition_per_utt
+CHILDES: 19762 windows (6-84 mo)
+AB Broca PWAs: 300
+AB Other PWAs (Anomic/Wernicke/Conduction): 913
+AB Controls: 1624
+
+=== T1. Broca-vs-young-children comparison on key features ===
+  Broca MLU range (10–90 pct): 1.70 – 5.51
+  Matched-MLU children: 16414 windows  (mean age 38.9 mo, range 11.0–84.0)
+
+  K-S statistic per feature (Broca vs matched-MLU children):
+  Higher = more different. Top-10 most-different features:
+          feature  ks_stat  p_value  broca_mean  child_mean
+    rel_ROOT_frac    0.858    0.000       0.353       0.126
+     pos_aux_frac    0.738    0.000       0.043       0.005
+   rel_PUNCT_frac    0.673    0.000       0.049       0.010
+    mlu_morphemes    0.627    0.000       7.466       3.297
+  pos_unique_tags    0.612    0.000      12.713      15.671
+    pos_part_frac    0.544    0.000       0.007       0.027
+    pos_conj_frac    0.530    0.000       0.000       0.007
+retracing_per_utt    0.518    0.000       0.000       0.018
+     pos_inf_frac    0.509    0.000       0.000       0.004
+     rel_INF_frac    0.500    0.000       0.000       0.004
+
+=== T2. Classifier: Broca PWA vs MLU-matched children ===
+  Broca PWA vs MLU-matched children classifier
+  n: 300 Broca windows vs 16414 matched-MLU child windows
+  Accuracy = 1.000 (chance = 0.982)
+  F1 = 0.988
+  → Near-perfect = qualitative distinction; near-chance = same population
+
+=== T2b. CONTROL: AB Controls vs MLU-matched children ===
+  AB Controls in Broca's MLU range: 194 windows (out of 1624 total controls)
+  n: 194 AB-Control windows vs 16414 matched-MLU child windows
+  Accuracy = 0.980 (chance = 0.988)
+  F1 = 0.345
+  Compare to Broca-vs-children F1 = 0.988
+  ✓ Broca much more separable than Controls (ΔF1=+0.643): qualitative-distinction claim is supported beyond corpus baseline.
+
+=== T2c. Per-subtype: PWA vs MLU-matched children ===
+  Broca         n_pwa=300 MLU=1.7-5.5  vs n_chi=16414  F1=0.988  (chance=0.982)
+                  control AB-healthy in same MLU (n=194)  F1=0.345  ΔF1(pwa-ctl)=+0.643
+  Anomic        n_pwa=485 MLU=4.2-8.8  vs n_chi= 2386  F1=0.998  (chance=0.831)
+                  control AB-healthy in same MLU (n=749)  F1=0.889  ΔF1(pwa-ctl)=+0.108
+  Conduction    n_pwa=317 MLU=3.5-8.1  vs n_chi= 4620  F1=0.989  (chance=0.936)
+                  control AB-healthy in same MLU (n=477)  F1=0.743  ΔF1(pwa-ctl)=+0.246
+  Wernicke      n_pwa=111 MLU=3.6-7.3  vs n_chi= 4031  F1=0.978  (chance=0.973)
+                  control AB-healthy in same MLU (n=239)  F1=0.682  ΔF1(pwa-ctl)=+0.296
+
+=== T3. 2D PCA projection ===
+  saved 2D projection
+
+Done. Outputs in /Users/edankrolewicz/Code/Experiments/language-state-modeling/outputs/broca_qualitative

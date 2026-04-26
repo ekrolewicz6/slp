@@ -1,0 +1,2 @@
+n_train_pairs,n_test_pairs,n_test_children,z_l2_mae_no_change,z_l2_mae_pop_drift,z_l2_mae_learned,age_mae_floor_actual_z,age_mae_no_change,age_mae_pop_drift,age_mae_learned
+2113,230,12,3.942208831453793,3.766558999291356,3.449224346006078,4.417427679590498,5.692621791588007,4.957259431125808,4.729180901738499
