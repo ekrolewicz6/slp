@@ -3508,3 +3508,3958 @@ In priority order. Each becomes a paper-grade analysis if it lands.
   a method. Confusing but consistent in this version of pylangacq.
 - All trajectory models in `phase3_trajectory.models` are scale-
   invariant. Apparent "weighting" wrappers are no-ops. (See #9.)
+
+---
+
+### 50. Highest-learning review-grade suite
+**Date:** 2026-04-26 · **Confidence:** HIGH for methodology / MIXED for
+headline claims · **Script:** [scripts/run_highest_learning_experiments.py](scripts/run_highest_learning_experiments.py)
+
+**Goal.** Implement the review-grade follow-up plan after #49: clean the
+data joins, rerun the acoustic and developmental/universality claims under
+fold-clean preprocessing, add balanced patient-level controls, decompose
+multimodal mechanisms, retest WAB subtests, test early state change, and add
+a stimulus-conditioned Cinderella informativeness proxy.
+
+**Data hygiene first.** The strict loader drops all ambiguous duplicated
+`window_id`s rather than keeping the first row. That removed **303 rows
+across 128 duplicated window IDs** from AphasiaBank, leaving **3,805 clean
+windows**. CHILDES developmental comparisons are now **TD-only**:
+Eng-NA + Eng-UK only, **16,527 windows / 276 children**, with
+Clinical-Eng excluded.
+
+We also fixed future AphasiaBank rebuilds by changing transcript IDs from
+`section/corpus/stem` to the full path under `aphasiabank/`, because
+section/corpus/stem is not unique across PWA/control/task subfolders.
+
+**A. Strict acoustic replication of #48.**
+
+Patient-level, fold-clean, same acoustic-joined sample:
+
+| Setup | Accuracy | Balanced acc | Macro-F1 | Wernicke | Anomic | Conduction |
+|---|---:|---:|---:|---:|---:|---:|
+| structural | 0.763 | 0.584 | 0.600 | 0.294 | 0.533 | 0.680 |
+| acoustic | 0.733 | 0.509 | 0.500 | 0.154 | 0.514 | 0.591 |
+| structural+acoustic | 0.802 | 0.606 | 0.618 | 0.250 | 0.633 | 0.744 |
+| structural+embedding+acoustic | **0.814** | **0.628** | **0.647** | **0.385** | **0.644** | **0.758** |
+
+The patient-stratified version of the acoustic story broadly survives:
+full stack improves macro-F1 0.600 → 0.647, with gains for Anomic and
+Conduction and a smaller Wernicke gain than #48. However, **corpus-held-out
+CV is much weaker**: full-stack macro-F1 is only 0.409 and Wernicke F1 is
+0.0. The acoustic result is real for patient-level held-out evaluation, but
+not yet robust to site/protocol/domain shift.
+
+**B. Broca "damaged adult state" falsification of #49.**
+
+This is the most important update. The earlier window-level result said
+Broca vs MLU-matched children was uniquely separable beyond AB controls.
+Under balanced entity-level sampling, TD-only CHILDES, artifact-safe
+features, and leave-corpus-out checks, that headline **does not survive**.
+
+For Broca, artifact-safe features:
+
+| CV | PWA-vs-child F1 | Control-vs-child F1 | Delta F1 | Conservative lower bound |
+|---|---:|---:|---:|---:|
+| balanced entity | 0.986 | 0.973 | +0.013 | -0.021 |
+| leave-corpus-out | 0.988 | 0.967 | +0.022 | -0.018 |
+
+The same pattern holds for stricter `no_rel` and `surface_core` feature
+sets: Broca remains highly separable from children, but **healthy adult AB
+controls are almost equally separable**. So the prior #49 claim that Broca
+speech occupies a region "no neurotypical speaker reaches" should be
+downgraded. The safer interpretation is:
+
+> At patient/entity level, MLU-matched adult-vs-child separability is already
+> very high in AphasiaBank/CHILDES. Current data do not yet isolate a uniquely
+> Broca-specific child-distinction effect beyond the adult-control baseline.
+
+Negative controls behaved as expected: shuffled labels F1 0.528, random
+features F1 0.479. High-MLU adult controls vs children were also highly
+separable (F1 0.958), reinforcing that adult/child corpus and discourse
+differences are a major confound.
+
+**C. Principal-angle universality test.**
+
+Replacing over-permissive Procrustes with principal angles shows the
+developmental and aphasia/control subspaces are not trivially the same:
+CHILDES vs AB controls mean angle **55.3 deg**, CHILDES vs AB PWA
+**56.9 deg**, Broca vs AB controls **53.3 deg**. The "same axes" claim from
+#49 should be treated as weak or false under this stricter test.
+
+**D. Mechanistic multimodal subtype ablations.**
+
+Best balanced-patient pairwise results:
+
+| Pair | Best setup | Macro-F1 |
+|---|---|---:|
+| Wernicke vs Conduction | **acoustic_all** | **0.905** |
+| Wernicke vs Anomic | structural | 0.832 |
+| Conduction vs Anomic | structural+embedding+acoustic | 0.820 |
+| Broca vs Control | structural+embedding+acoustic | 0.991 |
+
+This sharpens the acoustic story: acoustics are especially important for
+**Wernicke vs Conduction**, not uniformly for every fluent-subtype contrast.
+Pitch features are the strongest acoustic sub-block for Wernicke vs
+Conduction (macro-F1 0.833 balanced-patient; 0.712 corpus-held-out).
+
+**E. Fold-clean WAB subtest decomposition.**
+
+On the all-modality acoustic-joined sample, WAB subtests remain mostly
+subtype-dominated. Patient-kfold best r values: WAB-AQ 0.829, Repetition
+0.817, Resp Speech 0.819, Sent Completion 0.824, Object Naming 0.802. Most
+best models are `subtype_only`; exceptions are InfoContent
+(`subtype+structural`, r=0.792) and SeqComm (`structural+embedding`,
+r=0.732). This confirms the circularity caveat: WAB-derived subtype labels
+carry much of the WAB subtest signal.
+
+**F. Longitudinal state-change-before-WAB.**
+
+Using NMF state dimensions on consecutive sessions:
+
+| Group | n pairs | mean |Delta AQ| | mean state L2 |
+|---|---:|---:|---:|
+| stable WAB | 67 | 0.83 | 0.100 |
+| changed WAB | 26 | 11.92 | 0.123 |
+
+There is modest speech-state movement even when WAB is stable, but early
+state change does **not** predict final AQ change in the available
+longitudinal sample: n=22, MAE 7.18, r=0.071. This remains a null for
+prognosis, not yet a digital-twin result.
+
+**G. Stimulus-conditioned Cinderella informativeness proxy.**
+
+The Salem/Cinderella concept-coverage proxy is the most promising new
+positive signal in this suite. On the full Salem sample:
+
+- `concept_coverage` vs WAB-AQ: **r=0.658** (n=305)
+- concept-only WAB-AQ regression: **r=0.673**, MAE 10.19
+- concept-only subtype classification: weak, macro-F1 0.258
+
+So stimulus-conditioned informativeness looks like a severity/functional
+communication signal, not a subtype signal. The AphasiaBank feature
+intersection with Salem is only 43 sessions, too small for a fair
+structural-vs-concept model comparison.
+
+**Synthesis.**
+
+This suite tightened the project substantially. It produced one major
+correction and two stronger next directions:
+
+1. **Corrective:** The strong #49 Broca-child headline is not publishable in
+   its current form. Adult-control separability absorbs almost all of the
+   effect under balanced entity-level tests.
+2. **Still valuable:** Multimodal subtype classification remains useful, but
+   Wernicke gains are more contrast-specific than the global #48 table
+   suggested; Wernicke-vs-Conduction is the clean acoustic win.
+3. **New best scientific direction:** Cinderella concept coverage / main
+   concept style scoring is a high-value severity signal and should become
+   the next serious discourse experiment.
+
+**Outputs:** [outputs/highest_learning/](outputs/highest_learning/) —
+`data_audit.json`, `strict_acoustic_subtype.csv`,
+`strict_acoustic_per_class.csv`, `broca_falsification.csv`,
+`broca_negative_controls.csv`, `principal_angles.csv`,
+`multimodal_mechanisms.csv`, `wab_subtests_strict.csv`,
+`longitudinal_state_pairs.csv`, `ciu_proxy_correlations.csv`,
+`ciu_proxy_models.csv`.
+
+---
+
+### 51. Cinderella content-state discovery
+**Date:** 2026-04-26 · **Confidence:** HIGH · **Scripts:**
+[scripts/run_salem_cinderella_deep.py](scripts/run_salem_cinderella_deep.py),
+[scripts/run_salem_concept_controls.py](scripts/run_salem_concept_controls.py),
+[scripts/run_salem_concept_hierarchy.py](scripts/run_salem_concept_hierarchy.py),
+[scripts/run_salem_within_subtype_concepts.py](scripts/run_salem_within_subtype_concepts.py),
+[scripts/run_salem_story_specificity.py](scripts/run_salem_story_specificity.py)
+
+**Goal.** #50 found a strong but shallow signal: Cinderella concept coverage
+correlated with WAB-AQ at r≈0.66 on the full Salem sample, but the existing
+AphasiaBank feature table only intersected 43 Salem sessions. We extracted
+structural features directly from the full Salem CHAT directory and asked the
+harder question: is stimulus-conditioned narrative content a better language
+state measure than our generic structural/acoustic features?
+
+**Dataset.** 353 Salem Cinderella sessions; 348 successfully extracted
+structural features; 300 sessions had both WAB-AQ and valid extracted
+features. Grouped CV is by participant, so repeated sessions do not leak.
+
+**A. Full-sample structure vs content.**
+
+| Setup | n | MAE | r |
+|---|---:|---:|---:|
+| structural discourse features | 300 | 11.97 | 0.501 |
+| observed Cinderella concepts | 300 | 9.92 | 0.699 |
+| target annotations only | 300 | 12.80 | 0.453 |
+| augmented concepts | 300 | 9.70 | 0.703 |
+| all concepts | 300 | 9.48 | 0.726 |
+| structural + observed concepts | 300 | **8.98** | **0.756** |
+
+This is the cleanest positive result since acoustics. A simple
+stimulus-conditioned content representation beats 56 generic structural
+features by a large margin on WAB-AQ prediction.
+
+**B. Not just verbosity / MLU.**
+
+Controls on the same 300 sessions:
+
+| Setup | Participant-grouped r | Corpus-held-out r |
+|---|---:|---:|
+| verbosity only | 0.453 | 0.437 |
+| structural core without verbosity | 0.361 | 0.350 |
+| observed concept count only | 0.700 | 0.720 |
+| observed concept binaries only | 0.680 | 0.712 |
+| verbosity + observed concepts | 0.748 | 0.753 |
+| structure + observed concepts | 0.750 | 0.751 |
+| WAB type only | 0.812 | 0.812 |
+| WAB type + observed concepts | **0.861** | **0.870** |
+
+So the concept signal is not reducible to "they said more words." It is
+stable under corpus-held-out evaluation, unlike the acoustic subtype result.
+It also adds information even on top of WAB subtype.
+
+**C. Story-specificity placebo.**
+
+We generated 100 random concept lexicons from the same observed transcript
+vocabulary, matched to the Cinderella concept-set sizes, and reran the same
+grouped-CV WAB-AQ prediction.
+
+| Lexicon | CV r | MAE |
+|---|---:|---:|
+| true Cinderella concepts | **0.699** | **9.93** |
+| random lexicon mean | 0.343 | — |
+| random lexicon 95th pct | 0.440 | — |
+| random lexicon max | 0.493 | — |
+
+The real Cinderella concept set beats the random-lexicon 95th percentile
+decisively. This is a story-specific content signal, not arbitrary common-word
+production.
+
+**D. Narrative concept hierarchy.**
+
+Individual observed concepts form a severity-ordered ladder. Logistic
+thresholds (WAB-AQ at P(mention)=0.5):
+
+| Easier concepts | Threshold AQ |
+|---|---:|
+| Cinderella | 63.2 |
+| ball/dance | 64.2 |
+| slipper/shoe | 70.7 |
+| midnight | 75.0 |
+| prince | 77.2 |
+| dress | 77.3 |
+| fit/try | 81.3 |
+| fairy godmother | 83.5 |
+| stepfamily | 87.2 |
+| carriage | 90.6 |
+
+Guttman-style hierarchy reproducibility is **0.774**, while random concept
+orders average 0.653 and their 95th percentile is 0.701. The concept ladder is
+not arbitrary.
+
+**E. Within-subtype severity.**
+
+Observed concept coverage predicts WAB-AQ within major subtypes:
+
+| Subtype | n | raw coverage r | best CV r from concepts |
+|---|---:|---:|---:|
+| Broca | 72 | 0.494 | 0.502 |
+| Conduction | 56 | 0.660 | 0.582 |
+| Wernicke | 27 | 0.704 | 0.474 |
+| Anomic | 115 | 0.418 | 0.250 |
+
+For Conduction and Wernicke, structural/verbosity models are near zero or
+negative, while concept coverage remains meaningful. This suggests the
+content-state score is measuring a clinical dimension that generic form-based
+speech features miss.
+
+**Synthesis — strongest project claim now.**
+
+> A 15-concept, stimulus-conditioned narrative content score from a Cinderella
+> retell predicts aphasia severity far better than generic structural discourse
+> features, survives participant- and corpus-held-out validation, adds signal
+> beyond WAB subtype, is story-specific against random lexicon placebos, and
+> forms a reproducible severity hierarchy.
+
+This is the first result in the project that feels genuinely paper-grade and
+potentially field-shaping. The acoustic work improves subtype classification;
+the content-state work points at a better construct for clinical monitoring:
+**not how syntactically complex the speech is, but how much of the intended
+event structure survives into the discourse.**
+
+**Next experiment.** Generalize beyond Cinderella. We need a second stimulus
+with known main concepts (Cat Rescue, Broken Window, Picnic, sandwich
+procedure, BATS, or any other AphasiaBank task with an expected event schema).
+If the same "stimulus-conditioned content ladder" replicates across prompts,
+this becomes the project's best publication target.
+
+**Outputs:** [outputs/salem_cinderella_deep/](outputs/salem_cinderella_deep/),
+[outputs/salem_concept_controls/](outputs/salem_concept_controls/),
+[outputs/salem_concept_hierarchy/](outputs/salem_concept_hierarchy/),
+[outputs/salem_within_subtype/](outputs/salem_within_subtype/),
+[outputs/salem_story_specificity/](outputs/salem_story_specificity/).
+
+---
+
+### 52. Cross-prompt content state: toward an interpretable discourse biomarker
+**Date:** 2026-04-26 · **Confidence:** VERY HIGH · **Scripts:**
+[scripts/run_cross_prompt_content.py](scripts/run_cross_prompt_content.py),
+[scripts/run_cross_prompt_hierarchy.py](scripts/run_cross_prompt_hierarchy.py),
+[scripts/run_cross_prompt_state_reliability.py](scripts/run_cross_prompt_state_reliability.py),
+[scripts/run_cross_prompt_placebo.py](scripts/run_cross_prompt_placebo.py)
+
+**Goal.** #51 showed that a hand-built Cinderella content score is much
+stronger than generic structural features. The critical follow-up was whether
+this is a Cinderella artifact or a general property of prompt-conditioned
+discourse. We parsed raw AphasiaBank Protocol CHAT files by `@G:` task block
+and scored expected concepts for Window, Umbrella, Cat, Sandwich, Flood, and
+Cinderella.
+
+**Important hygiene correction.** Some NEURAL-2 control transcripts contain a
+number in the `@ID` slot that our parser names `wab_aq`, but these are not
+valid PWA WAB-AQ severity scores. Controls are now used only for normative
+content calibration, never as WAB-labeled severity cases.
+
+**Dataset.** 7,153 task segments; 4,012 non-control WAB-labeled segments from
+851 patient roots. Core tasks:
+
+| Task | WAB non-control segments |
+|---|---:|
+| Window | 923 |
+| Cinderella | 899 |
+| Sandwich | 896 |
+| Cat | 582 |
+| Umbrella | 579 |
+| Flood | 133 |
+
+**A. Cross-prompt replication.**
+
+Grouped CV by patient root shows that prompt-conditioned content is not a
+single-story effect:
+
+| Pooled setup | n | MAE | r | patient-bootstrap 95% CI |
+|---|---:|---:|---:|---:|
+| observed content + task | 4,012 | 10.39 | **0.782** | 0.758-0.803 |
+| structure + observed content + task | 4,012 | 9.53 | **0.814** | 0.794-0.832 |
+| structure + task | 4,012 | 12.56 | 0.658 | 0.620-0.693 |
+| verbosity + task | 4,012 | 13.21 | 0.620 | 0.580-0.660 |
+| subtype only | 3,961 | 7.92 | 0.857 | 0.838-0.876 |
+| subtype + observed content + task | 3,961 | 6.14 | **0.918** | 0.908-0.928 |
+
+Content is not just a proxy for saying more. It adds a large amount over
+verbosity and structure, and it adds meaningful signal even on top of WAB
+subtype.
+
+**B. Task-specific replication.**
+
+Best content/structure models by task:
+
+| Task | Best setup | n | MAE | r |
+|---|---|---:|---:|---:|
+| Window | structure + observed | 923 | 9.30 | **0.836** |
+| Cinderella | structure + observed | 899 | 8.26 | **0.868** |
+| Sandwich | structure + observed | 896 | 9.61 | **0.812** |
+| Umbrella | structure + observed | 579 | 9.34 | **0.806** |
+| Cat | structure + observed | 582 | 9.08 | **0.793** |
+| Flood | structure + observed | 133 | 12.33 | 0.637 |
+
+Observed concept binaries alone are already strong for every large prompt
+(roughly r=0.75-0.82 except Flood). Target-augmented CHAT annotations do not
+improve the main result, which is good: the deployable observed-speech signal
+is enough.
+
+**C. Cross-task transfer.**
+
+Training on all other prompts and testing on a held-out prompt remains strong
+for the main tasks even when held-out patients are excluded from training:
+
+| Held-out task | Patient-disjoint train n | Test n | MAE | r |
+|---|---:|---:|---:|---:|
+| Cat | 1,059 | 582 | 10.09 | 0.787 |
+| Umbrella | 1,041 | 579 | 12.82 | 0.725 |
+| Cinderella | 150 | 899 | 23.98 | 0.706 |
+| Sandwich | 131 | 896 | 13.24 | 0.702 |
+| Flood | 3,122 | 133 | 14.58 | 0.560 |
+
+The small disjoint training sets for Cinderella and Sandwich make those
+numbers conservative. The main point survives: prompt-normalized content is
+not tied to one stimulus.
+
+**D. Concept ladders replicate across prompts.**
+
+Severity-ordered concept ladders beat random item orders for every task:
+
+| Task | Reproducibility | Random-order 95th pct |
+|---|---:|---:|
+| Window | **0.830** | 0.723 |
+| Sandwich | **0.828** | 0.705 |
+| Umbrella | **0.807** | 0.725 |
+| Cinderella | **0.795** | 0.734 |
+| Cat | **0.792** | 0.718 |
+| Flood | **0.744** | 0.741 |
+
+Examples of easier concepts: Window `soccer_ball/window/kick`, Cat
+`cat/dog/father`, Sandwich `butter/bread/jelly`, Umbrella `rain/mother`,
+Cinderella `slipper/ball/cinderella`. Harder concepts tend to be inferential
+or low-salience event details: Window `angry/run_away`, Cat `stuck/call`,
+Sandwich `cut/plate/eat`, Cinderella `castle/magic`.
+
+**E. Patient/session content state.**
+
+Aggregating prompt-normalized content by session gives a stable patient-level
+state:
+
+| Model | n sessions | MAE | r | patient-bootstrap 95% CI |
+|---|---:|---:|---:|---:|
+| content + verbosity | 907 | 7.42 | **0.890** | 0.872-0.907 |
+| content summary only | 907 | 8.47 | **0.863** | 0.843-0.882 |
+| core task vector | 907 | 8.48 | **0.860** | 0.841-0.879 |
+| subtype only | 894 | 8.07 | 0.857 | 0.839-0.874 |
+| verbosity summary | 907 | 12.06 | 0.698 | 0.658-0.740 |
+| subtype + content | 894 | 5.43 | **0.941** | 0.931-0.949 |
+
+This is the strongest measurement result in the project so far: a compact
+content-state representation from discourse matches or beats WAB subtype for
+WAB-AQ prediction, without using the subtype label.
+
+The content state is internally reliable across prompts:
+
+| Reliability check | n | r / alpha |
+|---|---:|---:|
+| picture prompts vs story/procedure | 517 | 0.818 |
+| short sequences vs Cinderella | 539 | 0.781 |
+| Cronbach alpha across five core prompts | 517 | **0.909** |
+
+Pairwise task-score correlations for the main prompts are mostly 0.66-0.78,
+with Flood weaker and probably less cleanly captured by the current lexicon.
+
+**F. Random-vocabulary placebo.**
+
+We sampled 100 random task vocabularies matched to the number of true concepts
+per prompt and reran grouped-CV WAB-AQ prediction.
+
+| Lexicon | n | MAE | r |
+|---|---:|---:|---:|
+| true prompt concepts | 4,012 | 10.42 | **0.782** |
+| random vocabulary mean | 4,012 | 16.41 | 0.307 |
+| random vocabulary 95th pct | 4,012 | 16.04 | 0.366 |
+| random vocabulary max | 4,012 | 15.64 | 0.405 |
+
+The true event-schema concepts dominate arbitrary task words. This strongly
+supports the interpretation that the model is measuring preservation of
+expected event content, not generic lexical output.
+
+**Synthesis — current best field-shaping claim.**
+
+> Across multiple AphasiaBank elicitation prompts, a small set of
+> stimulus-conditioned event concepts forms a reliable, interpretable
+> patient-level discourse content state. This state predicts aphasia severity
+> about as well as WAB subtype, adds signal beyond subtype, beats verbosity and
+> structural discourse features, transfers across prompts, forms severity
+> ladders, and defeats random-vocabulary placebos.
+
+This is now the project's strongest publishable direction. The scientific
+value is not another black-box classifier; it is an interpretable measurement
+proposal for SLP: quantify how much of the expected event structure survives
+into a patient's discourse, and use the missing concepts as clinically
+meaningful, prompt-specific targets.
+
+**Next experiments.**
+
+1. Replace hand-built lexicons with blinded SLP/main-concept annotations or
+   independently sourced prompt rubrics, then test inter-rater agreement vs
+   automatic scoring.
+2. Validate against external discourse outcome measures: CIU, main-concept
+   analysis, informativeness, functional communication ratings, and therapy
+   goals if available.
+3. Build a longitudinal content-state model: does content state move before
+   WAB-AQ, and does it detect clinically meaningful change in stable-WAB
+   patients?
+4. Expand to ASR/audio: can this score survive automatic transcription and
+   real clinic audio quality?
+5. Test treatment targetability: are the "hard" missing concepts trainable,
+   and does recovery follow the severity ladder within patient?
+
+**Outputs:** [outputs/cross_prompt_content/](outputs/cross_prompt_content/),
+[outputs/cross_prompt_hierarchy/](outputs/cross_prompt_hierarchy/),
+[outputs/cross_prompt_state/](outputs/cross_prompt_state/),
+[outputs/cross_prompt_placebo/](outputs/cross_prompt_placebo/).
+
+---
+
+### 53. Longitudinal content-state stress test
+**Date:** 2026-04-26 · **Confidence:** MEDIUM · **Script:**
+[scripts/run_cross_prompt_longitudinal.py](scripts/run_cross_prompt_longitudinal.py)
+
+**Goal.** The cross-prompt content state is now a strong cross-sectional
+severity measure. The next clinical question is harder: does it track change
+within patient, and can early content movement predict later WAB-AQ movement?
+
+**Dataset.** Reused the cross-prompt protocol content state, excluding
+controls from WAB modeling. We kept sessions with WAB-AQ and at least three
+core prompts. To catch both lettered sessions (`Fridriksson03a/b`) and numeric
+sessions (`1104-2/1104-4`), longitudinal roots strip a trailing session letter
+or numeric suffix.
+
+| Quantity | n |
+|---|---:|
+| WAB sessions with >=3 core tasks | 907 |
+| consecutive same-root pairs | 405 |
+| roots with >=3 sessions | 72 |
+
+**A. Consecutive-session change.**
+
+| Change feature | n pairs | r with ΔWAB-AQ | r with abs ΔWAB-AQ |
+|---|---:|---:|---:|
+| Δ content mean z | 405 | 0.177 | 0.227 |
+| Δ core content mean z | 405 | 0.178 | 0.236 |
+| Δ coverage mean | 405 | 0.211 | 0.260 |
+| Δ tokens mean | 405 | 0.053 | -0.039 |
+| Δ mean utterance length | 405 | 0.119 | 0.085 |
+
+Content change tracks WAB change better than verbosity change, but the effect
+is modest. Most repeated sessions have stable WAB: 378 pairs have |ΔWAB| < 5,
+only 27 have |ΔWAB| >= 5, and only 13 have |ΔWAB| >= 10.
+
+Mean absolute content movement is still visible when WAB is stable:
+
+| Pair type | n | mean abs Δ content z | mean abs Δ coverage |
+|---|---:|---:|---:|
+| stable WAB, abs ΔWAB < 5 | 378 | 0.461 | 0.061 |
+| changed WAB, abs ΔWAB >= 5 | 27 | 0.757 | 0.108 |
+| changed WAB, abs ΔWAB >= 10 | 13 | 1.000 | 0.143 |
+
+This suggests the content state may be more sensitive than WAB in some stable
+cases, but we cannot yet say whether those changes are clinically meaningful.
+
+**B. Early content change predicting later WAB change.**
+
+For roots with at least three sessions, leave-one-root-out prediction of later
+ΔWAB-AQ from early Δcontent/coverage/verbosity is null:
+
+| Target | n | MAE | r |
+|---|---:|---:|---:|
+| later ΔWAB-AQ | 72 | 2.62 | -0.009 |
+
+**Synthesis.** The content-state result remains very strong as a
+cross-sectional and interpretable severity measure. Longitudinal prediction is
+not solved. Content movement is real and larger in WAB-changing pairs, but
+early movement does not forecast later WAB change in the available repeated
+Protocol sessions.
+
+**Implication.** The next longitudinal experiment should not use WAB-AQ as
+the only target. We need external clinically meaningful change anchors:
+therapy goals, CIU/main-concept change, functional communication ratings,
+SLP-rated discourse informativeness, or patient-reported participation. WAB
+may be too coarse to reveal the value of a discourse-content state.
+
+**Outputs:** [outputs/cross_prompt_longitudinal/](outputs/cross_prompt_longitudinal/).
+
+---
+
+### 54. Robustness battery for the cross-prompt content biomarker
+**Date:** 2026-04-26 · **Confidence:** VERY HIGH · **Scripts:**
+[scripts/run_cross_prompt_robustness.py](scripts/run_cross_prompt_robustness.py),
+[scripts/run_cross_prompt_incremental_permutation.py](scripts/run_cross_prompt_incremental_permutation.py)
+
+**Goal.** #52 is now the central scientific claim, so we stress-tested it as
+if a hostile reviewer were looking for corpus shift, subtype confounding,
+task fragility, or label leakage. We used the patient/session content-state
+table, excluding controls from WAB modeling and keeping sessions with at least
+three core prompts.
+
+**A. Participant- and corpus-grouped CV.**
+
+The content-state result survives corpus grouping:
+
+| CV | Setup | n | MAE | r | patient/corpus bootstrap 95% CI |
+|---|---|---:|---:|---:|---:|
+| participant-grouped | content + verbosity | 907 | 7.42 | **0.890** | 0.872-0.908 |
+| participant-grouped | subtype only | 907 | 8.20 | 0.852 | 0.834-0.869 |
+| participant-grouped | subtype + content + verbosity | 907 | 5.50 | **0.938** | 0.928-0.948 |
+| corpus-grouped | content + verbosity | 907 | 7.99 | **0.878** | 0.834-0.893 |
+| corpus-grouped | subtype only | 907 | 8.42 | 0.841 | 0.798-0.872 |
+| corpus-grouped | subtype + content + verbosity | 907 | 6.10 | **0.928** | 0.905-0.940 |
+
+This directly addresses the acoustic-subtype failure mode from #50: unlike
+the acoustic Wernicke result, content-state severity does not collapse under
+corpus grouping.
+
+**B. Leave-one-corpus-out transfer.**
+
+For corpora with at least 50 eligible sessions, content + verbosity transfers
+well:
+
+| Held-out corpus | Test n | Mean WAB-AQ | MAE | r |
+|---|---:|---:|---:|---:|
+| NEURAL-2 | 128 | 84.2 | 6.94 | **0.883** |
+| Fridriksson-2 | 328 | 63.3 | 8.29 | **0.880** |
+| Kurland | 62 | 72.0 | 9.51 | **0.824** |
+| SCALE | 54 | 69.0 | 8.97 | **0.755** |
+
+Only four corpora are large enough for this strict test, but all four are
+positive.
+
+**C. Within-subtype severity prediction.**
+
+Content + verbosity beats verbosity alone inside every major subtype:
+
+| Subtype | n | content+verbosity r | verbosity r |
+|---|---:|---:|---:|
+| Broca | 270 | **0.822** | 0.460 |
+| Conduction | 141 | **0.796** | 0.293 |
+| Wernicke | 63 | **0.863** | 0.460 |
+| Anomic | 270 | **0.489** | 0.260 |
+| NotAphasic | 111 | **0.278** | 0.208 |
+
+This is important: the content-state score is not only reconstructing WAB
+subtype. It measures severity gradients inside subtype labels, especially in
+Broca, Conduction, and Wernicke.
+
+**D. Core-task ablation.**
+
+Dropping any one core prompt leaves the patient-state model strong:
+
+| Dropped task | n | MAE | r |
+|---|---:|---:|---:|
+| none | 907 | 8.48 | **0.860** |
+| Cat | 907 | 8.58 | 0.856 |
+| Umbrella | 907 | 8.61 | 0.856 |
+| Window | 907 | 8.67 | 0.855 |
+| Cinderella | 907 | 8.72 | 0.849 |
+| Sandwich | 907 | 9.37 | 0.832 |
+
+The score is not driven by a single prompt. Sandwich contributes the most
+unique information, but the biomarker survives without it.
+
+**E. Strict subtype-preserving permutation.**
+
+A naive subtype-preserving WAB shuffle still gives high raw `r`, because
+subtype means remain intact and content features encode subtype. The sharper
+test is the incremental gain over subtype-only. Actual labels:
+
+| Model | r | MAE |
+|---|---:|---:|
+| subtype only | 0.852 | 8.20 |
+| subtype + content + verbosity | **0.938** | **5.50** |
+| incremental gain | **+0.087** | **+2.70 MAE improvement** |
+
+Across 200 WAB shuffles within subtype:
+
+| Null summary | Δr over subtype-only | ΔMAE improvement |
+|---|---:|---:|
+| mean | -0.015 | -0.409 |
+| 95th pct | -0.009 | -0.258 |
+| max | -0.004 | -0.150 |
+
+Actual incremental gain is far beyond the null. Content adds real
+within-subtype severity information.
+
+**F. Within-subtype permutation tests.**
+
+For each subtype, we shuffled WAB labels inside that subtype 200 times and
+reran the content+verbosity model:
+
+| Subtype | Actual r | Permuted mean r | Permuted 95th pct r | Beats null? |
+|---|---:|---:|---:|---|
+| Anomic | 0.489 | 0.011 | 0.136 | yes |
+| Broca | 0.822 | -0.011 | 0.100 | yes |
+| Conduction | 0.796 | -0.012 | 0.164 | yes |
+| NotAphasic | 0.278 | -0.023 | 0.176 | yes |
+| Wernicke | 0.863 | -0.021 | 0.228 | yes |
+
+This is the cleanest falsification test so far, and it supports the claim.
+
+**Synthesis.** The content-state biomarker has now survived the main
+review-grade threats:
+
+1. participant leakage: grouped by patient root;
+2. corpus/site shift: corpus-grouped and leave-one-corpus-out remain strong;
+3. subtype confounding: content adds beyond subtype and works within subtype;
+4. single-task fragility: leave-one-task-out ablations remain strong;
+5. arbitrary vocabulary: true concepts beat random task vocabulary;
+6. label leakage/chance: strict permutation tests pass.
+
+At this point, the best scientific claim is no longer just "content predicts
+WAB." It is:
+
+> Aphasia discourse contains a reliable, prompt-conditioned event-content
+> state that is interpretable at the item level, stable across elicitation
+> prompts, robust across corpora, and clinically meaningful beyond WAB subtype.
+
+**What is still missing for a field-changing paper.** We need an external
+clinical anchor that is not WAB: blinded SLP discourse ratings, main-concept
+analysis, CIU/informativeness, functional communication, participation, or
+therapy-response targets. The longitudinal WAB-only test in #53 suggests WAB
+is too coarse to be the final validation endpoint.
+
+**Outputs:** [outputs/cross_prompt_robustness/](outputs/cross_prompt_robustness/),
+[outputs/cross_prompt_incremental_permutation/](outputs/cross_prompt_incremental_permutation/).
+
+---
+
+### 55. Public discourse-outcome validation
+**Date:** 2026-04-26 · **Confidence:** HIGH · **Script:**
+[scripts/run_public_discourse_validation.py](scripts/run_public_discourse_validation.py)
+
+**Goal.** The biggest weakness after #54 was external validation beyond
+WAB-AQ. We downloaded public AphasiaBank discourse resources and joined them
+to our content-state table:
+
+- Fergadiotis 2018 spreadsheet: CIU counts/percentages for free speech,
+  Cinderella, and Umbrella, plus BNT/WAB/VNT columns.
+- Cunningham & Haley 2020 spreadsheet: WIM, MATTR-5, word count, WAB-AQ,
+  WAB subtests, VNT, sentence comprehension.
+- Official AphasiaBank Main Concept rule documents for Window, Umbrella, Cat,
+  Cinderella, and Sandwich were downloaded for later rubric replacement.
+
+Sources: AphasiaBank discourse resources at
+https://talkbank.org/aphasia/discourse/ and Main Concept Analysis materials at
+https://talkbank.org/aphasia/discourse/MainConcepts/.
+
+**Dataset overlap.**
+
+| Public source | Joined rows | Patient roots |
+|---|---:|---:|
+| Fergadiotis 2018 | 113 | 113 |
+| Cunningham & Haley 2020 | 258 | 258 |
+
+**A. CIU validation.**
+
+Content state predicts published CIU percentages well:
+
+| Outcome | Best content-relevant setup | n | MAE | CV r |
+|---|---|---:|---:|---:|
+| Cinderella CIU % | subtype + content | 106 | 0.119 | **0.669** |
+| Cinderella CIU % | content state | 106 | 0.119 | **0.660** |
+| Umbrella CIU % | content + verbosity | 111 | 0.143 | **0.616** |
+| Free speech CIU % | subtype + content | 113 | 0.177 | 0.362 |
+
+Direct correlations tell the same story:
+
+| Outcome | Content feature | n | r |
+|---|---|---:|---:|
+| Cinderella CIU % | core content mean z | 106 | **0.662** |
+| Umbrella CIU % | core content mean z | 111 | **0.576** |
+| Free speech CIU % | core content mean z | 113 | 0.377 |
+
+The weaker free-speech result is expected: our content state is
+prompt-conditioned, while free speech lacks a fixed expected event schema.
+
+**B. Cunningham/Haley WIM and word count.**
+
+WIM behaves partly like an informativeness measure and partly like a verbosity
+measure:
+
+| Outcome | Best setup | n | CV r |
+|---|---|---:|---:|
+| WIM | verbosity state | 258 | **0.736** |
+| WIM | content + verbosity | 258 | 0.720 |
+| WIM | task verbosity | 258 | 0.680 |
+| word count | content + verbosity | 258 | 0.685 |
+
+Direct correlations:
+
+| Outcome | Feature | n | r |
+|---|---|---:|---:|
+| WIM | Cinderella token count | 258 | 0.677 |
+| WIM | mean token count | 258 | 0.655 |
+| WIM | core content mean z | 258 | 0.619 |
+| WIM | Cinderella content z | 258 | 0.582 |
+
+Interpretation: WIM is a useful external discourse anchor, but in this sample
+it is highly length-sensitive. CIU percentage is a cleaner validation of
+content efficiency.
+
+**C. Clinical/lexical external outcomes.**
+
+Content state also predicts published lexical and clinical measures:
+
+| Outcome | Best content-relevant setup | n | CV r |
+|---|---|---:|---:|
+| Cunningham naming AQ | subtype + content | 248 | **0.621** |
+| Cunningham VNT total | subtype + content | 246 | **0.696** |
+| Cunningham WAB information content | content + verbosity | 255 | **0.590** |
+| Fergadiotis BNT | subtype + content | 113 | **0.739** |
+| Fergadiotis VNT | subtype + content | 112 | **0.732** |
+| Fergadiotis WAB score | content + verbosity | 108 | **0.657** |
+
+Direct correlations with core content mean z are strong for WAB-AQ, VNT,
+spontaneous speech score, naming, and information content, while token counts
+are much weaker for most clinical outcomes.
+
+**Synthesis.** This is the first external validation of the content-state
+biomarker against published discourse outcomes. It supports the main claim
+with an important qualification:
+
+> Prompt-conditioned content state is strongly aligned with CIU efficiency and
+> lexical/clinical outcomes, but not every published discourse metric is pure
+> informativeness; WIM in this sample is substantially verbosity-sensitive.
+
+This strengthens the field-facing argument. SLPs need measures that separate
+"said more" from "communicated the expected content." The content-state score
+does that better than raw WIM/word count and aligns with CIU percentage.
+
+**Next task.** Use official Main Concept rule documents to replace heuristic
+concept lexicons with published scoring rubrics, then compare rubric-derived
+content state against the current heuristic state.
+
+**Outputs:** [outputs/public_discourse_validation/](outputs/public_discourse_validation/),
+downloaded resources in [data/external/aphasiabank_discourse/](data/external/aphasiabank_discourse/).
+
+---
+
+### 56. Minimal and adaptive content assessment
+**Date:** 2026-04-26 · **Confidence:** HIGH · **Script:**
+[scripts/run_minimal_adaptive_assessment.py](scripts/run_minimal_adaptive_assessment.py)
+
+**Goal.** SLPs do not have unlimited assessment time. If content state is to
+change care, we need to know how many prompts are enough and which prompts
+should come first. We evaluated every subset of the five core protocol tasks
+on complete five-task sessions.
+
+**Dataset.** 517 non-control WAB-labeled sessions with Cat, Cinderella,
+Sandwich, Umbrella, and Window content scores.
+
+**A. Best prompt subsets.**
+
+| # prompts | Best subset | r with full five-prompt state | raw r with WAB-AQ | CV WAB-AQ r |
+|---:|---|---:|---:|---:|
+| 1 | Cinderella | 0.870 | 0.736 | **0.753** |
+| 1 | Cat | **0.891** | 0.737 | 0.728 |
+| 2 | Cinderella + Sandwich | 0.925 | 0.790 | **0.779** |
+| 2 | Cat + Cinderella | **0.948** | 0.793 | 0.777 |
+| 3 | Cat + Cinderella + Sandwich | 0.966 | 0.815 | **0.804** |
+| 4 | Cat + Cinderella + Sandwich + Window | 0.985 | 0.819 | **0.814** |
+| 5 | all five | 1.000 | 0.813 | **0.818** |
+
+**B. Greedy adaptive order.**
+
+The best greedy order for WAB prediction is:
+
+1. Cinderella
+2. Sandwich
+3. Cat
+4. Window
+5. Umbrella
+
+Performance by step:
+
+| Step | Prompts used | r with full state | MAE | CV WAB-AQ r |
+|---:|---|---:|---:|---:|
+| 1 | Cinderella | 0.870 | 9.38 | 0.753 |
+| 2 | Cinderella + Sandwich | 0.925 | 8.90 | 0.779 |
+| 3 | Cinderella + Sandwich + Cat | 0.966 | 8.41 | 0.804 |
+| 4 | + Window | 0.985 | 8.02 | 0.814 |
+| 5 | + Umbrella | 1.000 | 8.03 | 0.818 |
+
+**Synthesis.** Three prompts appear to be a practical high-value compromise:
+Cinderella + Sandwich + Cat recovers 96.6% of the five-prompt content state
+and nearly all of the WAB-AQ prediction available from all five prompts.
+
+This matters operationally. A clinic could run a short 3-prompt discourse
+assessment and still obtain a robust content-state estimate. The fifth prompt
+adds little for WAB prediction, though it may still add item-level treatment
+targets.
+
+**Next task.** Convert the item-level content matrix into treatment target
+recommendations: which missing concepts are near a patient's current ability
+and therefore plausible therapy targets?
+
+**Outputs:** [outputs/minimal_adaptive_assessment/](outputs/minimal_adaptive_assessment/).
+
+---
+
+### 57. Treatment-target sequencing from content items
+**Date:** 2026-04-26 · **Confidence:** HIGH for target-selection validity,
+LOW for treatment efficacy · **Script:**
+[scripts/run_treatment_target_sequencing.py](scripts/run_treatment_target_sequencing.py)
+
+**Goal.** Measurement alone does not change outcomes. SLPs need actionable
+therapy targets. This experiment asked whether item-level content data can
+predict which specific event concepts a patient will mention or miss, using
+broader content ability estimated from other prompts. If yes, missing concepts
+near the patient's ability level become plausible treatment targets.
+
+**Important caveat.** This is not a treatment-response experiment. We do not
+yet know whether training the recommended concepts improves discourse or
+generalizes. It validates target-selection logic, not therapy efficacy.
+
+**Dataset.** 47,114 item observations from 907 participants/sessions across
+61 event concepts. For each item, ability was estimated from the other core
+tasks, so the model is not simply reading the same prompt's score back.
+
+**A. Item-hit prediction.**
+
+| Model | AUC | Average precision | Brier | Accuracy @ 0.5 |
+|---|---:|---:|---:|---:|
+| ability + item + subtype | **0.856** | **0.841** | **0.155** | 0.775 |
+| ability + item | **0.855** | 0.838 | **0.155** | 0.774 |
+| WAB-AQ + item | 0.845 | 0.830 | 0.161 | 0.766 |
+| item popularity only | 0.756 | 0.707 | 0.200 | 0.690 |
+| ability only | 0.727 | 0.668 | 0.210 | 0.667 |
+
+The key finding is that `ability + item` nearly matches `ability + item +
+subtype`, and beats `WAB-AQ + item`. The content-state ability estimate is
+therefore clinically useful for item-level target selection.
+
+**B. Calibration.**
+
+The model is well calibrated enough to support target-zone logic:
+
+| Predicted bin | Observed hit rate |
+|---|---:|
+| 0.0-0.1 | 0.057 |
+| 0.2-0.3 | 0.225 |
+| 0.4-0.5 | 0.399 |
+| 0.5-0.6 | 0.517 |
+| 0.7-0.8 | 0.745 |
+| 0.9-1.0 | 0.940 |
+
+**C. Item difficulty examples.**
+
+Hardest low-hit concepts:
+
+| Item | Hit rate |
+|---|---:|
+| Sandwich: plate | 0.059 |
+| Window: run away | 0.065 |
+| Cinderella: magic | 0.078 |
+| Window: angry | 0.106 |
+| Window: inside | 0.141 |
+| Sandwich: cut | 0.169 |
+| Umbrella: lesson | 0.202 |
+
+Easiest high-hit concepts:
+
+| Item | Hit rate |
+|---|---:|
+| Cat: cat | 0.862 |
+| Window: soccer ball | 0.837 |
+| Umbrella: rain | 0.813 |
+| Sandwich: butter | 0.805 |
+| Sandwich: bread | 0.772 |
+| Cat: dog | 0.753 |
+
+**D. Target-zone recommendations.**
+
+The script outputs up to 10 missed concepts per participant with predicted hit
+probability between 0.25 and 0.70, centered near 0.45. These are not "the
+easiest missed words"; they are near-threshold event concepts that may be
+reachable enough for therapy while still representing real discourse gaps.
+
+**Synthesis.** This is the first step from assessment toward intervention:
+
+> A prompt-conditioned content state can estimate patient ability well enough
+> to predict item-level event concept success, enabling personalized lists of
+> plausible next discourse targets.
+
+This could matter clinically because treatment planning is often bottlenecked
+by target selection. The next necessary data are therapy outcomes: do
+near-threshold content targets improve faster than too-easy, too-hard, or
+generic lexical targets, and does improvement generalize to untrained
+discourse?
+
+**Outputs:** [outputs/treatment_target_sequencing/](outputs/treatment_target_sequencing/).
+
+---
+
+### 58. ASR/noise robustness simulation
+**Date:** 2026-04-26 · **Confidence:** MEDIUM-HIGH · **Script:**
+[scripts/run_asr_noise_robustness.py](scripts/run_asr_noise_robustness.py)
+
+**Goal.** A discourse biomarker that requires perfect CHAT transcripts will
+not change everyday SLP care. This experiment simulated imperfect transcripts
+by randomly deleting and substituting tokens, then rescored prompt concepts
+and recomputed patient-level content state.
+
+**Important caveat.** This is not a real ASR benchmark. Real aphasic speech
+recognition errors are structured: neologisms, phonemic paraphasias, dysarthria,
+false word substitutions, timing errors, and omissions are not random. This
+simulation is a first stress test, not deployment validation.
+
+**Dataset.** 907 non-control WAB-labeled sessions with at least three core
+task scores. Each noise condition was repeated 50 times except the no-noise
+baseline.
+
+**Results.**
+
+| Noise condition | Token retention | r noisy vs original state | r noisy state vs WAB-AQ | Mean abs state error |
+|---|---:|---:|---:|---:|
+| none | 1.00 | 1.000 | 0.835 | 0.000 |
+| 5% deletion | 0.95 | 0.998 | 0.831 | 0.075 |
+| 10% deletion | 0.90 | 0.995 | 0.826 | 0.154 |
+| 10% deletion + 5% substitution | 0.90 | 0.993 | 0.821 | 0.230 |
+| 20% deletion | 0.80 | 0.989 | 0.814 | 0.329 |
+| 20% deletion + 10% substitution | 0.80 | 0.982 | 0.802 | 0.489 |
+| 30% deletion | 0.70 | 0.980 | 0.798 | 0.532 |
+| 30% deletion + 15% substitution | 0.70 | 0.968 | 0.778 | 0.778 |
+| 40% deletion | 0.60 | 0.968 | 0.779 | 0.766 |
+| 50% deletion | 0.50 | 0.951 | 0.755 | 1.040 |
+
+**Synthesis.** The content-state score is surprisingly robust to random token
+loss. Because concepts are aggregated across prompts and items, the patient
+state remains stable even when many individual words disappear.
+
+This matters for future care delivery:
+
+> A prompt-conditioned event-content score may be practical with imperfect
+> transcripts, because it degrades gradually rather than catastrophically under
+> substantial token loss.
+
+**Next validation needed.** Run actual ASR on AphasiaBank audio or a clinic-like
+audio sample, then compare:
+
+1. human CHAT transcript content state;
+2. raw ASR transcript content state;
+3. ASR + aphasia-aware normalization;
+4. clinician-corrected ASR transcript content state.
+
+The random-noise result says this direction is worth pursuing; it does not
+replace real ASR validation.
+
+**Outputs:** [outputs/asr_noise_robustness/](outputs/asr_noise_robustness/).
+
+---
+
+## High-Impact SLP Experiment Queue
+**Date added:** 2026-04-26
+
+The project has moved from broad exploration to a concrete candidate for
+practice-changing SLP measurement: prompt-conditioned event-content state. The
+next experiments should optimize for impact on care, not model novelty.
+
+**Clinical north star.** SLPs need tools that:
+
+1. identify what a patient can communicate functionally, not just what errors
+   they make;
+2. choose therapy targets that are reachable and meaningful;
+3. detect real change faster than coarse standardized batteries;
+4. work from ordinary clinic speech, including noisy audio and ASR;
+5. generalize beyond one disorder, site, or hand-built scoring rubric;
+6. produce explanations that clinicians and patients can act on.
+
+### Active Task Queue
+
+| Priority | Experiment | Why it matters | Data |
+|---:|---|---|---|
+| 1 | Public discourse-outcome validation | Tests content state against CIU, WIM, MATTR, WAB subtests, not just WAB-AQ | Public AphasiaBank discourse spreadsheets |
+| 2 | Minimal/adaptive assessment | Finds the shortest prompt set that estimates content state accurately | Existing protocol prompts |
+| 3 | Treatment-target sequencing | Turns missing concepts into personalized therapy targets | Existing concept item matrix |
+| 4 | Main-concept rubric replacement | Replace heuristic lexicons with AphasiaBank main-concept rubrics and compare | Public MCA materials |
+| 5 | ASR/noise robustness | Determines whether the score survives real-world transcription/audio quality | AphasiaBank audio if available locally; otherwise ASR simulation |
+| 6 | Clinically meaningful change | Estimate reliable change thresholds and false-positive rates for content state | Existing repeated sessions; needs external therapy anchors |
+| 7 | Cross-disorder generalization | Test whether event-content state distinguishes aphasia/TBI/RHD/dementia/stuttering phenotypes | TalkBank public/approved-access corpora |
+| 8 | Patient-facing explanation quality | Generate clinician-readable reports and test whether missing concepts are stable and interpretable | Existing outputs plus clinician review |
+| 9 | Therapy response prediction | Predict which concept targets will improve with treatment | Requires treatment datasets/outcomes |
+| 10 | Equity/fairness audit | Check age, sex, site, dialect, and corpus bias in norms and predictions | Existing metadata plus more demographic detail |
+
+### Additional Data Needed
+
+The strongest missing data are not bigger language models; they are better
+clinical anchors:
+
+- blinded SLP ratings of discourse informativeness and functional adequacy;
+- manual Main Concept Analysis scores with AC/AI/IC/II labels;
+- CIU scores across all protocol tasks, not only a few samples;
+- therapy goal and treatment-response data;
+- patient-reported participation/communication confidence measures;
+- ASR transcripts from realistic clinic audio;
+- multilingual AphasiaBank protocol data scored with comparable rubrics;
+- non-aphasia clinical discourse corpora with severity and outcome measures
+  (TBI, right hemisphere disorder, dementia, developmental language disorder,
+  dysarthria, stuttering, voice).
+
+Each completed experiment below should update this queue: either strengthen
+the content-state biomarker, identify a blocker, or define the next external
+dataset we need.
+
+---
+
+## Generative-AI Reconstruction Branch
+**Date added:** 2026-04-26
+
+**Trigger.** Adikari et al. 2025, *Reconstructing impaired language using
+generative AI for people with aphasia* (Scientific Reports, DOI:
+10.1038/s41598-025-24725-x), is directly adjacent to this project. It used
+GPT-4o plus conversational memory to reconstruct 1,982 AphasiaBank utterances
+from 180 participants, reporting mean cosine similarity around 0.80 and SLP
+ratings around 4/5 for correctness and semantic fidelity.
+
+**How it should inform us.**
+
+1. The paper validates the clinical direction: generative models are now good
+   enough that aphasia reconstruction should be treated as a real assistive
+   communication research program, not a speculative demo.
+2. It also exposes a measurement weakness: cosine similarity and ROUGE can look
+   high while the intended message is clinically wrong, especially for negation,
+   role reversals, and subtle semantic paraphasias.
+3. Their strongest mechanistic clue is error-type dependence. Phonological
+   substitutions, semantic substitutions, and neologisms reduce reconstruction
+   accuracy; morphology and within-word dysfluency matter less.
+4. Our content-state work gives the missing evaluation layer: ask whether a
+   reconstruction preserves expected event concepts, CIU/main-concept content,
+   negation, and patient intent, not merely whether the output is fluent.
+
+**New scientific questions opened by the paper.**
+
+- When should AI reconstruct speech, and when should it preserve the raw form
+  because the error pattern itself is clinically informative?
+- Can an AI assistant increase listener understanding without inflating
+  assessment scores or hiding impairment?
+- Are "known-target" errors, such as phonological substitutions with CHAT
+  targets, the safe zone for reconstruction, while unknown-target semantic and
+  neologistic errors require abstention or top-k clarification?
+- Does conversational memory help because it restores patient intent, or does
+  it hallucinate plausible but unspoken content?
+- Can reconstruction outputs become therapy targets: near-threshold concepts
+  the patient attempted but could not express?
+- Can we build a safety metric that predicts when an LLM rewrite is too risky
+  for clinical or AAC use?
+
+### Generative-AI Experiment Queue
+
+| Priority | Experiment | Core question | Data |
+|---:|---|---|---|
+| 1 | Error-aware oracle reconstruction benchmark | Do CHAT target annotations rescue content and WAB signal, and which error types drive the gain? | Existing AphasiaBank CHAT targets and error tags |
+| 2 | LLM reconstruction safety benchmark | Do modern LLM rewrites preserve event concepts, negation, roles, and patient intent better than GPT-4o-era results? | AphasiaBank segments with CHAT targets; optional API/local LLM |
+| 3 | Selective reconstruction/abstention | Can we learn when to rewrite, when to offer top-k options, and when to abstain? | Error tags, target annotations, event concepts |
+| 4 | Conversational memory ablation | Does recent context improve intent preservation, or does it add plausible hallucinations? | Open-ended AphasiaBank conversation plus protocol tasks |
+| 5 | Reconstruction vs assessment separation | Does cleaned speech improve communication while corrupting severity measurement? | Raw, target-augmented, and LLM-rewritten transcripts |
+| 6 | Personalized reconstruction | Does patient-specific adaptation from prior utterances improve later reconstruction without more hallucination? | Longitudinal/patient repeated AphasiaBank sessions |
+| 7 | AAC top-k candidate experiment | Is the intended target present in top-k suggestions, and can the patient/SLP choose safely? | CHAT known-target paraphasias and neologisms |
+| 8 | Real ASR + reconstruction pipeline | Can audio-to-ASR-to-reconstruction preserve content under real aphasic speech errors? | AphasiaBank audio or clinic-like recordings |
+| 9 | Patient voice/style preservation | Can reconstruction improve intelligibility without erasing pragmatic markers and identity? | SLP/patient ratings needed |
+| 10 | Functional outcome trial design | Does AI-supported reconstruction improve participation, therapy efficiency, or discourse generalization? | Prospective clinical data needed |
+
+**Key design rule.** A newer GenAI model is not the discovery by itself. The
+publishable discovery would be a clinically valid control policy: *when AI
+should reconstruct aphasic speech, what evidence proves it preserved intent,
+and how it changes therapy decisions or functional outcomes.*
+
+---
+
+### 59. Error-aware oracle reconstruction benchmark
+**Date:** 2026-04-26 · **Confidence:** MEDIUM-HIGH · **Script:**
+[scripts/run_error_aware_reconstruction_benchmark.py](scripts/run_error_aware_reconstruction_benchmark.py)
+
+**Goal.** Use the Scientific Reports 2025 paper as a direct experimental
+prompt, but avoid jumping immediately to LLM calls. AphasiaBank CHAT already
+contains manual error tags and target annotations, so this experiment asks:
+what is the upper-bound value of reconstruction if we replace observed
+paraphasic/neologistic forms with known CHAT targets?
+
+**Dataset.** 7,153 prompt-conditioned segments from AphasiaBank protocol tasks,
+including 4,012 non-control WAB-labeled segments from 851 patient roots. The
+script joins cross-prompt event-content features with raw CHAT task text, then
+counts CLAN/CHAT error tags:
+
+- phonological errors (`[* p:*]`);
+- semantic errors (`[* s:*]`);
+- neologisms (`[* n:*]`);
+- morphology (`[* m:*]`);
+- dysfluency (`[* d:*]`);
+- known and unknown target annotations (`[: target]`, `[: x@n]`).
+
+**Important caveat.** CHAT target augmentation is an oracle, not a deployable
+model. It tells us where reconstruction *could* help if an AI assistant found
+the same intended target. Unknown-target errors remain intrinsically risky.
+
+**Headline results.**
+
+| Quantity | Result |
+|---|---:|
+| Segments with any CHAT error tag | 3,286 / 7,153 |
+| Segments with positive oracle concept gain | 1,065 / 7,153 |
+| Mean oracle concept gain fraction | 0.017 |
+| WAB-labeled non-control segments | 4,012 |
+| Patient roots with WAB | 851 |
+
+**Subtype pattern.**
+
+| Subtype | Mean WAB-AQ | Error rate / 100 tokens | Unknown-intent rate / 100 | Mean oracle gain | % segments with gain |
+|---|---:|---:|---:|---:|---:|
+| Global | 18.7 | 10.44 | 8.74 | 0.007 | 0.060 |
+| Broca | 51.9 | 9.23 | 2.78 | 0.043 | 0.356 |
+| Wernicke | 49.8 | 6.83 | 4.00 | 0.023 | 0.234 |
+| Conduction | 69.3 | 5.18 | 1.47 | 0.044 | 0.371 |
+| Anomic | 85.7 | 2.71 | 0.43 | 0.018 | 0.165 |
+| NotAphasic | 96.5 | 0.81 | 0.05 | 0.004 | 0.049 |
+
+This partly matches the paper and partly sharpens it. Global aphasia has the
+highest error rate, but the oracle content gain is small because many errors
+are unknown-intent (`s:uk`, `n:uk`): even a perfect text model has little safe
+target information to recover. Broca and Conduction show the largest oracle
+content gains because more errors are known-target/reconstructable.
+
+**WAB-AQ prediction under patient-grouped CV.**
+
+| Subset | Model | n | r | MAE |
+|---|---|---:|---:|---:|
+| All WAB non-control | observed content + task | 4,012 | 0.782 | 10.39 |
+| All WAB non-control | observed content + error profile + task | 4,012 | 0.815 | 9.50 |
+| All WAB non-control | target-augmented content + task | 4,012 | 0.771 | 10.72 |
+| All WAB non-control | target-augmented content + error profile + task | 4,012 | 0.816 | 9.44 |
+| High bottleneck-error quartile | observed content + task | 1,006 | 0.687 | 10.98 |
+| High bottleneck-error quartile | target-augmented content + task | 1,006 | 0.732 | 10.21 |
+| High bottleneck-error quartile | observed content + error profile + task | 1,006 | 0.738 | 10.21 |
+| High bottleneck-error quartile | target-augmented content + error profile + task | 1,006 | 0.756 | 9.82 |
+| Unknown-intent error subset | observed content + task | 1,379 | 0.709 | 11.14 |
+| Unknown-intent error subset | target-augmented content + task | 1,379 | 0.718 | 10.91 |
+
+**Mechanistic correlations.**
+
+| Signal | Outcome | r |
+|---|---|---:|
+| Known-reconstructable error rate | Oracle concept gain | 0.575 |
+| Target annotation rate | Oracle concept gain | 0.540 |
+| Total error rate | Oracle concept gain | 0.471 |
+| Paper bottleneck error rate | Oracle concept gain | 0.469 |
+| Phonological error rate | Oracle concept gain | 0.448 |
+| Neologism error rate | Oracle concept gain | 0.307 |
+| Semantic error rate | Oracle concept gain | 0.170 |
+| Unknown-intent error rate | Oracle concept gain | 0.098 |
+
+Error rates also track severity: unknown-intent error rate correlated with
+WAB-AQ at r = -0.413, and paper-bottleneck error rate at r = -0.397.
+
+**Synthesis.** This changes the LLM plan substantially:
+
+> Reconstruction should not be treated as a blanket text-cleaning step. The
+> high-value zone is selective recovery of known-target, content-bearing
+> errors. Unknown-intent semantic/neologistic errors are safety-critical and
+> should trigger abstention, top-k clarification, or human confirmation.
+
+For assessment, raw discourse content remains the primary biomarker. Oracle
+target augmentation alone does not improve all-patient WAB prediction, and can
+even slightly reduce it without error-profile features. For assistive
+communication, however, selective reconstruction is promising: in the high
+bottleneck-error quartile, target augmentation raises WAB-related signal from
+r = 0.687 to r = 0.732, and target+error profile reaches r = 0.756.
+
+**Next experiments.**
+
+1. Build an LLM reconstruction benchmark on the high-risk/high-gain segments,
+   not random utterances.
+2. Evaluate with event-concept preservation, known-target recovery,
+   unknown-target hallucination rate, negation/role consistency, and SLP
+   semantic-fidelity ratings, not cosine similarity alone.
+3. Train a selective policy that outputs one of: preserve raw speech, rewrite,
+   offer top-k target candidates, or abstain.
+4. Compare conversational-memory vs no-memory prompts on the same segments to
+   test whether memory improves intent preservation or increases plausible
+   hallucination.
+5. Keep raw and reconstructed scores separate in all assessment analyses.
+
+**Outputs:** [outputs/error_aware_reconstruction/](outputs/error_aware_reconstruction/).
+
+---
+
+### 60. Selective reconstruction policy simulation
+**Date:** 2026-04-26 · **Confidence:** MEDIUM · **Script:**
+[scripts/run_selective_reconstruction_policy.py](scripts/run_selective_reconstruction_policy.py)
+
+**Goal.** Experiment #59 showed that reconstruction is not uniformly valuable:
+known-target errors can rescue content, while unknown-intent errors are
+safety-critical. This experiment simulates candidate clinical policies before
+running expensive LLM rewrites.
+
+**Policies tested.**
+
+- preserve raw speech;
+- rewrite every segment;
+- rewrite any segment with an error tag;
+- rewrite known-target errors;
+- rewrite known-target errors only when there are no unknown-intent errors;
+- rewrite known phonological errors only;
+- oracle upper bound: rewrite only if CHAT target augmentation improves event
+  content;
+- oracle safe upper bound: rewrite only if content improves and there are no
+  unknown-intent errors.
+
+All rewrite policies still use CHAT target augmentation as the simulated
+output, so this is a policy upper-bound experiment, not a deployable assistant.
+
+**Policy tradeoffs.**
+
+| Policy | Rewrite rate | Mean content gain | Total oracle gain captured | Positive-gain recall | Unnecessary rewrite rate | Rewritten unknown-intent rate |
+|---|---:|---:|---:|---:|---:|---:|
+| rewrite all | 1.000 | 0.017 | 1.000 | 1.000 | 0.851 | 0.214 |
+| oracle gain only | 0.149 | 0.017 | 1.000 | 1.000 | 0.000 | 0.546 |
+| rewrite any error | 0.459 | 0.017 | 0.992 | 0.989 | 0.680 | 0.465 |
+| rewrite known target | 0.390 | 0.017 | 0.984 | 0.978 | 0.626 | 0.417 |
+| oracle safe gain only | 0.068 | 0.007 | 0.410 | 0.454 | 0.000 | 0.000 |
+| rewrite known target, no unknown | 0.227 | 0.007 | 0.395 | 0.435 | 0.715 | 0.000 |
+| rewrite phonological known | 0.151 | 0.005 | 0.297 | 0.315 | 0.689 | 0.000 |
+| preserve raw | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 |
+
+**Clinical-signal models.**
+
+Adding error-profile features dominates small differences among policies on
+the full WAB-labeled set. Best all-patient models cluster around r = 0.817:
+
+| Subset | Best policy model | n | r | MAE |
+|---|---|---:|---:|---:|
+| All WAB non-control | rewrite known target + error profile + task | 4,012 | 0.817 | 9.41 |
+| High bottleneck-error quartile | rewrite known target + error profile + task | 1,006 | 0.759 | 9.75 |
+| Unknown-intent subset | oracle gain only + error profile + task | 1,379 | 0.750 | 10.34 |
+
+Without error-profile features, raw speech is best for all-patient WAB
+prediction (r = 0.782) while blanket target augmentation is lower (r = 0.771).
+This reinforces a key separation:
+
+- raw speech is better for *assessment* unless error profiles are modeled;
+- reconstruction is better framed as *assistive communication* or target
+  discovery, not as a replacement transcript for severity scoring.
+
+**Synthesis.**
+
+The central design problem is now explicit:
+
+> A reconstruction assistant must be selective. A blanket rewrite captures
+> all oracle content gain but rewrites mostly no-gain segments and many
+> unknown-intent segments. A conservative no-unknown policy avoids the main
+> hallucination risk but captures only about 40% of recoverable content.
+
+That is a strong, clinically meaningful research question for modern GenAI:
+can a model recover more than the conservative policy while keeping the
+unknown-intent hallucination rate near zero? If yes, it is an assistive AAC
+advance. If no, the safe product should be top-k clarification and clinician
+review, not automatic rewriting.
+
+**Next experiments.**
+
+1. Use the `oracle_gain_only` and `unknown_intent_error` segments as the LLM
+   benchmark set; random utterance sampling is too easy and too low yield.
+2. Compare prompt modes: rewrite, top-k candidate targets, abstain-only,
+   and rewrite-with-confidence.
+3. Score outputs against CHAT targets and event concepts, with explicit
+   penalties for unknown-target hallucination.
+4. Add a "measurement firewall": raw discourse state for assessment, separate
+   reconstructed discourse for communication support.
+
+**Outputs:** [outputs/selective_reconstruction_policy/](outputs/selective_reconstruction_policy/).
+
+---
+
+### 61. Reconstruction safety benchmark and scoring harness
+**Date:** 2026-04-26 · **Confidence:** HIGH for benchmark construction /
+MEDIUM for automated safety metrics · **Script:**
+[scripts/build_reconstruction_safety_benchmark.py](scripts/build_reconstruction_safety_benchmark.py)
+
+**Goal.** Turn the generative-AI reconstruction question into a reusable
+benchmark. Random AphasiaBank utterances are too easy and not clinically
+diagnostic. The benchmark should over-sample the cases where a reconstruction
+assistant could help or harm: known-target gains, unknown-intent risk, high
+error/no-gain controls, and low-error controls.
+
+**Benchmark.** 400 AphasiaBank prompt-conditioned items, 80 per bucket:
+
+| Bucket | n | Mean WAB-AQ | Known-target errors/item | Unknown-intent errors/item | Mean oracle concept gain |
+|---|---:|---:|---:|---:|---:|
+| high_error_no_gain_control | 80 | 63.7 | 5.91 | 0.00 | 0.00 |
+| known_target_gain_safe | 80 | 71.2 | 9.76 | 0.00 | 1.50 |
+| known_target_gain_with_unknown_risk | 80 | 62.9 | 37.80 | 12.78 | 2.19 |
+| low_error_content_control | 80 | 90.4 | 0.00 | 0.00 | 0.06 |
+| unknown_intent_no_gain | 80 | 59.4 | 12.86 | 7.73 | 0.00 |
+
+Each item includes the raw CHAT segment, cleaned observed text, oracle
+target-augmented text, known targets, unknown-target codes, observed concepts,
+oracle concepts, subtype, WAB-AQ, corpus, and source file path.
+
+**Scoring harness.** Any model output CSV with `item_id,reconstruction` can be
+scored on:
+
+- recoverable event-concept recovery;
+- event-concept overreach beyond oracle concepts;
+- loss of already-observed event concepts;
+- known-target token recovery;
+- unknown-intent added-concept rate;
+- negation count changes;
+- correlation between output concept count and WAB-AQ.
+
+**Baseline scores.**
+
+| Candidate | Concept recovery | Concept overreach | Observed concept loss | Known target token recovery | Unknown-intent added concept rate | Negation flip rate |
+|---|---:|---:|---:|---:|---:|---:|
+| preserve raw | 0.000 | 0.000 | 0.000 | 0.341 | 0.000 | 0.000 |
+| oracle target augmented | 0.412 | 0.000 | 0.000 | 0.732 | 0.500 | 0.015 |
+
+The oracle target-augmented baseline has no concept overreach because it uses
+CHAT targets, but it still raises the unknown-intent added-concept flag in
+mixed-risk items. That is useful: the metric is intentionally conservative and
+flags any added concepts in unknown-intent contexts for human review.
+
+**Synthesis.**
+
+> This benchmark makes "AI reconstructs aphasic language" falsifiable in a
+> clinically meaningful way. A model must recover known-target content without
+> adding concepts in unknown-intent cases, flipping negation, or completing a
+> familiar story from its own prior.
+
+The important product insight is that a model can be fluent and still fail the
+benchmark. This should become the default evaluation target before any
+assistive communication claim.
+
+**Outputs:** [outputs/reconstruction_safety_benchmark/](outputs/reconstruction_safety_benchmark/).
+
+---
+
+### 62. Local LLM reconstruction safety pilot
+**Date:** 2026-04-26 · **Confidence:** MEDIUM · **Script:**
+[scripts/run_local_reconstruction_llm_benchmark.py](scripts/run_local_reconstruction_llm_benchmark.py)
+
+**Goal.** Validate the benchmark loop using the locally available Ollama model
+`qwen3-vl:32b-instruct`. This is not meant to establish a frontier result; it
+asks whether a general local model can follow a clinically safe rewrite /
+candidate / abstain policy on a 25-item balanced pilot.
+
+**Setup.** Same 25 benchmark items across five buckets, three prompt styles:
+
+1. original open rewrite/abstain/candidate JSON prompt;
+2. compact JSON prompt with short-output constraints;
+3. conservative prompt: default abstain, do not complete familiar stories from
+   memory, no added events/roles/negation.
+
+**Results.**
+
+| Prompt style | Rewrite | Abstain | Candidates | Parse error | Concept recovery | Concept overreach | Observed concept loss | Unknown-intent added concepts | Negation flip |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| original | 0.28 | 0.16 | 0.28 | 0.28 | 0.177 | 0.480 | 0.040 | 0.400 | 0.360 |
+| compact | 0.68 | 0.20 | 0.12 | 0.00 | 0.265 | 0.560 | 1.200 | 0.600 | 0.480 |
+| conservative | 0.24 | 0.72 | 0.04 | 0.00 | 0.080 | 0.080 | 0.000 | 0.000 | 0.120 |
+
+**Interpretation.**
+
+The model exposes a real safety frontier:
+
+- the original prompt is unusable operationally because JSON reliability is
+  poor;
+- compact constraints fix JSON formatting but make the model much more
+  aggressive and less clinically safe;
+- conservative prompting nearly eliminates the highest-risk behavior
+  (unknown-intent added concepts) but sacrifices most recoverable content.
+
+This is the strongest practical lesson from the GenAI branch so far:
+
+> Prompting alone is unlikely to solve aphasia reconstruction. We need a
+> selective controller trained/evaluated against explicit safety metrics:
+> rewrite known-target cases, abstain or ask for top-k clarification in
+> unknown-intent cases, and never score reconstructed text as if it were raw
+> assessment data.
+
+**Next experiments.**
+
+1. Run a full 400-item benchmark only after choosing a better model/API or
+   smaller set of prompt policies.
+2. Add a two-stage controller: first classify safe/unsafe/needs-candidates,
+   then reconstruct only if safe.
+3. Evaluate top-k candidates separately from rewritten text, because candidate
+   generation may be clinically useful even when automatic rewriting is unsafe.
+4. Add stricter negation and role-preservation checks.
+
+**Outputs:** [outputs/reconstruction_safety_benchmark/](outputs/reconstruction_safety_benchmark/),
+[outputs/local_llm_reconstruction/](outputs/local_llm_reconstruction/),
+[outputs/local_llm_reconstruction_compact/](outputs/local_llm_reconstruction_compact/),
+[outputs/local_llm_reconstruction_conservative/](outputs/local_llm_reconstruction_conservative/),
+and [outputs/local_llm_reconstruction_prompt_comparison.csv](outputs/local_llm_reconstruction_prompt_comparison.csv).
+
+---
+
+### 63. Public Main Concept Analysis rubric replacement
+**Date:** 2026-04-26 · **Confidence:** MEDIUM-HIGH · **Script:**
+[scripts/run_main_concept_rubric_experiment.py](scripts/run_main_concept_rubric_experiment.py)
+
+**Goal.** Replace or validate our hand-built event-content lexicons using the
+public AphasiaBank Main Concept Analysis rubrics for Window, Umbrella, Cat,
+Sandwich, and Cinderella. This tests whether our strongest content-state
+result is just an idiosyncratic lexicon or aligns with published SLP discourse
+scoring materials.
+
+**Method.** The script parses the DOCX files directly. Essential main-concept
+slots are marked in the documents with bold/italic superscript numbers; these
+were extracted into slot-level lexicons with nearby alternative productions.
+A concept is counted complete when all slots are hit; partial and slot-hit
+fractions are also computed.
+
+**Extracted rubrics.**
+
+| Task | Concepts | Slots | Mean terms/slot |
+|---|---:|---:|---:|
+| Cat | 12 | 34 | 7.38 |
+| Cinderella | 34 | 93 | 5.29 |
+| Sandwich | 10 | 27 | 6.67 |
+| Umbrella | 19 | 53 | 4.93 |
+| Window | 8 | 22 | 5.77 |
+
+**Segment-level comparison.**
+
+| Task | n | Heuristic content mean | MCA complete mean | MCA partial mean | r heuristic vs MCA partial |
+|---|---:|---:|---:|---:|---:|
+| Cat | 1,201 | 0.685 | 0.437 | 0.713 | 0.894 |
+| Cinderella | 1,494 | 0.562 | 0.398 | 0.642 | 0.924 |
+| Sandwich | 1,464 | 0.534 | 0.518 | 0.718 | 0.886 |
+| Umbrella | 1,186 | 0.694 | 0.261 | 0.566 | 0.901 |
+| Window | 1,534 | 0.491 | 0.348 | 0.609 | 0.892 |
+
+The public-rubric partial score is highly aligned with our heuristic score.
+This is reassuring: the content-state biomarker is not just an arbitrary word
+list. MCA complete scoring is stricter, especially for Umbrella.
+
+**WAB-AQ correlations and grouped CV.**
+
+Raw correlations with WAB-AQ:
+
+| Feature | r |
+|---|---:|
+| heuristic observed content | 0.742 |
+| MCA complete fraction | 0.649 |
+| MCA partial fraction | 0.736 |
+| MCA slot-hit fraction | 0.734 |
+
+Patient-grouped WAB models:
+
+| Setup | n | r | MAE |
+|---|---:|---:|---:|
+| MCA partial + error + task | 3,879 | 0.799 | 9.87 |
+| heuristic + MCA partial + task | 3,879 | 0.786 | 10.33 |
+| heuristic content + task | 3,879 | 0.776 | 10.59 |
+| MCA partial + task | 3,879 | 0.762 | 10.83 |
+| MCA augmented partial + task | 3,879 | 0.752 | 11.10 |
+| MCA complete + task | 3,879 | 0.742 | 11.26 |
+
+**Synthesis.**
+
+> The hand-built event-content score is strongly convergent with official
+> Main Concept Analysis structure, while MCA slot-level partial scoring plus
+> error profile gives the best clinical prediction in this restricted
+> five-task set.
+
+This strengthens the content-state claim. It says the signal maps onto a
+recognized SLP discourse scoring tradition, not only an arbitrary vocabulary
+placebo. Automated MCA complete scoring is too brittle as a sole measure; the
+better path is a hybrid of official-rubric slot structure, aphasia-aware
+lexical/phonological matching, and error-profile modeling.
+
+**Next experiments.**
+
+1. Improve rubric parsing around "See 1.1" cross-references and notes.
+2. Compare automated MCA scores against manual AC/AI/IC/II labels if we can
+   obtain them.
+3. Use MCA slots as therapy items in the treatment-target sequencing model.
+4. Re-run minimal/adaptive assessment using official MCA partial state instead
+   of only hand-built concept coverage.
+
+**Outputs:** [outputs/main_concept_rubric/](outputs/main_concept_rubric/).
+
+---
+
+### 64. Reliable-change thresholds for content state
+**Date:** 2026-04-26 · **Confidence:** MEDIUM · **Script:**
+[scripts/run_reliable_change_thresholds.py](scripts/run_reliable_change_thresholds.py)
+
+**Goal.** Estimate how much prompt-conditioned content state must change
+before we should treat it as more than measurement noise. This is the first
+step toward clinically meaningful change thresholds for discourse, and it also
+tests whether content-state movement behaves like WAB-AQ movement.
+
+**Dataset.** 405 consecutive repeated-session pairs from
+`outputs/cross_prompt_longitudinal/consecutive_pairs.csv`. Thresholds were
+estimated from stable-WAB pairs, defined as `|delta WAB-AQ| <= 3`.
+
+**Thresholds from stable-WAB pairs.**
+
+| Metric | Stable pairs | Stable SD(delta) | Empirical abs q90 | Empirical abs q95 | Parametric RCI95 |
+|---|---:|---:|---:|---:|---:|
+| core content mean z | 370 | 0.600 | 0.953 | 1.162 | 1.175 |
+| content mean z | 370 | 0.598 | 0.955 | 1.162 | 1.173 |
+| coverage mean | 370 | 0.080 | 0.126 | 0.155 | 0.156 |
+| tokens mean | 370 | 47.0 | 72.9 | 105.2 | 92.1 |
+| utterances mean | 370 | 6.39 | 10.63 | 14.34 | 12.53 |
+| mean utterance length | 370 | 1.20 | 1.96 | 2.31 | 2.35 |
+
+The empirical and parametric thresholds agree closely for core content:
+approximately **1.16 z** is a 95% reliable-change threshold.
+
+**Agreement with WAB movement.**
+
+Using the empirical 95% threshold for core content:
+
+| Quantity | Result |
+|---|---:|
+| specificity among stable-WAB pairs | 0.949 |
+| sensitivity for WAB movers >=5 AQ | 0.259 |
+| sensitivity for WAB movers >=10 AQ | 0.385 |
+| all-pair reliable content-change rate | 0.067 |
+| speech-only mover rate among all pairs | 0.047 |
+| delta content vs delta WAB r | 0.178 |
+
+Coverage mean has slightly better sensitivity to WAB movement than content z
+(0.296 for >=5 AQ, 0.462 for >=10 AQ), but the overall association remains
+modest.
+
+**Synthesis.**
+
+This does not support using discourse content as a simple WAB replacement.
+Instead, it gives a more useful clinical interpretation:
+
+> A large content-state change is fairly specific and probably meaningful, but
+> many WAB changes occur without a reliable content-state change, and some
+> stable-WAB patients show reliable discourse movement.
+
+That is exactly why discourse could matter clinically. WAB-AQ and content
+state appear to measure overlapping but non-identical change. The promising
+use case is not "predict WAB better"; it is detecting functional discourse
+movement that standardized batteries may miss, especially for patients whose
+WAB score is stable.
+
+**Next experiments.**
+
+1. Inspect speech-only movers qualitatively: did they add event concepts,
+   reduce errors, change verbosity, or shift task strategy?
+2. Use therapy/outcome anchors if available to decide whether speech-only
+   movers are clinically meaningful rather than noise.
+3. Estimate reliable-change thresholds separately for MCA partial state and
+   hand-built event-content state.
+4. Build patient reports that distinguish stable, reliable improvement,
+   reliable decline, and mixed WAB/content trajectories.
+
+**Outputs:** [outputs/reliable_change_thresholds/](outputs/reliable_change_thresholds/).
+
+---
+
+### 65. Error-type mechanism map
+**Date:** 2026-04-26 · **Confidence:** MEDIUM-HIGH · **Script:**
+[scripts/run_error_type_mechanism_map.py](scripts/run_error_type_mechanism_map.py)
+
+**Goal.** Map phonological, semantic, neologistic, morphological, dysfluency,
+known-target, and unknown-intent error profiles onto content, WAB-AQ, subtype,
+and longitudinal movement. This connects the Scientific Reports reconstruction
+paper's error-type finding to our content-state and treatment-target program.
+
+**Dataset.** 1,080 non-control session rows aggregated from prompt-level CHAT
+error tags, with 952 WAB-labeled sessions from 511 longitudinal roots. The
+longitudinal analysis used 405 consecutive repeated-session pairs.
+
+**Cross-sectional error severity.**
+
+| Error signal | n | r with WAB-AQ |
+|---|---:|---:|
+| unknown-intent error rate | 952 | -0.509 |
+| paper bottleneck error rate | 952 | -0.424 |
+| total error rate | 952 | -0.420 |
+| neologism rate | 952 | -0.396 |
+| semantic error rate | 952 | -0.384 |
+| target annotation rate | 952 | -0.336 |
+| known-reconstructable error rate | 952 | -0.198 |
+| phonological error rate | 952 | -0.188 |
+| morphology rate | 952 | 0.072 |
+| dysfluency rate | 952 | 0.074 |
+
+This sharpens the reconstruction safety result: unknown-intent errors are not
+just annoying model failures; they are the strongest error-type marker of
+clinical severity.
+
+**WAB-AQ models.**
+
+| Setup | n | r | MAE |
+|---|---:|---:|---:|
+| content + error + verbosity | 952 | 0.887 | 7.86 |
+| content + error | 952 | 0.884 | 7.90 |
+| content only | 952 | 0.875 | 8.22 |
+| error only | 952 | 0.644 | 12.88 |
+
+Error features add a modest but real increment over content alone. They are
+not a substitute for content state.
+
+**Subtype models.**
+
+| Setup | n | Accuracy | Balanced accuracy | Macro-F1 |
+|---|---:|---:|---:|---:|
+| content + error | 818 | 0.623 | 0.479 | 0.477 |
+| content only | 818 | 0.627 | 0.479 | 0.475 |
+| error only | 818 | 0.524 | 0.401 | 0.389 |
+
+Error profiles alone are weak subtype classifiers. Most subtype signal still
+appears to be carried by broad content/severity differences rather than a
+clean error-signature taxonomy.
+
+**Subtype profiles.**
+
+| Subtype | n | Mean WAB-AQ | Total errors/100 | Phonological | Semantic | Neologism | Unknown-intent | Oracle gain |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| Global | 16 | 18.5 | 9.93 | 0.90 | 4.65 | 4.38 | 8.30 | 0.004 |
+| Broca | 305 | 50.8 | 9.72 | 4.24 | 2.53 | 2.82 | 2.86 | 0.044 |
+| Wernicke | 64 | 48.0 | 7.50 | 0.87 | 4.26 | 2.25 | 4.51 | 0.022 |
+| Conduction | 156 | 68.8 | 5.43 | 1.73 | 2.09 | 1.39 | 1.56 | 0.044 |
+| Anomic | 293 | 85.8 | 2.64 | 1.07 | 0.99 | 0.42 | 0.42 | 0.017 |
+| NotAphasic | 122 | 96.6 | 0.82 | 0.41 | 0.31 | 0.05 | 0.05 | 0.004 |
+
+Broca and Conduction have the largest oracle concept gains, consistent with
+known-target reconstruction being most useful when intent is recoverable.
+Global and Wernicke carry more unknown-intent burden, making automatic
+rewriting more dangerous.
+
+**Longitudinal coupling.**
+
+| Delta signal | n | r with delta WAB | r with delta core content |
+|---|---:|---:|---:|
+| delta unknown-intent error rate | 405 | -0.131 | -0.022 |
+| delta total error rate | 405 | -0.114 | -0.090 |
+| delta phonological error rate | 405 | -0.046 | -0.074 |
+| delta semantic error rate | 405 | -0.073 | -0.065 |
+| delta neologism rate | 405 | -0.085 | -0.003 |
+| delta observed concept coverage | 405 | 0.212 | 0.988 |
+
+Longitudinal changes in error rates are only weakly coupled to content or WAB
+movement in this dataset. That could reflect measurement noise, therapy/task
+heterogeneity, or a real dissociation between error reduction and improved
+functional informativeness.
+
+**Synthesis.**
+
+> Aphasia discourse state should be modeled as at least two partly separable
+> axes: event-content/informativeness and error-load/intent recoverability.
+
+This matters clinically. A patient can improve by conveying more event
+content, by reducing unknown-intent errors, or by doing both. A reconstruction
+assistant should especially respect this distinction: unknown-intent errors
+are severity markers and safety hazards, while known-target errors are the
+best candidates for assistance.
+
+**Next experiments.**
+
+1. Build a two-axis patient state report: content state + unknown-intent/error
+   recoverability.
+2. Test whether therapy targets should be selected from missed event concepts,
+   high-error known targets, or both.
+3. Add manual review of cases where WAB/content improve but error load does
+   not, and vice versa.
+4. Combine acoustic features with error profiles to separate motor/phonologic
+   impairment from lexical-semantic intent uncertainty.
+
+**Outputs:** [outputs/error_type_mechanism_map/](outputs/error_type_mechanism_map/).
+
+---
+
+### 66. Two-axis discourse state typology
+**Date:** 2026-04-26 · **Confidence:** MEDIUM · **Script:**
+[scripts/run_two_axis_state_typology.py](scripts/run_two_axis_state_typology.py)
+
+**Goal.** Convert the mechanism map into a clinically interpretable state
+space. Instead of collapsing discourse into one severity score, represent each
+session on two axes:
+
+1. event-content / informativeness;
+2. unknown-intent error risk.
+
+Known-reconstructable error rate is included as a third care-planning signal.
+
+**Dataset.** 952 WAB-labeled non-control sessions from 511 longitudinal roots,
+using session-level aggregates from #65.
+
+**Axis correlations.**
+
+| Axis | r with WAB-AQ |
+|---|---:|
+| event content | 0.856 |
+| unknown-intent risk | -0.509 |
+| known-recoverable errors | -0.198 |
+| content vs unknown-intent risk | -0.488 |
+
+Content and unknown-intent risk are related but not redundant.
+
+**Quadrants.**
+
+| State quadrant | n | Mean WAB-AQ | Mean content | Mean unknown-risk | Mean recoverable errors | Mean oracle gain |
+|---|---:|---:|---:|---:|---:|---:|
+| low content / high unknown risk | 342 | 53.0 | 0.251 | 4.295 | 5.826 | 0.051 |
+| low content / low unknown risk | 130 | 55.7 | 0.254 | 0.040 | 2.846 | 0.015 |
+| high content / high unknown risk | 134 | 76.9 | 0.596 | 1.276 | 3.971 | 0.035 |
+| high content / low unknown risk | 346 | 87.9 | 0.656 | 0.049 | 1.265 | 0.009 |
+
+The two low-content groups have similar WAB-AQ but very different error-risk
+profiles. That is clinically important: they may need different therapy and
+assistive supports.
+
+**Care-planning interpretation.**
+
+| Assistive priority | n | Mean WAB-AQ | Mean content | Mean unknown-risk | Mean recoverable errors | Mean oracle gain |
+|---|---:|---:|---:|---:|---:|---:|
+| high-support intent clarification | 342 | 53.0 | 0.251 | 4.295 | 5.826 | 0.051 |
+| event-concept expansion | 78 | 53.5 | 0.227 | 0.026 | 0.459 | 0.004 |
+| known-target repair + content expansion | 52 | 59.0 | 0.295 | 0.061 | 6.427 | 0.031 |
+| clarification/repair support | 134 | 76.9 | 0.596 | 1.276 | 3.971 | 0.035 |
+| maintenance/generalization | 346 | 87.9 | 0.656 | 0.049 | 1.265 | 0.009 |
+
+**WAB models.**
+
+| Setup | n | r | MAE |
+|---|---:|---:|---:|
+| content + risk + recoverable axes | 952 | 0.872 | 8.26 |
+| axes + quadrant | 952 | 0.872 | 8.28 |
+| content + risk axes | 952 | 0.864 | 8.56 |
+| content axis only | 952 | 0.849 | 9.16 |
+| quadrant only | 952 | 0.719 | 11.84 |
+| priority only | 952 | 0.718 | 11.81 |
+
+The continuous axes remain better for prediction, but the quadrants are useful
+for clinical interpretation.
+
+**Synthesis.**
+
+> The most care-relevant state space so far is not subtype alone and not a
+> single severity score. It is a two-axis map: how much meaningful event
+> content the patient conveys, and how risky/uncertain the intended message is.
+
+This could directly change SLP practice. Two patients with similar WAB-AQ and
+low content may need different plans:
+
+- low content / low unknown risk: train event concepts, discourse planning,
+  and elaboration;
+- low content / high unknown risk: prioritize clarification, repair
+  strategies, AAC supports, and safe partner confirmation before simple
+  content expansion.
+
+**Next experiments.**
+
+1. Validate the typology against CIU/WIM and manual MCA outcomes.
+2. Use the typology to stratify treatment-target recommendations.
+3. Test whether reliable-change thresholds differ by quadrant.
+4. Build a prototype SLP-facing report from the two-axis state.
+
+**Outputs:** [outputs/two_axis_state_typology/](outputs/two_axis_state_typology/).
+
+---
+
+### 67. Target-selection policy simulation
+**Date:** 2026-04-26 · **Confidence:** MEDIUM · **Script:**
+[scripts/run_target_policy_simulation.py](scripts/run_target_policy_simulation.py)
+
+**Goal.** Compare plausible therapy target-selection policies using the
+item-level hit model from #57. This is not a treatment efficacy result, because
+we do not yet have therapy response labels. It asks whether the model can
+distinguish target lists that are likely too easy, too hard, random, or in a
+near-threshold learning zone.
+
+**Policies compared.** For each participant, select up to five missed concepts:
+
+- near-threshold: predicted hit probability closest to 0.45;
+- high-utility: maximize `p * (1-p)`;
+- easy missed: highest predicted hit probability;
+- hard missed: lowest predicted hit probability;
+- generic popular: highest population hit-rate among missed concepts;
+- random missed.
+
+**Results.**
+
+| Policy | Targets | Participants | Mean predicted success | Zone score | Learning utility | Too easy | Too hard |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| near-threshold | 4,533 | 907 | 0.440 | 0.939 | 0.240 | 0.003 | 0.009 |
+| high-utility | 4,533 | 907 | 0.481 | 0.928 | 0.242 | 0.006 | 0.006 |
+| generic popular | 4,533 | 907 | 0.663 | 0.763 | 0.194 | 0.466 | 0.009 |
+| easy missed | 4,533 | 907 | 0.668 | 0.762 | 0.194 | 0.473 | 0.005 |
+| random missed | 4,533 | 907 | 0.345 | 0.758 | 0.160 | 0.123 | 0.444 |
+| hard missed | 4,533 | 907 | 0.114 | 0.658 | 0.086 | 0.003 | 0.878 |
+
+**Subtype pattern.** Near-threshold targeting stays in the same useful zone
+across major subtypes:
+
+| Subtype | Near-threshold mean predicted success | Too easy | Too hard |
+|---|---:|---:|---:|
+| Anomic | 0.446 | 0.004 | 0.009 |
+| Broca | 0.428 | 0.001 | 0.016 |
+| Conduction | 0.444 | 0.001 | 0.003 |
+| Global | 0.393 | 0.000 | 0.014 |
+| Wernicke | available in full output | — | — |
+
+Generic-popular and easy-missed policies often select items with predicted
+success around 0.66-0.78 and mark nearly half or more as too easy, especially
+for milder subtypes. Hard-missed and random policies overload too-hard items.
+
+**Synthesis.**
+
+> The target model is clinically useful because it does not merely pick common
+> or easy concepts. It can place missed concepts into a plausible treatment
+> zone: difficult enough to matter, reachable enough to practice.
+
+This creates a concrete prospective trial hypothesis: near-threshold discourse
+targets should produce better learning/generalization than generic-popular,
+too-easy, too-hard, or random missed concepts.
+
+**Next experiments.**
+
+1. Use two-axis state typology to choose between event-concept targets,
+   known-target repair targets, and clarification/AAC targets.
+2. Convert near-threshold concept lists into SLP-readable treatment plans.
+3. Test whether near-threshold target predictions match actual improvement in
+   any available therapy-response dataset.
+4. Add item diversity constraints so target lists do not over-concentrate on
+   Cinderella/Sandwich concepts.
+
+**Outputs:** [outputs/target_policy_simulation/](outputs/target_policy_simulation/).
+
+---
+
+### 68. Streaming ASR feasibility audit
+**Date:** 2026-04-26 · **Confidence:** HIGH · **Script:**
+[scripts/run_streaming_asr_feasibility.py](scripts/run_streaming_asr_feasibility.py)
+
+**Correction.** The project does not store AphasiaBank audio locally, but this
+does **not** block ASR experiments. The acoustic pipeline streams TalkBank MP4s
+with the cookie, converts to temporary WAV, extracts features, then deletes the
+WAV. Real ASR should use the same streaming/ephemeral pattern.
+
+**Local state.**
+
+| Item | Result |
+|---|---:|
+| Indexed AphasiaBank transcript sessions | 2,896 |
+| Sessions with persisted acoustic features from streamed media | 691 |
+| Persisted acoustic windows | 1,058 |
+| Local persisted audio/video files | 1 demo WAV + empty scratch dirs |
+| TalkBank cookie available in `.env` | yes |
+| `ffmpeg` available | yes |
+| Local Whisper/faster-whisper/mlx-whisper installed | no |
+
+**Acoustic feature files.**
+
+| File | Rows | Sessions | Windows |
+|---|---:|---:|---:|
+| acoustic_g0.parquet | 364 | 190 | 364 |
+| acoustic_g1.parquet | 232 | 195 | 232 |
+| acoustic_g2.parquet | 110 | 79 | 110 |
+| acoustic_g3.parquet | 352 | 227 | 352 |
+
+**Remote size probe.** The script probed 40 already-acoustic-covered sessions
+without saving audio. All probed sessions were under the 250 MB candidate
+limit, ranging from 22 MB to 249 MB. This gives a tractable initial ASR pilot
+set.
+
+**Synthesis.**
+
+> The real-ASR branch is feasible as a streaming experiment. The blocker is
+> not audio availability; it is choosing/installing the ASR backend and deciding
+> how much compute/time to spend.
+
+For the next ASR experiment, use known-good streamed sessions from the acoustic
+manifest, transcribe with a local or API ASR backend, score prompt-conditioned
+content from ASR text, and compare:
+
+1. human CHAT content state;
+2. ASR transcript content state;
+3. ASR + aphasia-aware normalization;
+4. ASR + reconstruction safety controller.
+
+**Outputs:** [outputs/streaming_asr_feasibility/](outputs/streaming_asr_feasibility/).
+
+---
+
+### 69. Real streaming ASR concept-state pilot
+**Date:** 2026-04-26 · **Confidence:** MEDIUM · **Scripts:**
+[scripts/run_streaming_asr_pilot.py](scripts/run_streaming_asr_pilot.py),
+[scripts/run_streaming_asr_model_comparison.py](scripts/run_streaming_asr_model_comparison.py)
+
+**Goal.** Move from the feasibility audit to an actual storage-free ASR
+experiment. The script streams TalkBank media with the cookie, extracts
+temporary PAR-only utterance clips from CHAT time marks, transcribes with local
+Whisper, scores the same prompt-conditioned concept features used in #52/#63,
+and deletes all audio.
+
+**Implementation details.**
+
+- Installed local ASR support in the project environment:
+  `openai-whisper==20250625`, `numba==0.61.2`, `llvmlite==0.44.0`.
+- Added optional `asr` dependencies to [pyproject.toml](pyproject.toml).
+- Added two clip sources:
+  - `utterance_http`: direct HTTP-range ffmpeg clips per PAR utterance;
+  - `session_wav`: stream one temporary session WAV, slice locally, delete
+    after the session.
+- Kept investigator prompts out of ASR scoring by transcribing PAR utterance
+  time marks only.
+
+**Runs.**
+
+| Sample | Model | Sessions | Task rows | Utterance clips | PAR audio min | Mean F1 | Recall | Precision | ASR coverage vs WAB r | Human coverage vs WAB r |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| severe Broca floor sample | tiny.en | 2 | 10 | 71 | 4.80 | 0.200 | 0.200 | 0.200 | -0.244 | -0.244 |
+| severe Broca floor sample | base.en | 2 | 10 | 71 | 4.80 | 0.200 | 0.200 | 0.200 | 0.163 | -0.244 |
+| balanced severity sample | tiny.en | 4 | 20 | 200 | 14.20 | 0.833 | 0.770 | 0.938 | 0.828 | 0.931 |
+| balanced severity sample | base.en | 4 | 20 | 200 | 14.20 | 0.855 | 0.794 | 0.950 | 0.849 | 0.931 |
+
+**Key result.**
+
+Generic ASR is already good enough to preserve much of the
+prompt-conditioned content signal when speakers produce recoverable content.
+On the balanced sample, ASR-derived concept coverage tracked WAB-AQ strongly
+and almost as well as human CHAT concept coverage. But severe low-output Broca
+speech stayed at the floor with both tiny and base models.
+
+**Interpretation.**
+
+> The ASR bottleneck is not uniform. For mild/moderate or fluent speech, local
+> ASR can support automated discourse-state measurement. For very severe
+> low-output speech, bigger generic Whisper is not enough; the clinical path is
+> clarification, AAC/repair, forced alignment, or aphasia-specific ASR, not
+> just model scale.
+
+**Why this matters.** This connects the project to a practical SLP future:
+automated discourse measurement may be feasible from real audio without
+storing protected media, but reconstruction/communication support must not
+pretend ASR has solved severe aphasic intent recovery.
+
+**Limitations.**
+
+- Small pilot samples.
+- Concept scoring uses hand-built lexicons, not full manual MCA labels.
+- No WER/CER analysis yet.
+- No acoustic noise/recording-quality stratification yet.
+- The balanced sample was selected for speed and severity spread, not for
+  review-grade representativeness.
+
+**Outputs:**
+[outputs/streaming_asr_pilot/](outputs/streaming_asr_pilot/),
+[outputs/streaming_asr_pilot_severe_base/](outputs/streaming_asr_pilot_severe_base/),
+[outputs/streaming_asr_pilot_balanced/](outputs/streaming_asr_pilot_balanced/),
+[outputs/streaming_asr_pilot_balanced_base/](outputs/streaming_asr_pilot_balanced_base/),
+[outputs/streaming_asr_model_comparison/](outputs/streaming_asr_model_comparison/).
+
+---
+
+### 70. Scaled streaming ASR validity and failure analysis
+**Date:** 2026-04-26 · **Confidence:** MEDIUM · **Scripts:**
+[scripts/run_streaming_asr_pilot.py](scripts/run_streaming_asr_pilot.py),
+[scripts/run_streaming_asr_error_analysis.py](scripts/run_streaming_asr_error_analysis.py)
+
+**Goal.** Check whether the balanced ASR result survives a larger pilot and
+identify exactly where ASR loses clinically meaningful content.
+
+**Design.** Ran `tiny.en` on a 12-session severity-balanced sample using
+temporary session-WAV caching. The run transcribed PAR-only utterance clips for
+Window, Umbrella, Cat, Cinderella, and Sandwich.
+
+**Headline result.**
+
+| Metric | Value |
+|---|---:|
+| Sessions | 12 |
+| Task rows | 60 |
+| Utterance clips | 739 |
+| PAR audio transcribed | 54.59 min |
+| Mean concept F1 vs human CHAT | 0.783 |
+| Mean recall | 0.732 |
+| Mean precision | 0.873 |
+| ASR concept coverage vs WAB-AQ | r = 0.722 |
+| Human CHAT concept coverage vs WAB-AQ | r = 0.764 |
+
+**By task.**
+
+| Task | Mean F1 | Recall | Precision | ASR coverage | Human coverage |
+|---|---:|---:|---:|---:|---:|
+| Umbrella | 0.879 | 0.858 | 0.931 | 0.442 | 0.483 |
+| Cat | 0.818 | 0.771 | 0.900 | 0.368 | 0.444 |
+| Sandwich | 0.782 | 0.713 | 0.900 | 0.410 | 0.507 |
+| Cinderella | 0.735 | 0.683 | 0.812 | 0.322 | 0.383 |
+| Window | 0.703 | 0.635 | 0.823 | 0.271 | 0.361 |
+
+**Concept-level error analysis.** Across 732 concept decisions:
+
+| Task | Human hits | ASR hits | False negatives | False positives | Recall | Precision |
+|---|---:|---:|---:|---:|---:|---:|
+| Cat | 64 | 53 | 12 | 1 | 0.812 | 0.981 |
+| Cinderella | 69 | 58 | 13 | 2 | 0.812 | 0.966 |
+| Sandwich | 73 | 59 | 16 | 2 | 0.781 | 0.966 |
+| Umbrella | 58 | 53 | 8 | 3 | 0.862 | 0.943 |
+| Window | 52 | 39 | 14 | 1 | 0.731 | 0.974 |
+
+Most missed concepts were false negatives rather than hallucinated content:
+Window `kick`, Cinderella `dress`, Sandwich `peanut`, Window `soccer_ball`,
+Umbrella `rain`, Cat `firefighters`.
+
+**Subtype pattern.**
+
+| Subtype | Sessions | Recall | Precision | Mean F1 |
+|---|---:|---:|---:|---:|
+| Anomic | 5 | 0.791 | 0.976 | 0.867 |
+| Broca | 4 | 0.732 | 0.932 | 0.647 |
+| Wernicke | 1 | 0.714 | 0.833 | 0.648 |
+| NotAphasic | 1 | 0.933 | 0.977 | 0.952 |
+
+**Synthesis.**
+
+> ASR-derived content state is conservative. It tends to under-detect real
+> concepts more than it invents false content. That is acceptable for some
+> measurement uses, but not for reconstruction or high-stakes communication
+> support without a safety controller.
+
+This is a strong practical result for SLP science: discourse state may be
+measurable from real audio at useful fidelity without storing the audio, but
+the missed-concept pattern tells us where aphasia-specific ASR, forced
+alignment, or clinician confirmation should focus.
+
+**Caveats.**
+
+- One 12-session pilot item came from an `Other` Protocol path rather than a
+  strict `PWA` path; the review-grade run should enforce path/corpus filters.
+- This is still small-N and lexicon-scored.
+- Whisper progress output is noisy; future runs should suppress it or batch
+  utterances.
+
+**Next experiments.**
+
+1. Scale to 50-100 strict Protocol/PWA sessions with patient-level bootstrap
+   CIs and held-corpus/site checks.
+2. Compare PAR-only utterance ASR against task-window ASR to quantify
+   investigator-prompt contamination.
+3. Add ASR normalization/forced-alignment variants and test whether they
+   recover the false-negative concepts without increasing false positives.
+4. Pipe ASR text into the reconstruction safety benchmark from #61 and test
+   whether ASR errors increase unsafe reconstruction.
+5. Build a measurement firewall: ASR/human raw speech for assessment, optional
+   reconstruction only for communication support with uncertainty shown.
+
+**Outputs:**
+[outputs/streaming_asr_pilot_balanced12_tiny/](outputs/streaming_asr_pilot_balanced12_tiny/),
+[outputs/streaming_asr_error_analysis_balanced12_tiny/](outputs/streaming_asr_error_analysis_balanced12_tiny/),
+[outputs/streaming_asr_model_comparison/](outputs/streaming_asr_model_comparison/).
+
+---
+
+### 71. Strict PWA30 streaming ASR validation
+**Date:** 2026-04-26 · **Confidence:** MEDIUM-HIGH · **Scripts:**
+[scripts/run_streaming_asr_pilot.py](scripts/run_streaming_asr_pilot.py),
+[scripts/run_streaming_asr_error_analysis.py](scripts/run_streaming_asr_error_analysis.py),
+[scripts/run_streaming_asr_model_comparison.py](scripts/run_streaming_asr_model_comparison.py)
+
+**Goal.** Re-run the streaming ASR content-state validation under the stricter
+condition that selected sessions must come from Protocol/PWA paths, removing
+the small corpus/path caveat from #70.
+
+**Design.** Ran local `tiny.en` Whisper on 30 strict PWA sessions selected by
+balanced WAB-AQ severity. The pipeline used TalkBank streaming, one ephemeral
+session WAV at a time, PAR-only utterance clips, and no persisted source audio.
+The selected sample spans WAB-AQ 10.8 to 100.0.
+
+**Headline result.**
+
+| Metric | Value |
+|---|---:|
+| Sessions | 30 |
+| Task rows | 150 |
+| Utterance clips | 2,602 |
+| PAR audio transcribed | 202.75 min |
+| Mean concept F1 vs human CHAT | 0.764 |
+| Mean recall | 0.718 |
+| Mean precision | 0.859 |
+| ASR concept coverage vs WAB-AQ | r = 0.713 |
+| Human CHAT concept coverage vs WAB-AQ | r = 0.761 |
+
+**By task.**
+
+| Task | Mean F1 | Recall | Precision | ASR coverage | Human coverage |
+|---|---:|---:|---:|---:|---:|
+| Cat | 0.764 | 0.716 | 0.856 | 0.442 | 0.550 |
+| Cinderella | 0.727 | 0.682 | 0.830 | 0.396 | 0.478 |
+| Sandwich | 0.749 | 0.689 | 0.872 | 0.411 | 0.525 |
+| Umbrella | 0.821 | 0.779 | 0.902 | 0.513 | 0.590 |
+| Window | 0.760 | 0.724 | 0.834 | 0.392 | 0.444 |
+
+**Concept-level error analysis.** Across 1,830 concept decisions, ASR errors
+remained mostly conservative false negatives, not false positives.
+
+| Task | Human hits | ASR hits | False negatives | False positives | Recall | Precision |
+|---|---:|---:|---:|---:|---:|---:|
+| Cat | 198 | 159 | 40 | 1 | 0.798 | 0.994 |
+| Cinderella | 215 | 178 | 43 | 6 | 0.800 | 0.966 |
+| Sandwich | 189 | 148 | 47 | 6 | 0.751 | 0.959 |
+| Umbrella | 177 | 154 | 28 | 5 | 0.842 | 0.968 |
+| Window | 160 | 141 | 25 | 6 | 0.844 | 0.957 |
+
+Most missed concepts: Cinderella `midnight`, Sandwich `eat`, Sandwich
+`jelly`, Cat `chase`, Sandwich `butter`, Window `soccer_ball`, Umbrella
+`rain`, Cat `dog`.
+
+**Subtype pattern.**
+
+| Subtype | Sessions | Recall | Precision |
+|---|---:|---:|---:|
+| Anomic | 11 | 0.772 | 0.972 |
+| Broca | 6 | 0.603 | 0.940 |
+| Conduction | 3 | 0.820 | 0.965 |
+| Isolation | 1 | 0.000 | 0.000 |
+| NotAphasic | 6 | 0.943 | 0.992 |
+| TransMotor | 1 | 0.692 | 0.931 |
+| Wernicke | 2 | 0.804 | 0.891 |
+
+**Synthesis.**
+
+> Strict PWA-only streaming ASR preserves the clinically meaningful
+> prompt-conditioned content-state signal at useful fidelity, but undercounts
+> content in ways that are subtype- and concept-specific.
+
+This result strengthens the practical claim from #69/#70: storage-free
+automated discourse measurement is realistic for many AphasiaBank-style
+protocol recordings. The measurement should be treated as conservative. It is
+appropriate for screening, tracking, and triage experiments, but not as a
+complete reconstruction of patient intent.
+
+**Immediate implications.**
+
+1. The next scaled ASR run should be checkpointed because the 30-session run
+   already consumed about 21 minutes and 203 minutes of PAR audio.
+2. We need bootstrap CIs at the patient level for the headline F1/recall/
+   precision and WAB correlations.
+3. Broca/severe under-recall is now the main ASR risk surface; generic model
+   scaling alone did not solve it in #69.
+4. Any communication-support experiment must include an uncertainty/abstention
+   controller and should evaluate false omissions separately from false added
+   content.
+
+**Outputs:**
+[outputs/streaming_asr_pilot_pwa30_tiny/](outputs/streaming_asr_pilot_pwa30_tiny/),
+[outputs/streaming_asr_error_analysis_pwa30_tiny/](outputs/streaming_asr_error_analysis_pwa30_tiny/),
+[outputs/streaming_asr_model_comparison/](outputs/streaming_asr_model_comparison/).
+
+---
+
+### 72. Strict PWA60 streaming ASR validation, uncertainty, and technical audit
+**Date:** 2026-04-26 · **Confidence:** HIGH for measurement feasibility /
+MEDIUM for corpus generalization · **Scripts:**
+[scripts/run_streaming_asr_pilot.py](scripts/run_streaming_asr_pilot.py),
+[scripts/run_streaming_asr_bootstrap_analysis.py](scripts/run_streaming_asr_bootstrap_analysis.py),
+[scripts/run_streaming_asr_error_analysis.py](scripts/run_streaming_asr_error_analysis.py),
+[scripts/run_streaming_asr_technical_audit.py](scripts/run_streaming_asr_technical_audit.py)
+
+**Goal.** Move the strict PWA streaming-ASR result from pilot scale to a
+larger, checkpointed, patient-level uncertainty estimate.
+
+**Engineering update.** The ASR runner now supports checkpointed partial
+outputs, resume-by-transcript/task, quiet Whisper output by default, and
+session/task progress logs. A one-session smoke test confirmed checkpoint and
+resume behavior.
+
+**Design.** Ran `tiny.en` on 60 WAB-balanced Protocol/PWA sessions using
+session-WAV streaming and PAR-only utterance clips. The run wrote a valid
+partial CSV/summary after every task row.
+
+**Run result.**
+
+| Metric | Value |
+|---|---:|
+| Selected sessions | 60 |
+| Sessions with any transcribed task | 52 |
+| Task rows transcribed | 233 |
+| Utterance clips attempted | 3,809 |
+| Utterance clips transcribed | 3,681 |
+| PAR audio transcribed | 255.57 min |
+| Mean task F1 vs human CHAT | 0.742 |
+| Mean task recall | 0.703 |
+| Mean task precision | 0.817 |
+| ASR coverage vs WAB-AQ | r = 0.738 |
+| Human CHAT coverage vs WAB-AQ | r = 0.789 |
+
+**Patient-level bootstrap CIs.** Participant/root is the uncertainty unit.
+
+| Metric | Point | 95% CI |
+|---|---:|---:|
+| Mean F1 | 0.716 | 0.640-0.788 |
+| Mean recall | 0.680 | 0.604-0.751 |
+| Mean precision | 0.792 | 0.712-0.868 |
+| ASR coverage vs WAB-AQ | 0.881 | 0.823-0.923 |
+| Human coverage vs WAB-AQ | 0.902 | 0.856-0.938 |
+| ASR-human coverage gap | -0.057 | -0.074 to -0.042 |
+
+**Technical audit.**
+
+| Issue | Count | Interpretation |
+|---|---:|---|
+| Session stream failures | 8/60 | All selected UMD/Baycrest sessions failed to stream as session WAVs. |
+| Low clip-success task rows | 5/233 | All involved Fridriksson-2 `1012-*`; failures were `empty_wav`. |
+| Mean F1 excluding low clip-success rows | 0.755 | Technical failures depress F1 slightly but do not explain the main result. |
+| ASR coverage r excluding low clip-success rows | 0.732 | Severity signal is stable after technical-failure filtering. |
+
+Follow-up fix: the failed UMD/Baycrest selections had `remote_size_mb = 0`.
+The selector now skips implausibly small probed media via `--min-mp4-mb`
+instead of allowing zero-size media into scaled ASR runs.
+
+**Concept-level errors.** Across 2,869 concept decisions, false negatives
+still dominated false positives.
+
+| Task | Recall | Precision | Most missed concepts |
+|---|---:|---:|---|
+| Cat | 0.846 | 0.985 | `firefighters`, `chase`, `dog` |
+| Cinderella | 0.736 | 0.918 | `midnight`, `dress`, `slipper` |
+| Sandwich | 0.790 | 0.983 | `bread`, `peanut`, `butter` |
+| Umbrella | 0.885 | 0.939 | `rain`, `refusal`, `wet` |
+| Window | 0.833 | 0.962 | `soccer_ball`, `kick`, `boy` |
+
+**Subtype pattern.**
+
+| Subtype | Patients | Mean F1 | Recall | Precision |
+|---|---:|---:|---:|---:|
+| Broca | 22 | 0.552 | 0.528 | 0.619 |
+| Wernicke | 7 | 0.679 | 0.639 | 0.760 |
+| Anomic | 12 | 0.878 | 0.820 | 0.976 |
+| Conduction | 3 | 0.898 | 0.857 | 0.984 |
+| NotAphasic | 8 | 0.938 | 0.901 | 0.989 |
+
+**Synthesis.**
+
+> Storage-free ASR is good enough to measure discourse content state at scale,
+> but not good enough to be treated as complete intent recovery.
+
+The strongest signal is now robust: ASR-derived content coverage tracks WAB
+very strongly at patient level, only slightly below human CHAT-derived
+coverage. The failure mode remains clinically important under-recall, not
+large-scale hallucination. That makes ASR useful for conservative measurement
+and triage, but any assistive reconstruction layer still needs abstention,
+clarification, and explicit uncertainty.
+
+**Outputs:**
+[outputs/streaming_asr_pilot_pwa60_tiny/](outputs/streaming_asr_pilot_pwa60_tiny/),
+[outputs/streaming_asr_bootstrap_pwa60_tiny/](outputs/streaming_asr_bootstrap_pwa60_tiny/),
+[outputs/streaming_asr_error_analysis_pwa60_tiny/](outputs/streaming_asr_error_analysis_pwa60_tiny/),
+[outputs/streaming_asr_technical_audit_pwa60_tiny/](outputs/streaming_asr_technical_audit_pwa60_tiny/),
+[outputs/streaming_asr_model_comparison/](outputs/streaming_asr_model_comparison/).
+
+---
+
+### 73. Reconstruction metric fragility after the Scientific Reports paper
+**Date:** 2026-04-26 · **Confidence:** HIGH · **Scripts/Data:**
+[scripts/run_reconstruction_metric_fragility.py](scripts/run_reconstruction_metric_fragility.py),
+[data/external/literature/s41598-025-24725-x.txt](data/external/literature/s41598-025-24725-x.txt),
+[data/external/literature/41598_2025_24725_MOESM1_ESM.docx](data/external/literature/41598_2025_24725_MOESM1_ESM.docx)
+
+**Trigger.** The Scientific Reports paper used GPT-4o + memory on 1,982
+AphasiaBank open-ended utterances and primarily reported cosine similarity,
+ROUGE-L, and small-sample SLP ratings. The supplement shows cosine and
+BERTScore were very close numerically. The paper itself correctly notes that
+similarity can miss clinically wrong outputs such as negation errors.
+
+**Goal.** Quantify that weakness with our explicit safety benchmark.
+
+**Design.** For all 400 reconstruction safety items, generated six candidate
+families: preserve raw, oracle target reference, negation flip, role swap,
+added plausible concept, and content omission. Scored each candidate with
+MiniLM embedding cosine to the oracle text, ROUGE-L F1, and our explicit
+content/overreach/negation/unknown-intent safety metrics.
+
+**Key result.**
+
+| Candidate family | Mean cosine | Mean ROUGE-L | Unsafe rate | High-cosine unsafe rate |
+|---|---:|---:|---:|---:|
+| Negation flip | 0.990 | 0.987 | 1.000 | 1.000 |
+| Added plausible concept | 0.987 | 0.992 | 0.865 | 0.858 |
+| Role swap | 0.976 | 0.985 | 0.362 | 0.355 |
+| Content omission | 0.984 | 0.992 | 0.262 | 0.262 |
+| Preserve raw | 0.977 | 0.957 | 0.000 | 0.000 |
+
+Similarity metrics were weakly related to safety metrics. For example,
+embedding cosine correlated only 0.068 with the negation-flip flag and -0.048
+with concept overreach.
+
+**Synthesis.**
+
+> Cosine similarity and ROUGE are not clinically valid safety metrics for
+> aphasia reconstruction.
+
+This does not invalidate generative AI assistance. It invalidates evaluation
+claims that treat high semantic similarity as proof of preserved intent. A
+paper-grade system needs explicit tests for added event concepts, lost
+observed concepts, negation flips, role swaps, and unknown-intent overreach.
+
+**Outputs:** [outputs/reconstruction_metric_fragility/](outputs/reconstruction_metric_fragility/).
+
+---
+
+### 74. Open-ended interview reconstruction audit
+**Date:** 2026-04-26 · **Confidence:** MEDIUM-HIGH · **Script:**
+[scripts/run_open_ended_reconstruction_audit.py](scripts/run_open_ended_reconstruction_audit.py)
+
+**Goal.** Reproduce the natural interview setting used by the Scientific
+Reports reconstruction paper, but ask a safety/control question before running
+more LLMs: how much open-ended AphasiaBank speech is safely reconstructable
+known-target error material versus unknown-intent material that should trigger
+abstention or clarification?
+
+**Important correction.** The first pass undercounted because AphasiaBank's
+open-ended interview sections are themselves `@G:` blocks. The corrected
+parser includes `Speech`, `Stroke`, `Important_Event`, `Conversation`, and
+related natural-interview group labels.
+
+**Dataset.**
+
+| Metric | Value |
+|---|---:|
+| Open-ended PAR utterances | 66,321 |
+| Sessions | 679 |
+| Patient/root IDs | 533 |
+| Corpora | 28 |
+| Utterances with any CHAT error tag | 4,335 |
+| Safe known-target rewrite candidates | 3,094 |
+| Unknown-intent abstain/clarify candidates | 1,010 |
+
+Only 6.5% of open-ended utterances carried CHAT error tags, 4.7% were
+safe-known rewrite candidates, and 1.5% contained unknown-intent errors. This
+means a deployable assistant should be sparse and selective, not a blanket
+rewriter of all patient speech.
+
+**WAB correlations at session level.**
+
+| Signal | n | r with WAB-AQ |
+|---|---:|---:|
+| Unknown-intent error rate | 578 | -0.360 |
+| Abstain/clarify utterance fraction | 578 | -0.357 |
+| Target-token gain rate | 578 | -0.327 |
+| Total error rate | 578 | -0.309 |
+| Known-reconstructable error rate | 578 | -0.190 |
+| Safe-known rewrite fraction | 578 | -0.038 |
+| Open-ended utterance count | 578 | 0.268 |
+| Observed tokens | 578 | 0.318 |
+
+**Subtype pattern.** Global, Broca, and Wernicke carry the highest
+unknown-intent burden; TransMotor and Broca show more safe known-target
+rewrite material. NotAphasic sessions have very low unknown-intent rates.
+
+**Synthesis.**
+
+> In natural interview speech, the clinical opportunity is not mass
+> reconstruction. It is selective assistance for a small subset of recoverable
+> known-target errors, plus abstention/clarification for the unknown-intent
+> cases that track severity.
+
+This reframes the product/science target: SLP-facing AI should measure raw
+speech and offer targeted communication support only when intent evidence is
+strong. The next LLM benchmark should sample from these open-ended policy
+buckets, not only from prompt-task story retellings.
+
+**Outputs:** [outputs/open_ended_reconstruction_audit/](outputs/open_ended_reconstruction_audit/).
+
+---
+
+### 75. ASR prompt-contamination experiment
+**Date:** 2026-04-26 · **Confidence:** MEDIUM · **Script:**
+[scripts/run_asr_prompt_contamination.py](scripts/run_asr_prompt_contamination.py)
+
+**Goal.** Test whether full task-window ASR, which includes investigator/task
+speech, contaminates automated content measurement relative to PAR-only
+utterance ASR.
+
+**Design.** Selected 12 WAB-balanced strict PWA sessions from the PWA60 run.
+For each task, transcribed one full task-window clip spanning INV + PAR speech
+and compared it to the existing PAR-only utterance ASR result for the same
+transcript/task. Human CHAT PAR concepts remained the reference.
+
+**Result.**
+
+| Metric | PAR-only | Full task window | Delta |
+|---|---:|---:|---:|
+| Mean F1 | 0.756 | 0.761 | +0.005 |
+| Mean recall | - | - | +0.076 |
+| Mean precision | - | - | -0.068 |
+| False positives/task | - | - | +0.400 |
+| Coverage vs WAB-AQ | r = 0.775 | r = 0.800 | +0.025 |
+
+Full-window ASR slightly improved recall and WAB correlation, but did so by
+lowering precision and adding false positives. Investigator CHAT contained
+task concepts on average, especially in Sandwich, Umbrella, and Cinderella.
+
+**By task.**
+
+| Task | INV concepts/task | Delta F1 | Delta recall | Delta precision | Delta false positives |
+|---|---:|---:|---:|---:|---:|
+| Cat | 0.000 | -0.045 | +0.002 | -0.096 | +0.333 |
+| Cinderella | 0.700 | +0.155 | +0.192 | +0.135 | +0.000 |
+| Sandwich | 2.600 | -0.092 | +0.014 | -0.199 | +0.600 |
+| Umbrella | 1.000 | -0.059 | +0.030 | -0.166 | +0.889 |
+| Window | 0.583 | +0.046 | +0.119 | -0.032 | +0.250 |
+
+**Synthesis.**
+
+> Full-window ASR can make measurement look slightly better while quietly
+> importing prompt/interviewer content.
+
+This validates the conservative design choice in #69-#72: PAR-only utterance
+clipping or speaker-separated diarization should be the default for assessment.
+Full-window audio is acceptable for communication assistance only if the
+system separates speakers or explicitly estimates prompt contamination.
+
+**Outputs:** [outputs/asr_prompt_contamination_pwa12_tiny/](outputs/asr_prompt_contamination_pwa12_tiny/).
+
+---
+
+### 76. ASR-to-reconstruction safety experiment
+**Date:** 2026-04-26 · **Confidence:** MEDIUM-HIGH · **Script:**
+[scripts/run_asr_reconstruction_safety.py](scripts/run_asr_reconstruction_safety.py)
+
+**Goal.** Test whether ASR errors are safe enough to feed into a downstream
+LLM/reconstruction controller. The key distinction: conservative omissions are
+acceptable for measurement with uncertainty; added concepts, unknown-intent
+overreach, and negation changes are unsafe for communication support.
+
+**Design.** Took the 233 PWA60 ASR task rows and joined them to the
+error-aware reconstruction segment table. Built safety items with human raw
+CHAT, human oracle target-augmented text, and ASR PAR text as candidate
+outputs. Scored each candidate with the same reconstruction safety metrics as
+#61/#73: observed concept loss, concept overreach, unknown-intent added
+concepts, known-target recovery, and negation-count changes. Repeated the
+analysis after excluding low clip-success rows (`clip_success_rate < 0.8`).
+
+**All transcribed rows.**
+
+| Candidate | Output concepts | Observed loss | Concept overreach | Unknown-intent added | Negation-change rate | Output concepts vs WAB |
+|---|---:|---:|---:|---:|---:|---:|
+| Human raw CHAT | 4.893 | 0.000 | 0.000 | 0.000 | 0.000 | r = 0.788 |
+| Human oracle targets | 5.142 | 0.000 | 0.000 | 0.116 | 0.009 | r = 0.767 |
+| ASR PAR text | 4.167 | 0.906 | 0.167 | 0.064 | 0.352 | r = 0.746 |
+
+**Clean-clip sensitivity (`clip_success_rate >= 0.8`).**
+
+| Candidate | Items | Mean ASR F1 | Observed loss | Concept overreach | Unknown-intent added | Negation-change rate |
+|---|---:|---:|---:|---:|---:|---:|
+| ASR PAR text | 228 | 0.755 | 0.873 | 0.171 | 0.066 | 0.346 |
+
+The conclusion survives technical-failure filtering.
+
+**Risk by safety bucket.**
+
+| Bucket | n | Mean WAB | ASR observed loss | ASR overreach | ASR unknown-intent added | ASR F1 |
+|---|---:|---:|---:|---:|---:|---:|
+| Known + unknown risk | 49 | 55.6 | 0.796 | 0.265 | 0.265 | 0.802 |
+| Known-target safe zone | 58 | 69.0 | 1.155 | 0.138 | 0.000 | 0.733 |
+| Unknown-intent | 23 | 37.5 | 0.652 | 0.087 | 0.087 | 0.588 |
+| Low-error content | 95 | 77.3 | 0.947 | 0.158 | 0.000 | 0.804 |
+
+**Risk by subtype.**
+
+| Subtype | n | ASR F1 | Observed loss | Concept overreach | Unknown-intent added |
+|---|---:|---:|---:|---:|---:|
+| Anomic | 60 | 0.878 | 1.250 | 0.150 | 0.017 |
+| Broca | 87 | 0.552 | 0.782 | 0.172 | 0.057 |
+| Conduction | 15 | 0.898 | 0.867 | 0.133 | 0.133 |
+| NotAphasic | 40 | 0.938 | 0.850 | 0.100 | 0.000 |
+| Wernicke | 31 | 0.679 | 0.677 | 0.290 | 0.226 |
+
+**Synthesis.**
+
+> ASR is good enough for conservative measurement, but not safe enough to be
+> blindly handed to a generative reconstruction system.
+
+The main ASR failure is still omission: it loses nearly one human-observed
+concept per task. But the unsafe side is not zero. ASR adds out-of-oracle
+concepts, changes negation counts, and adds concepts in unknown-intent rows,
+especially Wernicke and severe/low-WAB cases. This means the product/science
+architecture should be:
+
+1. raw human/ASR speech for assessment;
+2. ASR content state with uncertainty for triage/tracking;
+3. reconstruction only after a safety controller classifies the segment as
+   known-target/high-evidence;
+4. clarification/top-k candidates or abstention for unknown-intent speech.
+
+**Outputs:**
+[outputs/asr_reconstruction_safety_pwa60_tiny/](outputs/asr_reconstruction_safety_pwa60_tiny/),
+[outputs/asr_reconstruction_safety_pwa60_tiny_cleanclips/](outputs/asr_reconstruction_safety_pwa60_tiny_cleanclips/).
+
+---
+
+### 77. ASR-only safety controller pilot
+**Date:** 2026-04-26 · **Confidence:** MEDIUM · **Script:**
+[scripts/run_asr_safety_controller.py](scripts/run_asr_safety_controller.py)
+
+**Goal.** Test whether a deployable controller can decide `rewrite` vs
+`clarify` vs `preserve` from ASR-only information, without privileged CHAT
+target/error tags.
+
+**Why this matters.** #76 showed ASR is not safe enough to feed blindly into
+reconstruction. The next question is whether we can automatically decide when
+to rewrite, when to ask for clarification, and when to preserve raw speech.
+If that decision requires CHAT error labels, it is not deployable.
+
+**Labels.**
+
+- `rewrite`: known-target safe-zone rows.
+- `clarify`: unknown-intent or known-plus-unknown-risk rows.
+- `preserve`: low-error content / low-content / other rows.
+
+Labels are derived from CHAT targets/error tags, but deployable models only
+see ASR-derived features. Evaluation is grouped by patient/root.
+
+**Action distribution.**
+
+| Action | n |
+|---|---:|
+| Preserve | 102 |
+| Clarify | 72 |
+| Rewrite | 54 |
+
+**Model results.**
+
+| Model | Inputs | Macro-F1 | 95% CI | Clarify F1 | Preserve F1 | Rewrite F1 |
+|---|---|---:|---:|---:|---:|---:|
+| Privileged error oracle | CHAT error/target features | 0.919 | 0.874-0.955 | 0.910 | 0.948 | 0.899 |
+| Clinical upper | ASR + WAB + subtype | 0.601 | 0.509-0.685 | 0.653 | 0.653 | 0.496 |
+| ASR text model | ASR text + task + operational features | 0.553 | 0.474-0.621 | 0.536 | 0.641 | 0.482 |
+| ASR operational only | ASR counts/timing/task | 0.497 | 0.413-0.572 | 0.496 | 0.581 | 0.414 |
+| Low-content rule | simple hand rule | 0.263 | 0.209-0.319 | 0.050 | 0.578 | 0.162 |
+| Majority baseline | always preserve | 0.206 | 0.170-0.235 | 0.000 | 0.618 | 0.000 |
+
+**ASR text confusion matrix.**
+
+| Truth | Pred clarify | Pred preserve | Pred rewrite |
+|---|---:|---:|---:|
+| Clarify | 37 | 22 | 13 |
+| Preserve | 18 | 66 | 18 |
+| Rewrite | 11 | 16 | 27 |
+
+**Synthesis.**
+
+> ASR text alone contains some safety signal, but not enough for autonomous
+> reconstruction control.
+
+This is an important scientific/product boundary. The privileged error oracle
+shows the control problem is learnable if we can observe the right latent
+variables. But ASR-only text does not reliably recover those latent variables.
+The missing layer is likely richer uncertainty evidence: ASR token confidence,
+acoustic quality/prosody, speaker diarization, patient-specific history, or
+human/SLP confirmation. A clinically safe assistant should therefore start as
+human-in-the-loop clarification/top-k support, not automatic rewriting.
+
+**Outputs:** [outputs/asr_safety_controller_pwa60_tiny_cleanclips/](outputs/asr_safety_controller_pwa60_tiny_cleanclips/).
+
+---
+
+### 78. Whisper confidence does not solve reconstruction safety
+**Date:** 2026-04-26 · **Confidence:** MEDIUM · **Scripts:**
+[scripts/run_streaming_asr_pilot.py](scripts/run_streaming_asr_pilot.py),
+[scripts/run_asr_reconstruction_safety.py](scripts/run_asr_reconstruction_safety.py),
+[scripts/run_asr_safety_controller.py](scripts/run_asr_safety_controller.py)
+
+**Goal.** Test the first obvious missing safety signal from #77: Whisper
+confidence/quality diagnostics. The hypothesis was that task-level avg
+logprob, no-speech probability, compression ratio, segment counts, clip
+duration, and clip success might help identify when ASR is unsafe for
+rewrite/clarify/preserve decisions.
+
+**ASR confidence pilot.** We reran the balanced PWA12 streaming pipeline with
+confidence persistence enabled:
+
+- 12 selected sessions, 60 task rows.
+- 861 utterance clips transcribed.
+- 64.21 minutes of PAR audio.
+- Mean ASR concept F1 0.749, recall 0.721, precision 0.823.
+- ASR concept coverage vs WAB-AQ r=0.722; human coverage vs WAB-AQ r=0.808.
+
+**Reconstruction-safety readout on the same 60 rows.**
+
+| Metric | ASR text | Human raw |
+|---|---:|---:|
+| Observed concept loss / item | 1.150 | 0.000 |
+| Concept overreach / item | 0.183 | 0.000 |
+| Unknown-intent added concepts / item | 0.133 | 0.000 |
+| Negation flip rate | 0.233 | 0.000 |
+
+The smaller confidence pilot reproduces the central #76 problem: ASR is useful
+for conservative measurement, but not safe as an unguarded reconstruction
+substrate.
+
+**Controller ablation.** We added explicit no-confidence vs confidence feature
+sets to avoid mixing effects.
+
+| Model | Macro-F1 | 95% CI | Clarify F1 | Preserve F1 | Rewrite F1 |
+|---|---:|---:|---:|---:|---:|
+| Privileged error oracle | 0.703 | 0.496-0.854 | 0.645 | 0.778 | 0.686 |
+| Clinical upper | 0.448 | 0.291-0.586 | 0.258 | 0.630 | 0.457 |
+| ASR operational, no confidence | 0.337 | 0.223-0.438 | 0.176 | 0.549 | 0.286 |
+| ASR text, no confidence | 0.335 | 0.221-0.438 | 0.182 | 0.538 | 0.286 |
+| ASR operational + confidence | 0.323 | 0.190-0.428 | 0.158 | 0.478 | 0.333 |
+| ASR text + confidence | 0.315 | 0.180-0.417 | 0.111 | 0.500 | 0.333 |
+
+**Synthesis.**
+
+> Task-level Whisper confidence is not the missing safety layer.
+
+The confidence features did not close the gap; they slightly hurt on this
+small patient-held-out sample. This should redirect the next experiments away
+from coarse confidence summaries and toward concept-level evidence: word/clip
+alignment, n-best hypotheses, phonological neighbors, acoustic quality,
+patient-specific history, and explicit human confirmation.
+
+**Outputs:**
+[outputs/streaming_asr_confidence_pwa12_tiny/](outputs/streaming_asr_confidence_pwa12_tiny/),
+[outputs/asr_reconstruction_safety_confidence_pwa12_tiny/](outputs/asr_reconstruction_safety_confidence_pwa12_tiny/),
+[outputs/asr_safety_controller_confidence_pwa12_tiny/](outputs/asr_safety_controller_confidence_pwa12_tiny/).
+
+---
+
+### 79. Top-k clarification benchmark
+**Date:** 2026-04-26 · **Confidence:** MEDIUM-HIGH for benchmark result /
+MEDIUM for deployable policy · **Script:**
+[scripts/run_topk_clarification_benchmark.py](scripts/run_topk_clarification_benchmark.py)
+
+**Goal.** Reframe the reconstruction branch around a safer clinical action:
+instead of silently rewriting, ask whether a small candidate list can contain
+the intended known target. The key question is whether the bottleneck is
+candidate generation or deciding when to ask.
+
+**Full 400-item reconstruction benchmark.** Positive target-gain items are
+items where CHAT known-target annotations add at least one task concept.
+
+| Strategy / policy | k | Offer rate | Useful-offer precision | Positive-item hit recall | Target-concept recall | Unnecessary offer rate | Unknown-no-gain offer rate |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Context co-occurrence + oracle target-gain gate | 3 | 0.412 | 0.903 | 0.903 | 0.693 | 0.000 | 0.000 |
+| Hybrid + oracle target-gain gate | 5 | 0.412 | 0.964 | 0.964 | 0.860 | 0.000 | 0.000 |
+| Context co-occurrence + offer all | 3 | 0.978 | 0.381 | 0.903 | 0.693 | 0.578 | 0.195 |
+| Hybrid + content-gap gate | 5 | 0.890 | 0.441 | 0.952 | 0.853 | 0.542 | 0.180 |
+
+The candidate-generation result is surprisingly strong: if we know a row has
+a recoverable known target, a top-3 list contains the intended concept for
+about 90% of positive rows, and top-5 reaches about 96%. But naive deployable
+gates ask far too often, including many low-error or unknown-intent rows.
+
+**ASR confidence PWA12 subset.**
+
+| Strategy / policy | k | Offer rate | Useful-offer precision | Positive-item hit recall | Target-concept recall | Unnecessary offer rate | Unknown-no-gain offer rate |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Context co-occurrence + oracle target-gain gate | 3 | 0.217 | 0.692 | 0.692 | 0.562 | 0.000 | 0.000 |
+| Context co-occurrence + oracle target-gain gate | 5 | 0.217 | 0.769 | 0.769 | 0.750 | 0.000 | 0.000 |
+| Context co-occurrence + ASR-controller not-preserve gate | 5 | 0.550 | 0.242 | 0.615 | 0.625 | 0.697 | 0.150 |
+
+**Synthesis.**
+
+> Clarification candidate generation is not the hard part. Safe triggering is
+> the hard part.
+
+This is a clinically useful pivot. A top-k AAC/clarification assistant could
+be powerful if it only asks when the patient is likely expressing a recoverable
+known target. Current deployable gates do not know that yet. The next work
+should therefore optimize safety/coverage curves, concept-level ASR evidence,
+and human-in-the-loop confirmation rather than direct LLM rewriting.
+
+**Outputs:**
+[outputs/topk_clarification_benchmark/](outputs/topk_clarification_benchmark/),
+[outputs/topk_clarification_asr_confidence_pwa12_tiny/](outputs/topk_clarification_asr_confidence_pwa12_tiny/).
+
+---
+
+### 80. Clarification coverage-risk and burden simulation
+**Date:** 2026-04-26 · **Confidence:** MEDIUM-HIGH · **Script:**
+[scripts/run_clarification_coverage_risk.py](scripts/run_clarification_coverage_risk.py)
+
+**Goal.** Convert the #79 top-k result into clinically meaningful operating
+curves. Macro-F1 is not the right objective for a clarification assistant.
+The relevant question is: how much target recovery can we get while keeping
+unnecessary clarification and unknown-intent offers below tolerable limits?
+
+**Full 400-item benchmark.** We swept deployable gates based on content gap,
+low content, and missing-concept fraction, plus oracle gates as upper bounds.
+
+Risk caps:
+
+- Strict: unnecessary-offer rate <= 0.25 and unknown-no-gain item offer rate
+  <= 0.05.
+- Moderate: <= 0.40 and <= 0.10.
+- Liberal: <= 0.60 and <= 0.20.
+
+| Operating point | Status / best deployable result |
+|---|---|
+| Strict caps | No deployable policy met constraint |
+| Moderate caps | No deployable policy met constraint |
+| Liberal caps | Best deployable recall only 0.109 positive-item hit recall, target-concept recall 0.087 |
+
+The only liberal-cap survivor was a very conservative content-gap gate
+(`content_gap_score >= 11`, k=5): offer rate 0.098, useful-offer precision
+0.462, unnecessary-offer rate 0.436, unknown-no-gain item offer rate 0.188.
+Safety improves only by giving up most recovery.
+
+**Question burden to reach target recovery, full benchmark.**
+
+| Target positive-item recall | Best deployable gate | Offers | Offer rate | Useful precision | Unnecessary rate | Unknown-no-gain item offer rate |
+|---:|---|---:|---:|---:|---:|---:|
+| 0.50 | content gap >= 5, k=5 | 168 | 0.420 | 0.530 | 0.435 | 0.525 |
+| 0.70 | content gap >= 3, k=5 | 258 | 0.645 | 0.523 | 0.453 | 0.675 |
+| 0.80 | content gap >= 3, k=5 | 258 | 0.645 | 0.523 | 0.453 | 0.675 |
+| 0.90 | content gap >= 2, k=5 | 312 | 0.780 | 0.481 | 0.500 | 0.800 |
+
+The oracle upper bound is very different: it reaches 0.964 positive-item hit
+recall with 165 offers, useful precision 0.964, and zero unnecessary or
+unknown-no-gain offers. This makes the missing variable precise: we need to
+detect recoverable known-target moments, not invent better generic candidate
+lists.
+
+**ASR confidence PWA12 subset.**
+
+| Operating point | Status / best deployable result |
+|---|---|
+| Strict caps | No deployable policy met constraint |
+| Moderate caps | No deployable policy met constraint |
+| Liberal caps | Best deployable recall 0.385, target-concept recall 0.312 |
+
+To reach 0.70 positive-item recall on the ASR subset, the best deployable gate
+had to offer 52/60 times: useful precision 0.192, unnecessary-offer rate
+0.769, and unknown-no-gain item offer rate 0.933. The ASR setting makes the
+same bottleneck harsher.
+
+**Synthesis.**
+
+> A blind clarification assistant is too burdensome. The value is real, but
+> only if the system knows when a recoverable known target is likely.
+
+This result is important because it avoids the obvious product trap. Top-k
+suggestions look impressive by recall, but the clinical burden is unacceptable
+unless a much better gate exists. The next experiments should target
+concept-level ASR evidence, n-best/beam alternatives, phonological neighbors,
+and patient-specific history, because coarse content-gap heuristics cannot
+deliver safe coverage.
+
+**Outputs:**
+[outputs/clarification_coverage_risk/](outputs/clarification_coverage_risk/),
+[outputs/clarification_coverage_risk_asr_confidence_pwa12_tiny/](outputs/clarification_coverage_risk_asr_confidence_pwa12_tiny/).
+
+---
+
+### 81. Concept-level ASR confidence evidence
+**Date:** 2026-04-26 · **Confidence:** MEDIUM-HIGH · **Scripts:**
+[scripts/run_streaming_asr_pilot.py](scripts/run_streaming_asr_pilot.py),
+[scripts/run_asr_concept_evidence.py](scripts/run_asr_concept_evidence.py)
+
+**Goal.** Test whether the failure of task-level Whisper confidence in #78
+was an aggregation problem. We added `--save-clip-results` to the streaming
+ASR runner, reran the balanced PWA12 pilot, and asked whether per-utterance
+confidence predicts concept-level omissions or overreach.
+
+**Dataset.** The rerun exactly replicated the PWA12 task metrics while saving
+clip-level evidence:
+
+- 12 sessions, 60 task rows.
+- 861 utterance clips.
+- 64.21 minutes of PAR audio.
+- Mean task concept F1 0.749, recall 0.721, precision 0.823.
+- 11,127 clip-concept rows.
+- 656 human-positive concept rows.
+- 168 ASR concept false negatives.
+- 24 ASR concept false positives.
+
+**Task-level clip-concept performance.**
+
+| Task | Human-positive concepts | ASR-positive concepts | False negatives | False positives | Recall | Precision |
+|---|---:|---:|---:|---:|---:|---:|
+| Cat | 124 | 102 | 24 | 2 | 0.806 | 0.980 |
+| Cinderella | 183 | 128 | 62 | 7 | 0.661 | 0.945 |
+| Sandwich | 112 | 93 | 22 | 3 | 0.804 | 0.968 |
+| Umbrella | 124 | 102 | 31 | 9 | 0.750 | 0.912 |
+| Window | 113 | 87 | 29 | 3 | 0.743 | 0.966 |
+
+**Confidence signal.**
+
+False-negative concept rows had worse utterance confidence than true-positive
+rows:
+
+| Concept status | n | Low-logprob score | No-speech prob | Compression ratio | Clip seconds | ASR empty rate |
+|---|---:|---:|---:|---:|---:|---:|
+| True positive | 488 | 0.555 | 0.061 | 0.948 | 6.451 | 0.000 |
+| False negative | 168 | 0.811 | 0.150 | 1.062 | 5.539 | 0.006 |
+| False positive | 24 | 0.742 | 0.110 | 0.911 | 5.816 | 0.000 |
+| True negative | 10,447 | 0.709 | 0.140 | 0.899 | 4.507 | 0.001 |
+
+Predicting missed concepts among human-positive rows:
+
+| Feature | AUC |
+|---|---:|
+| Low-logprob score | 0.772 |
+| No-speech probability | 0.710 |
+| Short-clip score | 0.593 |
+| ASR empty | 0.503 |
+| Compression ratio | 0.363 |
+
+The best simple threshold result is clinically interpretable: low-logprob
+score >= 0.670 flags 34.8% of human-positive concept rows, captures 64.9% of
+misses, and has 47.8% precision for a miss. False-positive prediction is much
+weaker; the best AUC there is only 0.612 for compression ratio.
+
+**Synthesis.**
+
+> Confidence was not useless; it was being measured at the wrong level.
+
+Task-averaged Whisper confidence did not improve the safety controller, but
+utterance-level confidence has real signal for **ASR omissions**. This matters
+for the product/science direction: confidence can support a measurement
+firewall such as "do not treat absence of this concept as evidence of absence
+when clip confidence is poor." It does not yet solve overreach or unknown
+intent, so it should be used as an uncertainty flag, not an autonomous
+rewrite trigger.
+
+**Outputs:**
+[outputs/streaming_asr_clip_evidence_pwa12_tiny/](outputs/streaming_asr_clip_evidence_pwa12_tiny/),
+[outputs/asr_concept_evidence_pwa12_tiny/](outputs/asr_concept_evidence_pwa12_tiny/).
+
+---
+
+### 82. 1-best ASR phonological/string-neighbor probe
+**Date:** 2026-04-26 · **Confidence:** MEDIUM · **Script:**
+[scripts/run_asr_phonological_neighbor_probe.py](scripts/run_asr_phonological_neighbor_probe.py)
+
+**Goal.** Ask whether the 1-best ASR transcript preserves near-miss evidence
+for concepts it failed to recognize exactly. If yes, a clarification gate
+might use phonological/string-neighbor features without needing ASR beam
+alternatives.
+
+**Setup.** For each utterance clip with at least one human-positive concept
+missed by ASR, rank task concepts absent from the ASR transcript by maximum
+string similarity between ASR tokens and concept aliases. Compare top-k
+recovery against random candidate rankings.
+
+**Results.** There were 144 missed-concept clips. String-neighbor ranking is
+above random, but not strong enough to be the missing safety layer.
+
+| k | Any missed concept in top-k | Missed-concept recall | Random any-hit mean | Random any-hit 95th pct | Near-miss >= .75 | Near-miss >= .85 |
+|---:|---:|---:|---:|---:|---:|---:|
+| 1 | 0.257 | 0.247 | 0.097 | 0.132 | 0.188 | 0.062 |
+| 3 | 0.493 | 0.449 | 0.284 | 0.333 | 0.188 | 0.062 |
+| 5 | 0.632 | 0.580 | 0.466 | 0.521 | 0.188 | 0.062 |
+
+**Synthesis.**
+
+> 1-best ASR contains some near-miss signal, but not enough.
+
+This is a useful negative/partial result. String-neighbor evidence can help
+prioritize candidates, but most missed concepts do not leave a strong
+near-miss in the 1-best transcript. The next version should use actual ASR
+alternatives or audio-level alignment: beam/n-best hypotheses, word-level
+timestamps/confidence, and phonological encodings closer to speech sound than
+orthographic similarity.
+
+**Output:** [outputs/asr_phonological_neighbor_probe_pwa12_tiny/](outputs/asr_phonological_neighbor_probe_pwa12_tiny/).
+
+---
+
+### 83. ASR multipass recovery for missed concepts
+**Date:** 2026-04-26 · **Confidence:** MEDIUM · **Script:**
+[scripts/run_asr_multipass_recovery.py](scripts/run_asr_multipass_recovery.py)
+
+**Goal.** Test a cheap n-best proxy: re-stream only the utterance clips where
+1-best ASR missed at least one human concept, then transcribe each clip at
+multiple Whisper temperatures to see whether omitted concepts appear in
+alternative outputs.
+
+**Setup.**
+
+- Input: 144 missed-concept clips from #81.
+- Missed concepts: 168.
+- Whisper model: `tiny.en`.
+- Temperatures: 0.0, 0.2, 0.4, 0.6.
+- Total ASR passes: 576.
+- Audio remained storage-free: session audio was streamed to temporary WAVs,
+  clips were cut locally, and temporary audio was deleted.
+
+**Results.**
+
+| Metric | Value |
+|---|---:|
+| Clips with any union recovery | 0.153 |
+| Mean union recovery fraction / clip | 0.135 |
+| Missed-concept recovery fraction | 0.131 |
+
+By temperature:
+
+| Temperature | Mean recovery fraction | Clips with any recovered concept |
+|---:|---:|---:|
+| 0.0 | 0.000 | 0.000 |
+| 0.2 | 0.035 | 0.042 |
+| 0.4 | 0.056 | 0.062 |
+| 0.6 | 0.076 | 0.090 |
+
+**Synthesis.**
+
+> Cheap stochastic ASR alternatives recover some missed concepts, but most
+> omissions are not latent in simple multipass Whisper output.
+
+This is another boundary-setting result. Multipass ASR can add a small number
+of useful candidates, and those examples are clinically plausible (`ball`,
+`prince`, `dog`, `fairy_godmother`, `slipper`, `umbrella`). But 13.1%
+missed-concept recovery is too low to solve clarification gating. The next
+step should be true beam/lattice output or forced alignment against candidate
+concept aliases, not just higher-temperature 1-best sampling.
+
+**Output:** [outputs/asr_multipass_recovery_pwa12_tiny/](outputs/asr_multipass_recovery_pwa12_tiny/).
+
+---
+
+### 84. Open-ended selective controller benchmark
+**Date:** 2026-04-26 · **Confidence:** MEDIUM · **Script:**
+[scripts/run_open_ended_selective_controller.py](scripts/run_open_ended_selective_controller.py)
+
+**Goal.** Move beyond protocol-picture tasks and test whether natural
+AphasiaBank interview utterances can be triaged into the clinically relevant
+communication actions: preserve, rewrite, or clarify.
+
+**Setup.**
+
+- Input: 66,321 open-ended PAR utterances from #74.
+- Patients: 533.
+- Sessions: 679.
+- Policy labels:
+  - `clarify`: utterances flagged as unknown-intent / abstain-needed.
+  - `rewrite`: safe known-target rewrite candidates.
+  - `preserve`: everything else.
+- Splits: group CV by patient/root.
+- Model families:
+  - Majority baseline.
+  - Cleaned text only.
+  - Recent conversational context + text.
+  - Clinical context without privileged CHAT target/error tags.
+  - Privileged error oracle with CHAT-derived cues.
+- To keep the benchmark tractable and clinically shaped, the natural-screening
+  set kept all rare `rewrite`/`clarify` rows and sampled 12,000 `preserve`
+  rows; the balanced-challenge set used all `rewrite`/`clarify` rows and an
+  equal-sized `preserve` sample.
+
+**Results.**
+
+Original labels:
+
+| Label | Rows |
+|---|---:|
+| preserve | 62,217 |
+| rewrite | 3,094 |
+| clarify | 1,010 |
+
+Natural-screening benchmark:
+
+| Model | Macro-F1 | Preserve F1 | Rewrite F1 | Clarify F1 |
+|---|---:|---:|---:|---:|
+| privileged_error_oracle | 0.999 | 1.000 | 0.999 | 0.999 |
+| clinical_context | 0.511 | 0.845 | 0.413 | 0.274 |
+| text_only | 0.480 | 0.857 | 0.428 | 0.156 |
+| context_text | 0.475 | 0.854 | 0.419 | 0.152 |
+| majority | 0.285 | 0.855 | 0.000 | 0.000 |
+
+Balanced-challenge benchmark:
+
+| Model | Macro-F1 |
+|---|---:|
+| privileged_error_oracle | 1.000 |
+| clinical_context | 0.521 |
+| context_text | 0.478 |
+| text_only | 0.469 |
+| majority | 0.200 |
+
+**Synthesis.**
+
+> Natural conversation confirms the central safety problem: cleaned text and
+> short context are not enough to decide when to rewrite versus clarify.
+
+This is scientifically useful because it separates two worlds. With privileged
+evidence about errors and known targets, the controller problem is nearly
+solved. Without that evidence, deployable text/context models are much better
+than majority baselines for `rewrite`, but still weak for `clarify`. The
+missing ingredient is not simply a larger text classifier; it is better
+measurement of intent uncertainty, ASR uncertainty, patient history, or an
+explicit clarification loop.
+
+**Output:** [outputs/open_ended_selective_controller/](outputs/open_ended_selective_controller/).
+
+---
+
+### 85. Stable-WAB discourse movers
+**Date:** 2026-04-26 · **Confidence:** MEDIUM · **Script:**
+[scripts/run_stable_wab_mover_analysis.py](scripts/run_stable_wab_mover_analysis.py)
+
+**Goal.** Test whether discourse-state measures detect meaningful movement
+when broad standardized severity, especially WAB-AQ, is stable.
+
+**Setup.**
+
+- Input: 405 consecutive repeated-session pairs from the cross-prompt
+  longitudinal analysis.
+- Stable WAB-AQ: `abs(delta_wab_aq) <= 3`.
+- WAB-changed: `abs(delta_wab_aq) >= 5`.
+- Discourse movers were defined using reliable-change thresholds from #67.
+- State axes came from the two-axis content/recoverability typology.
+
+**Results.**
+
+| Metric | Value |
+|---|---:|
+| Consecutive pairs | 405 |
+| Stable-WAB pairs | 370 |
+| Stable-WAB discourse movers | 66 |
+| Stable-WAB mover rate | 0.178 |
+| WAB-changed pairs | 27 |
+| WAB mover but discourse stable | 17 |
+| r(delta content, delta WAB-AQ) | 0.178 |
+| r(abs delta content, abs delta WAB-AQ) | 0.236 |
+
+Mover classes:
+
+| Class | Pairs |
+|---|---:|
+| stable_or_small_change | 312 |
+| stable_wab_other_discourse_mover | 47 |
+| stable_wab_content_improved | 10 |
+| stable_wab_content_declined | 9 |
+| wab_and_discourse_mover | 10 |
+| wab_mover_discourse_stable | 17 |
+
+**Synthesis.**
+
+> Discourse state often moves when WAB-AQ does not.
+
+This is one of the strongest no-clinician signals so far. It does not prove
+patient-centered functional improvement, but it does show that the discourse
+state model captures changes that are partly independent of broad WAB-AQ
+movement. The next scientific question is whether these movers are therapy
+response, task/context sensitivity, compensatory strategy, measurement noise,
+or early-warning movement before standardized scores change.
+
+**Output:** [outputs/stable_wab_movers/](outputs/stable_wab_movers/).
+
+---
+
+### 86. SLP state report prototype and therapy/assistive triage
+**Date:** 2026-04-26 · **Confidence:** MEDIUM · **Script:**
+[scripts/run_slp_state_report_prototype.py](scripts/run_slp_state_report_prototype.py)
+
+**Goal.** Convert the two-axis state model into an auditable clinical-facing
+summary without claiming clinical validation: what state is this person in,
+what kind of support is suggested, what concepts are near-threshold, and where
+would clarification be safer than hidden rewriting?
+
+**Setup.**
+
+- Inputs:
+  - Two-axis state typology.
+  - Treatment-target sequencing recommendations.
+  - Open-ended reconstruction audit session summaries.
+  - Stable-WAB mover flags.
+- Outputs:
+  - Row-level report table.
+  - Example report cards.
+  - Same-WAB/different-plan examples.
+  - Internal safety checks.
+
+**Results.**
+
+| Metric | Value |
+|---|---:|
+| Reports generated | 956 |
+| Reports with top target recommendations | 911 |
+| Reports with stable-WAB mover flags | 121 |
+| High-risk reports without clarification plan | 0 |
+| Same-WAB/different-plan example pairs | 50 |
+
+Plan distribution:
+
+| Plan | n | Mean WAB-AQ | Mean content | Mean unknown-risk | Mean recoverable |
+|---|---:|---:|---:|---:|---:|
+| High-support intent clarification / AAC scaffolding | 342 | 53.037 | 0.251 | 4.295 | 5.826 |
+| Event-concept expansion | 80 | 54.427 | 0.233 | 0.027 | 0.452 |
+| Known-target repair plus content expansion | 52 | 59.021 | 0.295 | 0.061 | 6.427 |
+| Clarification and repair support | 134 | 76.857 | 0.596 | 1.276 | 3.971 |
+| Maintenance and generalization | 348 | 87.981 | 0.657 | 0.049 | 1.258 |
+
+**Synthesis.**
+
+> The same WAB-AQ severity can imply different care logic once content and
+> recoverability are separated.
+
+The prototype produced internally consistent summaries and found same-WAB
+examples with sharply different treatment/assistive plans. This is not
+clinical validation, but it is a useful product-science result: WAB severity
+alone is too compressed to guide intervention. A two-axis discourse state can
+surface whether the immediate priority is concept expansion, known-target
+repair, clarification scaffolding, or maintenance/generalization.
+
+**Output:** [outputs/slp_state_report_prototype/](outputs/slp_state_report_prototype/).
+
+---
+
+### 87. No-clinician discovery suite: change mechanisms, target reliability, and compressed clinical states
+**Date:** 2026-04-26 · **Confidence:** MEDIUM · **Script:**
+[scripts/run_no_clinician_discovery_suite.py](scripts/run_no_clinician_discovery_suite.py)
+
+**Goal.** Keep pushing discovery with no new clinician labels: classify
+longitudinal discourse-change mechanisms, test whether concept targets are
+stable traits or change-sensitive markers, and find where WAB-AQ/subtype
+compress clinically different states.
+
+**Results.**
+
+Longitudinal change subtypes from 405 repeated-session pairs:
+
+| Change subtype | Pairs | Stable-WAB rate | Mean ΔWAB | Mean Δcontent | Mean Δrisk |
+|---|---:|---:|---:|---:|---:|
+| stable_or_unclassified | 216 | 0.981 | 0.062 | 0.064 | 0.010 |
+| mixed_multiaxis_change | 38 | 1.000 | 0.179 | -0.039 | 0.022 |
+| semantic_content_decline | 21 | 0.857 | -1.762 | -1.320 | -0.064 |
+| semantic_content_gain | 21 | 0.810 | 1.233 | 1.254 | -0.360 |
+| more_words_without_content_gain | 20 | 1.000 | 0.000 | 0.154 | -0.340 |
+| intent_risk_worsening | 17 | 0.882 | -2.282 | 0.000 | 9.543 |
+| intent_safety_gain_without_content_gain | 16 | 0.938 | -0.325 | -0.042 | -6.683 |
+| wab_only_change | 12 | 0.000 | 2.450 | 0.034 | -0.096 |
+
+Patient-specific concept reliability:
+
+| Task | Root-items | Variable rate | Gained rate | Lost rate | Mean flip rate |
+|---|---:|---:|---:|---:|---:|
+| Window | 2,256 | 0.277 | 0.112 | 0.093 | 0.200 |
+| Cinderella | 2,775 | 0.271 | 0.117 | 0.083 | 0.196 |
+| Sandwich | 2,172 | 0.254 | 0.096 | 0.088 | 0.174 |
+| Cat | 1,608 | 0.251 | 0.118 | 0.113 | 0.230 |
+| Umbrella | 1,350 | 0.228 | 0.118 | 0.091 | 0.209 |
+
+Therapy-target reliability overlay:
+
+| Target reliability bucket | Target rows | Mean predicted success | Patients |
+|---|---:|---:|---:|
+| stable_absent | 3,080 | 0.425 | 577 |
+| not_repeated_or_unobserved | 2,909 | 0.437 | 322 |
+| variable_other | 776 | 0.455 | 301 |
+| gained | 685 | 0.469 | 292 |
+| lost | 601 | 0.466 | 287 |
+
+Severe/Broca floor mechanisms:
+
+| Floor mechanism | n | Mean WAB | Mean content | Mean risk | Mean recoverable |
+|---|---:|---:|---:|---:|---:|
+| low_output_or_motor_floor | 151 | 37.787 | 0.099 | 4.982 | 5.807 |
+| unknown_intent_floor | 51 | 46.967 | 0.184 | 6.059 | 6.078 |
+| mixed_floor | 24 | 43.579 | 0.195 | 0.951 | 1.413 |
+| known_repairable_error_floor | 15 | 48.353 | 0.219 | 0.739 | 10.242 |
+| low_content_low_error_floor | 12 | 49.633 | 0.202 | 0.067 | 0.525 |
+
+Boundary findings:
+
+- Wernicke overall had much higher unknown-intent risk than non-Wernicke
+  sessions (4.51 vs 1.54 errors/100 tokens), but within WAB severity bands the
+  profile is more nuanced: severe Wernicke had higher risk than same-bin
+  non-Wernicke, while moderate Wernicke showed higher content and lower
+  recoverable-error burden.
+- High-WAB/NotAphasic cases looked normal under the two-axis z thresholds, but
+  21.4% of high-WAB NotAphasic sessions fell below a control-norm content
+  proxy. This is a warning that "not aphasic" does not necessarily mean
+  discourse-normal.
+
+**Synthesis.**
+
+> The most clinically useful object may not be a severity score. It may be a
+> mechanism-specific state: content preserved/lost, output expanded without
+> content, risk reduced/increased, or repair opportunity emerging.
+
+This directly supports a more SLP-relevant research direction. Patients with
+the same WAB-AQ can differ in whether the problem is low output, unknown
+intent, recoverable lexical/phonological errors, or true event-content loss.
+Targets also differ: some missed concepts are stable absences, while others
+are variable or gained/lost across sessions and therefore better monitoring or
+intervention candidates.
+
+**Output:** [outputs/no_clinician_discovery/](outputs/no_clinician_discovery/).
+
+---
+
+### 88. Measurement firewall and clarification burden synthesis
+**Date:** 2026-04-26 · **Confidence:** HIGH · **Script:**
+[scripts/run_measurement_firewall_experiment.py](scripts/run_measurement_firewall_experiment.py)
+
+**Goal.** Quantify why assessment text and communication-support text must be
+separated. If reconstructed or ASR-derived text is scored as patient ability,
+does it corrupt the measurement?
+
+**Results.**
+
+Assessment corruption by candidate family:
+
+| Universe | Candidate | n | Mean Δconcepts vs raw | Inflation | Deflation | Corruption | Known-target recovery |
+|---|---|---:|---:|---:|---:|---:|---:|
+| reconstruction_safety_400 | human_raw_chat | 400 | 0.000 | 0.000 | 0.000 | 0.000 | 0.341 |
+| reconstruction_safety_400 | oracle_target_augmented | 400 | 0.750 | 0.413 | 0.000 | 0.415 | 0.732 |
+| reconstruction_safety_400 | local_llm_reconstruction | 25 | 0.760 | 0.360 | 0.000 | 0.520 | 0.266 |
+| reconstruction_safety_400 | local_llm_reconstruction_compact | 25 | -0.080 | 0.320 | 0.240 | 0.760 | 0.212 |
+| reconstruction_safety_400 | local_llm_reconstruction_conservative | 25 | 0.160 | 0.120 | 0.000 | 0.200 | 0.332 |
+| reconstruction_safety_400 | local_llm_reconstruction_full_conservative | 400 | -0.038 | 0.060 | 0.075 | 0.188 | 0.347 |
+| ASR PWA12 confidence | asr_par_text | 60 | -0.933 | 0.100 | 0.433 | 0.633 | 0.236 |
+| ASR PWA60 clean clips | asr_par_text | 228 | -0.689 | 0.075 | 0.474 | 0.711 | 0.200 |
+
+Clarification burden:
+
+| Setting | Policy | Target positive recall | Offer rate | Useful precision | Target concept recall | Turns/useful hit |
+|---|---|---:|---:|---:|---:|---:|
+| CHAT benchmark | deployable | 0.70 | 0.645 | 0.523 | 0.767 | 1.911 |
+| CHAT benchmark | deployable | 0.90 | 0.780 | 0.481 | 0.830 | 2.080 |
+| CHAT benchmark | oracle upper | 0.70 | 0.413 | 0.964 | 0.860 | 1.038 |
+| ASR PWA12 confidence | deployable | 0.70 | 0.867 | 0.192 | 0.750 | 5.200 |
+| ASR PWA12 confidence | deployable | 0.80 | not reached |  |  |  |
+| ASR PWA12 confidence | oracle upper | 0.70 | 0.217 | 0.769 | 0.750 | 1.300 |
+
+**Synthesis.**
+
+> Raw patient language is for measurement. Reconstructed language is for
+> communication support only.
+
+This is now a hard product/science constraint. Oracle target augmentation can
+recover known targets, but it also inflates apparent content in 41.3% of
+benchmark items. ASR text goes the other direction: it often deflates measured
+content and corrupts assessment in 63-71% of scored ASR items. The field
+should not use "cleaned-up" GenAI transcripts as standardized discourse
+scores without a firewall.
+
+The burden analysis also matters clinically. A deployable clarification
+controller can recover many targets on human transcripts, but in ASR mode it
+needs too many offers and too many low-precision questions. The next technical
+need is better uncertainty evidence, not a more fluent rewriter.
+
+**Output:** [outputs/measurement_firewall/](outputs/measurement_firewall/).
+
+---
+
+### 89. Full local-model reconstruction safety benchmark
+**Date:** 2026-04-26 · **Confidence:** MEDIUM-HIGH · **Script:**
+[scripts/run_local_reconstruction_llm_benchmark.py](scripts/run_local_reconstruction_llm_benchmark.py)
+
+**Goal.** Replace the 25-item local LLM pilot with the full 400-item
+reconstruction safety benchmark using the conservative prompt and checkpointed
+Ollama execution.
+
+**Setup.**
+
+- Model: `qwen3-vl:32b-instruct` via local Ollama.
+- Items: all 400 safety benchmark items.
+- Prompt style: `conservative`.
+- Execution: sequential, checkpointed after each item.
+- Mean latency: 5.41 seconds/item.
+
+**Results.**
+
+Overall:
+
+| Metric | Value |
+|---|---:|
+| Items scored | 400 |
+| Rewrite rate | 0.265 |
+| Abstain rate | 0.710 |
+| Candidates rate | 0.015 |
+| Parse error rate | 0.010 |
+| Mean concept recovery rate | 0.025 |
+| Mean concept overreach count | 0.085 |
+| Mean observed concept loss count | 0.155 |
+| Mean known-target token recovery | 0.347 |
+| Unknown-intent added concept rate | 0.025 |
+| Negation flip rate | 0.120 |
+| r(WAB, output concept count) | 0.680 |
+
+By bucket:
+
+| Bucket | n | Rewrite | Abstain | Candidates | Concept recovery | Overreach | Unknown added | Negation flip |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| high_error_no_gain_control | 80 | 0.188 | 0.800 | 0.013 | 0.000 | 0.062 | 0.000 | 0.113 |
+| known_target_gain_safe | 80 | 0.212 | 0.713 | 0.037 | 0.069 | 0.100 | 0.000 | 0.087 |
+| known_target_gain_with_unknown_risk | 80 | 0.037 | 0.950 | 0.013 | 0.019 | 0.050 | 0.075 | 0.025 |
+| low_error_content_control | 80 | 0.825 | 0.175 | 0.000 | 0.037 | 0.188 | 0.000 | 0.350 |
+| unknown_intent_no_gain | 80 | 0.062 | 0.912 | 0.013 | 0.000 | 0.025 | 0.025 | 0.025 |
+
+**Synthesis.**
+
+> A conservative local GenAI model can learn a rough abstention policy, but it
+> is not yet a safe autonomous reconstruction system.
+
+The model mostly abstains in unknown-risk buckets, which is the right
+direction. But its utility is low: concept recovery is only 2.5% overall and
+6.9% in the known-target-safe bucket. It also still produces nonzero overreach
+and a surprisingly high negation-flip rate, especially in low-error content
+controls. The field should not equate "conservative prompt" with clinical
+safety. The model can be a component inside a controller/firewall, not the
+controller itself.
+
+**Output:** [outputs/local_llm_reconstruction_full_conservative/](outputs/local_llm_reconstruction_full_conservative/).
+
+---
+
+### 90. Patient-history safety-controller add-on
+**Date:** 2026-04-26 · **Confidence:** MEDIUM · **Script:**
+[scripts/run_patient_history_controller_addon.py](scripts/run_patient_history_controller_addon.py)
+
+**Goal.** Test whether prior-session patient history improves open-ended
+rewrite/clarify/preserve decisions beyond current utterance context.
+
+**Setup.**
+
+- Input: 66,321 natural interview utterances.
+- History features: previous-session action rates, error rates, token/filler
+  profile, and two-axis content/risk/recoverable state.
+- Splits: held out by longitudinal root, so no same-patient root appears in
+  both train and test.
+- Benchmarks:
+  - Natural screening set.
+  - Balanced challenge set.
+  - History-only balanced subset with prior sessions available.
+
+**Results.**
+
+Natural screening:
+
+| Model | Macro-F1 | Clarify F1 | Preserve F1 | Rewrite F1 |
+|---|---:|---:|---:|---:|
+| context_plus_history_current | 0.524 | 0.292 | 0.850 | 0.429 |
+| context_plus_current_clinical | 0.502 | 0.238 | 0.847 | 0.422 |
+| context_plus_history | 0.497 | 0.198 | 0.854 | 0.438 |
+| context_text | 0.475 | 0.151 | 0.849 | 0.426 |
+| history_only | 0.441 | 0.130 | 0.832 | 0.361 |
+
+Balanced challenge:
+
+| Model | Macro-F1 | Clarify F1 | Preserve F1 | Rewrite F1 |
+|---|---:|---:|---:|---:|
+| context_plus_history_current | 0.534 | 0.352 | 0.673 | 0.577 |
+| context_plus_current_clinical | 0.520 | 0.327 | 0.662 | 0.570 |
+| context_plus_history | 0.512 | 0.293 | 0.651 | 0.594 |
+| context_text | 0.475 | 0.207 | 0.633 | 0.587 |
+| history_only | 0.467 | 0.267 | 0.592 | 0.541 |
+
+History-only balanced subset:
+
+| Model | Macro-F1 | Clarify F1 | Preserve F1 | Rewrite F1 |
+|---|---:|---:|---:|---:|
+| context_plus_history_current | 0.574 | 0.399 | 0.840 | 0.484 |
+| context_plus_history | 0.534 | 0.306 | 0.849 | 0.448 |
+| history_only | 0.495 | 0.208 | 0.840 | 0.437 |
+| context_text | 0.431 | 0.108 | 0.817 | 0.366 |
+
+**Synthesis.**
+
+> Patient history helps, but it does not replace utterance-level intent
+> evidence.
+
+This is the first positive result for a deployable signal after the open-ended
+controller ceiling. On rows with prior sessions, context + patient history
+raises macro-F1 from 0.431 to 0.574 and clarify F1 from 0.108 to 0.399. That is
+large enough to matter. But the best model is still far below the privileged
+CHAT oracle, so history should be treated as a calibration feature, not a
+solution to unknown intent.
+
+**Output:** [outputs/patient_history_controller/](outputs/patient_history_controller/).
+
+---
+
+### 91. Human-confirmation burden simulation
+**Date:** 2026-04-26 · **Confidence:** MEDIUM · **Script:**
+[scripts/run_human_confirmation_simulation.py](scripts/run_human_confirmation_simulation.py)
+
+**Goal.** Estimate how many patient/clinician confirmations are needed to make
+model-assisted reconstruction safe, using the full local LLM benchmark and the
+clarification burden curves.
+
+**Results.**
+
+LLM rewrite/candidate confirmation:
+
+| Policy | Confirmations / 100 items | Useful outputs / 100 items | Confirmations / useful output | Unsafe / 100 before confirmation | Residual unsafe / 100 |
+|---|---:|---:|---:|---:|---:|
+| auto_llm_outputs_no_confirmation | 0.0 | 3.0 | 0.0 | 16.25 | 16.25 |
+| confirm_llm_rewrite_or_candidates, 90% catch | 28.0 | 3.0 | 9.33 | 16.25 | 1.63 |
+| confirm_llm_rewrite_or_candidates, 95% catch | 28.0 | 3.0 | 9.33 | 16.25 | 0.81 |
+| confirm_llm_rewrite_or_candidates, 99% catch | 28.0 | 3.0 | 9.33 | 16.25 | 0.16 |
+| confirm_llm_rewrite_or_candidates, perfect catch | 28.0 | 3.0 | 9.33 | 16.25 | 0.00 |
+
+Clarification-controller comparison:
+
+| Setting | Policy | Confirmations / 100 items | Useful hits / 100 items | Confirmations / useful hit | Target concept recall |
+|---|---|---:|---:|---:|---:|
+| CHAT benchmark | deployable 70% target recall | 64.5 | 33.75 | 1.91 | 0.767 |
+| CHAT benchmark | deployable 90% target recall | 78.0 | 37.50 | 2.08 | 0.830 |
+| CHAT benchmark | oracle upper 70% target recall | 41.25 | 39.75 | 1.04 | 0.860 |
+| ASR PWA12 | deployable 70% target recall | 86.67 | 16.67 | 5.20 | 0.750 |
+| ASR PWA12 | oracle upper 70% target recall | 21.67 | 16.67 | 1.30 | 0.750 |
+
+**Synthesis.**
+
+> Confirmation makes autonomy safer, but it exposes the current utility
+> bottleneck.
+
+For the conservative local LLM, asking the user to confirm every rewrite or
+candidate would require 28 confirmations per 100 items but produce only about
+3 useful communication gains per 100. That is too much burden for too little
+benefit. Clarification policies are more promising because they recover many
+more target concepts per question on human transcripts, but ASR mode remains
+burdensome. The next useful technical target is not autonomous rewriting; it
+is better uncertainty ranking so the system asks fewer, higher-yield questions.
+
+**Output:** [outputs/human_confirmation_simulation/](outputs/human_confirmation_simulation/).
+
+---
+
+## Master Experiment Task List
+**Date added:** 2026-04-26
+
+This is the active execution queue. Experiments are ordered by expected
+scientific learning per unit time, not by implementation convenience. The
+working rule is: every completed task either strengthens a clinically useful
+measurement/intervention claim, falsifies a tempting but weak claim, or
+defines a concrete missing dataset.
+
+### Tier 1: Highest-Learning Now
+
+- [x] Review-grade replication and correction of #48/#49.
+- [x] Cross-prompt event-content state discovery.
+- [x] Public discourse validation against CIU/WIM/MATTR/outcome spreadsheets.
+- [x] Minimal/adaptive assessment prompt selection.
+- [x] Treatment-target sequencing from near-threshold event concepts.
+- [x] Random ASR/noise robustness simulation.
+- [x] Error-aware oracle reconstruction benchmark.
+- [x] Selective reconstruction policy simulation.
+- [x] Reconstruction safety benchmark dataset and scoring harness.
+- [x] Local-model reconstruction safety pilot on high-risk/high-gain segments.
+- [x] Reconstruction metric fragility: cosine/ROUGE vs explicit safety
+  metrics.
+- [x] Open-ended interview reconstruction audit matching the
+  Scientific Reports natural-conversation setting.
+- [x] Full LLM/local-model reconstruction benchmark on the 400-item safety set.
+- [ ] LLM abstention/top-k clarification experiment.
+- [ ] Conversational-memory ablation for reconstruction.
+- [x] Open-ended selective controller benchmark on safe-known vs unknown-intent
+  utterance policy buckets.
+- [ ] Open-ended LLM reconstruction benchmark on safe-known vs unknown-intent
+  utterance policy buckets.
+- [x] Measurement firewall experiment: raw score for assessment vs
+  reconstructed text for communication support.
+- [x] Main Concept Analysis rubric replacement using public AphasiaBank MCA
+  materials.
+- [x] Clinically meaningful change and reliable-change thresholds for content
+  state.
+- [x] Streaming-ASR feasibility audit: re-stream TalkBank media rather than
+  relying on local audio files.
+- [x] Real streaming ASR pipeline: TalkBank MP4 -> ephemeral WAV -> ASR ->
+  content state -> reconstruction.
+- [x] Streaming ASR model-scaling pilot: severe floor sample and balanced
+  sample under `tiny.en`/`base.en`.
+- [x] Scaled streaming ASR content-validity pilot over 12 sessions.
+- [x] ASR concept-level failure analysis: identify false-negative concepts,
+  tasks, and subtype patterns.
+- [x] Strict streaming ASR validation over 30 Protocol/PWA sessions.
+- [x] Add checkpointed partial outputs/progress logging to the streaming ASR
+  runner before larger runs.
+- [x] Strict streaming ASR validation over 50-100 Protocol/PWA sessions with
+  patient-level bootstrap CIs and held-corpus/site checks.
+- [ ] Investigate Fridriksson-2 empty-WAV time-mark failures; UMD/Baycrest
+  zero-size media are now skipped at selection time.
+- [x] ASR prompt-contamination experiment: PAR-only utterance clips vs full
+  task-window clips.
+- [ ] ASR normalization/forced-alignment experiment to recover missed concepts
+  without raising false positives.
+- [x] ASR -> reconstruction safety experiment using the #61 benchmark and
+  measurement firewall.
+- [x] ASR-only safety controller: predict rewrite/clarify/abstain without
+  privileged CHAT target/error tags.
+- [ ] Add richer safety-controller signals: ASR token confidence/logprobs,
+  acoustic quality, diarization, patient history, and clinician confirmation.
+- [x] Whisper confidence pilot: persist utterance/task avg logprob,
+  no-speech probability, compression ratio, clip duration, and failure reasons.
+- [x] Safety-controller + ASR confidence: test whether confidence features close
+  the gap between ASR-only text and privileged CHAT error labels.
+- [ ] Acoustic quality safety-controller add-on: use pitch/voice/timing quality
+  and clip success to predict unsafe reconstruction decisions.
+- [x] Patient-history safety-controller add-on: use earlier session/state
+  profile to decide whether current ambiguous ASR should rewrite, clarify, or
+  preserve.
+- [x] Top-k clarification benchmark: evaluate whether the intended known target
+  appears in candidate lists even when direct rewriting is unsafe.
+- [x] Controller coverage-risk curves: optimize clarification coverage at fixed
+  unnecessary-offer and unknown-intent-offer limits rather than macro-F1.
+- [x] Concept-level ASR confidence pilot: align utterance/segment confidence
+  with concept omissions and overreach.
+- [x] 1-best ASR phonological/string-neighbor probe for missed concepts.
+- [ ] Concept-level ASR uncertainty extension: add word-level alignment,
+  n-best hypotheses, and true phonological encodings to each candidate concept.
+- [x] ASR multipass clarification proxy: test whether stochastic Whisper
+  alternatives recover concepts omitted by 1-best ASR.
+- [ ] True ASR n-best/beam clarification experiment: test whether missed
+  intended concepts appear in beam/lattice alternatives even when 1-best ASR
+  omits them.
+- [x] Clarification burden simulation: estimate the question count needed for
+  70/80/90% target recovery under different gating policies.
+- [x] Human-in-the-loop simulation: estimate how many clinician/patient
+  confirmations are needed to make reconstruction safe at useful coverage.
+- [ ] ASR speaker-separation/diarization audit: compare PAR-only time marks,
+  full-window diarization, and full-window non-diarized ASR.
+- [ ] Full PWA100 strict ASR rerun after zero-size media and empty-WAV fixes,
+  including confidence metrics and patient-level CIs.
+- [ ] Review-grade ASR manuscript table generator: one command producing
+  headline tables, CIs, caveats, and failure examples.
+
+### Tier 2: Mechanism And Treatment
+
+- [x] Error-type mechanism map: phonological/semantic/neologism/morphology
+  effects on content, WAB subtests, subtype, and longitudinal change.
+- [x] Therapy target utility simulation: near-threshold targets vs easiest,
+  hardest, random, and clinician-generic targets.
+- [x] Two-axis patient state typology: event content vs unknown-intent risk.
+- [x] Longitudinal content-state change subtypes: who improves by adding new
+  event concepts vs increasing lexical diversity vs reducing error load?
+- [x] Patient-specific content-state reliability: which concepts are stable
+  traits, task artifacts, or change-sensitive markers?
+- [x] WAB subtest decomposition with event-content + error profile + acoustic
+  profile under strict patient/corpus splits.
+- [x] Acoustic/text/content mechanistic triad: which clinical constructs are
+  production timing, lexical retrieval, semantic content, or comprehension?
+- [ ] Therapy response prediction if usable therapy datasets are available.
+- [ ] Two-axis state validation: event-content/informativeness vs
+  intent-recoverability/error-risk under patient/corpus held-out splits.
+- [x] Concept ladder replication across Window/Umbrella/Cat/Sandwich, not just
+  Cinderella.
+- [x] Concept hierarchy invariance: test whether concept difficulty orders are
+  stable across subtype, corpus, sex, age, and recording source.
+- [x] Patient-specific concept reliability: distinguish stable trait deficits,
+  prompt artifacts, and change-sensitive therapy targets.
+- [x] Longitudinal early-warning experiment: does content-state or
+  unknown-intent risk change before WAB-AQ/subtests change?
+- [x] Stable-WAB mover analysis: find patients whose discourse state changes
+  despite stable standardized scores and manually inspect clinical meaning.
+- [x] Treatment target triage: compare missed event concepts,
+  known-reconstructable errors, unknown-intent errors, and acoustic breakdown
+  as therapy target classes.
+- [x] Near-threshold concept intervention simulation with uncertainty: choose
+  targets where small gains should move functional informativeness most.
+- [x] Subtype-free treatment planning: test whether state vectors recommend
+  more useful targets than WAB subtype labels.
+- [ ] Mechanism disentanglement: separate lexical-semantic impairment,
+  phonological production, motor/acoustic impairment, and comprehension limits.
+- [x] Severe/Broca floor analysis: identify whether low scores reflect no
+  content, ASR failure, motor output failure, or unknown intent.
+- [x] Wernicke risk analysis: quantify why Wernicke has high overreach and
+  unknown-intent risk despite fluent output.
+- [x] Control-vs-PWA high-WAB boundary: find where “not aphasic” WAB labels
+  still show discourse-state abnormalities.
+
+### Tier 3: Generalization, Equity, And Product Validity
+
+- [ ] Cross-disorder extension to TBI/RHD/dementia/voice/stuttering where
+  public TalkBank-style data and severity anchors exist.
+- [ ] Equity/fairness audit by age, sex, corpus/site, education if available,
+  dialect proxies, and recording/transcription source.
+- [ ] Multilingual protocol feasibility: identify comparable prompt tasks and
+  scoring rubrics outside English.
+- [ ] Patient-facing explanation quality: do generated reports match what SLPs
+  and patients find useful and non-stigmatizing?
+- [ ] Human-in-the-loop clinician study design for target recommendations and
+  reconstruction safety.
+- [ ] Prospective functional outcome trial blueprint: participation,
+  communication confidence, therapy efficiency, and generalization outcomes.
+- [ ] Cross-corpus robustness dashboard: report every headline result with
+  leave-corpus-out, leave-site-out, and patient bootstrap uncertainty.
+- [ ] Recording-quality fairness audit: does ASR/content measurement degrade by
+  corpus equipment, video/audio quality, or session length?
+- [ ] Demographic fairness audit: age, sex, education when available, and proxy
+  dialect/site effects.
+- [ ] Multilingual AphasiaBank inventory: locate prompts/languages where
+  comparable content-state scoring is possible.
+- [ ] Low-resource language plan: define what minimal main-concept rubrics and
+  audio annotations are needed outside English.
+- [ ] Cross-disorder two-axis state test: ask whether content vs
+  recoverability generalizes to dementia/TBI/RHD or is aphasia-specific.
+- [ ] AAC integration design: map rewrite/clarify/preserve decisions onto an
+  interface that preserves autonomy and avoids hidden correction.
+- [x] SLP report prototype: generate patient-state summaries and test whether
+  they are clinically interpretable, useful, and non-misleading.
+- [ ] Patient/caregiver explanation audit: evaluate whether outputs preserve
+  voice, agency, and intended meaning rather than merely sounding fluent.
+- [x] Clinical workflow burden model: estimate time saved/lost under ASR
+  measurement, clarification prompts, and clinician confirmation.
+- [ ] Prospective validation protocol: pre-register endpoints for discourse
+  state, WAB subtests, participation, confidence, and therapy efficiency.
+
+### Tier 4: Methods, Ablations, And Negative Controls
+
+- [ ] Fold-clean preprocessing audit for every remaining model: no global
+  scaling, PCA, imputation, one-hot fitting, or embedding PCA leakage.
+- [ ] Duplicate/leakage audit: assert unique transcript/window/task IDs and no
+  participant leakage in every headline split.
+- [ ] Negative controls for every publishable result: shuffled labels, random
+  concepts, random acoustic features, high-WAB controls, and prompt labels.
+- [ ] Corpus artifact probes: test whether path/corpus/site can predict labels
+  and remove or report artifacts.
+- [x] Lexicon placebo tests for every concept rubric: matched random lexicons,
+  frequency-matched lexicons, and task-mismatched concept lists.
+- [ ] Measurement invariance: compare structural text, concept content,
+  acoustic features, ASR features, and error tags across tasks and corpora.
+- [ ] Calibration analysis: convert content-state and safety-controller outputs
+  into calibrated uncertainty, not just point predictions.
+- [ ] Confidence intervals everywhere: patient/root bootstrap for metrics,
+  paired bootstrap for model comparisons, and corpus-held-out sensitivity.
+- [ ] Failure-case library: maintain curated examples for ASR omission,
+  ASR overreach, negation change, unknown-intent ambiguity, and safe rewrite.
+- [ ] Reproducibility bundle: one command that rebuilds all key outputs from
+  raw data paths and writes environment/package versions.
+
+### Data Acquisition Queue
+
+- [ ] Download/parse additional public TalkBank discourse resources where
+  license permits.
+- [ ] Locate public or requestable aphasia therapy outcome datasets with goals,
+  session dates, and discourse outcomes.
+- [ ] Locate ASR-ready aphasic speech audio with human transcripts and
+  consistent licensing.
+- [ ] Collect or request manual Main Concept Analysis AC/AI/IC/II labels across
+  all core AphasiaBank prompts.
+- [ ] Collect blinded SLP ratings for reconstruction semantic fidelity,
+  informativeness, safety, and usefulness.
+- [ ] Collect patient/caregiver ratings for whether reconstructions preserve
+  voice, autonomy, and intended meaning.
+- [ ] Extract/locate therapy dose, goals, session timing, and outcome measures
+  from any public or requestable aphasia treatment datasets.
+- [ ] Request or collect manual CIU/main-concept labels for open-ended
+  interview sections, not only structured protocol tasks.
+- [ ] Request ASR confidence/alignment benchmarks for aphasic speech where
+  human word-level transcripts and audio are licensed.
+- [ ] Download/parse public dementia, TBI, RHD, dysarthria, stuttering, and
+  voice corpora with discourse/audio and severity or participation anchors.
+- [ ] Build a data-needs memo for a prospective SLP study: exact fields,
+  consent language, audio handling, ratings, therapy goals, and outcomes.
+- [ ] Create a blinded SLP rating packet from benchmark items for semantic
+  fidelity, informativeness, safety, autonomy, and clinical usefulness.
+- [ ] Create a patient/caregiver rating packet for voice preservation,
+  acceptability, perceived agency, and communication confidence.
+- [ ] Identify public multilingual aphasia discourse rubrics and prompt images.
+- [ ] Track licensing/access constraints for every dataset and whether audio
+  can be streamed, stored, derived, or redistributed.
+
+**Current next task:** move from cheap multipass alternatives to true
+alignment: beam/lattice hypotheses, word-level timestamps/confidence,
+audio-level forced alignment, acoustic quality, and patient history. The
+central bottleneck is no longer candidate generation; it is deciding safely
+when to ask.
+
+## DLD / Cross-Lifespan Language State Track
+
+**Date:** 2026-04-26
+
+The project should not choose between aphasia and DLD. Aphasia has been the
+best discovery sandbox because AphasiaBank supplies severity labels, subtype
+labels, repeated sessions, discourse tasks, and audio. DLD is the natural next
+generalization test because it has much larger population reach and asks the
+earlier-life version of the same question: can natural speech reveal mechanism,
+risk, and treatment target state before broad scores or labels are sufficient?
+
+New spec: `DLD_LANGUAGE_STATE_SPEC.md`.
+
+### DLD task list
+
+- [x] DLD/cross-lifespan spec: define scientific questions, data constraints,
+  experiments, controls, and success criteria.
+- [x] DLD-00 data inventory and label audit script with reconstructed
+  participant IDs.
+- [x] DLD-01 TD normative state and language-age gap baseline.
+- [x] DLD-02 first-pass natural-speech screening baselines under
+  participant-held-out CV.
+- [x] DLD-03 first-pass catch-up trajectory analysis for repeated
+  observations under the external TD age ceiling.
+- [x] DLD-04 first-pass DLD age-residual subtype clustering.
+- [x] DLD-05 treatment-target policy simulation for DLD residual profiles.
+- [x] DLD-06 literacy/school outcome data search and feasibility memo.
+- [x] DLD-07 first artifact audit: corpus+age baseline, leave-corpus-out
+  sensitivity, shuffled labels, and random-feature controls.
+- [x] DLD-08 cross-lifespan state comparison: TD, DLD, adult controls, and
+  aphasia.
+- [x] DLD-09 review-grade rerun with bootstrapped CIs, shuffled-label controls,
+  random-feature controls, and corpus-balanced sampling.
+- [x] DLD-10 fix Clinical-Eng longitudinal age parsing, especially Rescorla
+  late-talker follow-up ages encoded in paths.
+- [x] DLD-11 task/corpus deconfounding: within-corpus matched TD-vs-DLD,
+  task-matched narrative-only models, and leave-task-out tests.
+- [x] DLD-12 late-talker catch-up model after age parsing: early residual
+  state -> later residual state, with MLU-only and age-only baselines.
+- [x] DLD-13 narrative/content-state proxy for ENNI, Gillam, and Frog-style
+  narrative corpora.
+- [x] DLD-14 fairness audit for available age, sex, corpus/site, language
+  exposure, dialect/region proxies, and recording/transcription source.
+- [x] DLD-15 Manchester Language Study access plan: variable map, download
+  instructions for registered access, and join schema for outcome modeling.
+- [x] DLD-16 cross-disorder generalization plan: DLD, aphasia, dementia, TBI,
+  RHD, fluency, voice, and dysarthria state axes.
+- [x] DLD-17 prospective DLD study blueprint: minimal transcript/audio sample,
+  parent/teacher ratings, literacy outcomes, intervention exposure, consent,
+  and fairness fields.
+
+Immediate caution: the old Clinical-Eng dry run grouped some children too
+coarsely because `child_id` was inherited from folder-level metadata. The DLD
+track therefore reconstructs participant roots from transcript paths before
+any grouped CV.
+
+### DLD first-pass results
+
+Script: `scripts/run_dld_state_screening.py`
+
+Output: `outputs/dld_state_screening/summary.md`
+
+**Inventory.** Clinical-Eng provides 4,067 windows, 2,307 transcripts, 1,562
+reconstructed participant roots, and 17 corpora. Extracted labels: TD 1,603
+windows / 779 participant roots; SLI/DLD-like 636 / 329; late talker 635 / 93;
+Down syndrome 228 / 101; hearing loss 78 / 19.
+
+**External TD normative age model.** Training on Eng-NA/Eng-UK TD windows
+produced grouped-CV MAE **5.81 months** and r **0.765** over ages 6-84 months.
+Applying that model to Clinical-Eng gave mean language-age gaps:
+
+- TD: -1.25 months
+- SLI/DLD-like: -7.57 months
+- Late talker: -7.16 months
+- DS: -27.01 months
+
+This supports a real delay signal, but the SLI/DLD gap alone is not enough:
+`norm_gap_only` performed poorly as a classifier, so DLD is not captured by a
+single developmental-age residual.
+
+**Natural-speech screening.** Participant-held-out DLD/SLI-vs-TD, age <=84:
+
+- full language + age: participant macro-F1 **0.802**, participant AUC **0.903**
+- full language without age: participant macro-F1 **0.798**, AUC **0.883**
+- MLU + age: participant macro-F1 **0.680**, AUC **0.795**
+- age only: participant macro-F1 **0.588**, AUC **0.698**
+
+So the language-state features carry signal beyond age and MLU.
+
+**Critical artifact finding.** Corpus+age alone was even stronger for DLD/SLI
+than the full language model under participant-held-out CV: participant
+macro-F1 **0.833**, AUC **0.894**. Leave-corpus-out results were uneven:
+Conti and ENNI transferred partially, EisenbergGuo was weak, and Feldman
+nearly collapsed. Shuffled-label and random-feature controls were chance, so
+there is not obvious row leakage, but corpus/task confounding is currently
+load-bearing. This means DLD screening is promising but not publishable as a
+general clinical claim yet.
+
+**DLD residual clusters.** Age-residual clustering found three broad profiles:
+
+1. severe low-output/short-utterance profile with high single-word ratio;
+2. comparatively higher-output profile with disfluency/repair and argument
+   structure deviations;
+3. younger low-utterance/function-word profile with high single-word ratio and
+   lexical-distribution shifts.
+
+This is conceptually aligned with the aphasia result: a broad label hides
+different state mechanisms.
+
+**Target policy simulation.** `scripts/run_dld_target_policy_simulation.py`
+writes `outputs/dld_target_policy_simulation/summary.md`. Near-threshold and
+high-utility policies mainly nominate utterance length, grammar/function words,
+lexical variety, argument structure, and predicate structure. Highest-deficit
+policies over-select extreme low-output targets. This is useful for target
+hypothesis generation but not evidence of treatment efficacy.
+
+**Data acquisition.** `outputs/dld_data_needs/summary.md` identifies the
+Manchester Language Study / Conti-Ramsden longitudinal cohort on UK Data
+Service ReShare as the highest-value next dataset because it links DLD to
+literacy, education, social, and young-adult outcomes. The local CHILDES data
+are enough for discovery, but outcome linkage is required for clinical impact.
+
+### DLD-08 to DLD-12 continuation results
+
+**DLD-08 cross-lifespan state comparison.**
+Script: `scripts/run_dld_cross_lifespan_state.py`
+Output: `outputs/dld_cross_lifespan_state/summary.md`
+
+Using 20 surface-core structural features over 3,154 participant/child entities,
+DLD/SLI and late talkers sit near the TD child space, while adult controls are
+far away. Broca aphasia is superficially close to low-output child language by
+centroid distance, but MLU-matched classifiers strongly separate them:
+
+- DLD/SLI vs Broca, MLU-matched: macro-F1 **0.987**
+- Late talker vs Broca, MLU-matched: macro-F1 **1.000**
+- DLD/SLI vs TD child, MLU-matched: macro-F1 **0.883**
+
+Interpretation: low output is not one universal state. DLD/SLI, late talking,
+and Broca can overlap in MLU but remain structurally separable. This reinforces
+the project's broader claim that similar surface severity can hide different
+mechanisms.
+
+**DLD-09 screening audit.**
+Script: `scripts/run_dld_review_grade_audit.py`
+Output: `outputs/dld_review_grade_audit/summary.md`
+
+Participant-level bootstrap CIs show full language state beats MLU+age and
+age-only:
+
+- full language + age macro-F1 **0.802** [0.772, 0.832], AUC **0.903** [0.882, 0.924]
+- MLU + age macro-F1 **0.680** [0.644, 0.719], AUC **0.795** [0.762, 0.828]
+- age only macro-F1 **0.588** [0.550, 0.623], AUC **0.698** [0.659, 0.737]
+
+But corpus+age remains a serious artifact baseline: macro-F1 **0.833** [0.804,
+0.862]. Corpus-balanced bootstrap drops the apparent performance sharply:
+full language + age macro-F1 **0.599** [0.547, 0.651]. So the current
+Clinical-Eng data support DLD signal discovery, not a clinical screener claim.
+
+**DLD-10 / DLD-12 Rescorla late-talker catch-up.**
+Script: `scripts/run_dld_late_talker_catchup.py`
+Output: `outputs/dld_late_talker_catchup/summary.md`
+
+The age repair recovered **217** missing-age rows in Rescorla and reduced
+missing age from 217 to 0. Same-age TD residualization shows late talkers move
+toward TD from 36 to 108 months:
+
+- 36 months: mean composite z **-1.568**
+- 48 months: **-0.652**
+- 60 months: **-0.297**
+- 108 months: **-0.170**
+- 156 months: **-0.560** (small TD n and likely task/age artifacts)
+
+Longitudinally, late talkers improved by mean delta z **+1.042**; **55.3%**
+ended within the TD band, while **21.1%** retained a persistent gap. However,
+early transcript state did **not** predict final TD-band status better than
+chance in this local setup. That is an important negative result: local
+Rescorla transcripts describe catch-up but do not yet solve prognosis.
+
+**DLD-11 corpus deconfounding.**
+Script: `scripts/run_dld_corpus_deconfounding.py`
+Output: `outputs/dld_corpus_deconfounding/summary.md`
+
+Within-corpus participant-held-out models still carry signal:
+
+- pooled within-corpus full language + age: macro-F1 **0.800**, AUC **0.844**
+- MLU + age: macro-F1 **0.787**, AUC **0.828**
+- age only: macro-F1 **0.727**, AUC **0.766**
+
+Age-bin-matched pooled results were similar: full language + age macro-F1
+**0.795**, AUC **0.839**. So the DLD signal is not only corpus membership, but
+the incremental gain over MLU/age is modest in the currently local data.
+
+**DLD-13 narrative proxy.**
+Script: `scripts/run_dld_narrative_proxy.py`
+Output: `outputs/dld_narrative_proxy/summary.md`
+
+This is not true main-concept scoring, but a structural narrative-state proxy.
+Narrative-like Clinical-Eng windows: **664**; participant-task rows: **521**.
+DLD/SLI samples showed lower TD-referenced narrative proxy scores in ENNI,
+Feldman, and Gillam. All-narrative DLD-vs-TD proxy classifier: macro-F1
+**0.764**, AUC **0.863**; ENNI-only macro-F1 **0.715**, AUC **0.845**.
+Interpretation: narrative state is promising, but the real next step is child
+prompt-specific main-concept rubrics analogous to the aphasia content work.
+
+**DLD-14 fairness/metadata audit.**
+Script: `scripts/run_dld_fairness_metadata_audit.py`
+Output: `outputs/dld_fairness_metadata_audit/summary.md`
+
+Metadata coverage in current local DLD predictions:
+
+- corpus: 100%
+- age bin: 100%
+- task proxy: 71.7%
+- path-encoded sex token: 1.9%
+
+Corpus subgroup performance varied widely: macro-F1 range **0.345** across
+reportable corpora. Sex/gender, dialect, bilingual exposure, socioeconomic
+status, race/ethnicity, and intervention history are not available enough for a
+serious fairness claim. This is a hard requirement for any prospective study.
+
+**DLD-15 to DLD-17 planning outputs.**
+
+- `outputs/dld_manchester_access_plan/summary.md`: Manchester Language Study
+  access/join plan.
+- `outputs/dld_cross_disorder_generalization_plan/summary.md`: cross-disorder
+  language-state extension across aphasia, DLD, dementia, TBI, RHD, fluency,
+  dysarthria, and voice.
+- `outputs/dld_prospective_study_blueprint/summary.md`: minimal prospective
+  DLD study design with transcript/audio, literacy, school, intervention, and
+  fairness fields.
+
+At this point the DLD local-data queue is complete through DLD-17. The main
+scientific conclusion is that DLD is worth pursuing as a cross-lifespan
+generalization track, but the local CHILDES/Clinical-Eng data support mechanism
+discovery better than clinical screening or prognosis.

@@ -343,13 +343,19 @@ def parse_cha_par_metadata(file_path: Path) -> list[AphasiaTranscriptRecord]:
         return records
 
     # Section / corpus inferred from path under data/raw/aphasiabank.
+    # Keep the full relative path in transcript_id. Several AphasiaBank
+    # bundles contain the same filename stem under different subfolders
+    # (for example PWA/control/task-specific folders), so section/corpus/stem
+    # is not unique enough for downstream window joins.
     parts = file_path.resolve().parts
     try:
         ab_idx = parts.index("aphasiabank")
         section = parts[ab_idx + 1]
         corpus = parts[ab_idx + 2]
+        transcript_id = Path(*parts[ab_idx + 1:]).with_suffix("").as_posix()
     except (ValueError, IndexError):
         section, corpus = "unknown", "unknown"
+        transcript_id = file_path.with_suffix("").name
 
     n_par = sum(1 for line in text.splitlines() if line.startswith("*PAR"))
 
@@ -366,7 +372,7 @@ def parse_cha_par_metadata(file_path: Path) -> list[AphasiaTranscriptRecord]:
             participant_id = stem
 
         records.append(AphasiaTranscriptRecord(
-            transcript_id=f"{section}/{corpus}/{stem}",
+            transcript_id=transcript_id,
             section=section,
             corpus=corpus,
             participant_id=participant_id,
