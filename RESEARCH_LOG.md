@@ -9253,3 +9253,127 @@ plus sentence repetition and broader language/cognition/literacy variables.
 - SCALES access packet and variable-map plan.
 - Continue Purdue stuttering feature ablation and robustness while waiting for
   password-gated FluencyBank corpora.
+
+## 2026-05-01 Local Batch 8: Clinical literature map and full FluencyBank transcript access
+
+User request: understand the major scientific papers that should inform the
+research direction, especially clinical findings, and incorporate Brian's note
+that FluencyBank access had just been opened.
+
+Outputs:
+
+- `outputs/clinical_literature_review/summary.md`
+- `outputs/clinical_literature_review/paper_matrix.md`
+- `outputs/fluencybank_download_inventory/summary.md`
+- `scripts/download_fluencybank_transcripts.py`
+
+### FluencyBank access result
+
+Brian's access change worked. The current TalkBank cookie can download the
+formerly password-gated FluencyBank transcript ZIPs:
+
+- IISRP
+- IISRP-new
+- Wagovich
+- Ratner
+- Maxfield
+- Tellis
+- Sawyer
+
+The local inventory now has:
+
+- TalkBankDB FluencyBank rows: **1,999**
+- Local `.cha` transcripts: **1,999**
+- Formerly password-gated `.cha` transcripts now local: **1,154**
+
+This supersedes Batch 7's password-gated FluencyBank finding. Transcript-level
+stuttering recovery modeling is now unblocked. Media access still needs probing
+before acoustic recovery modeling.
+
+### Clinical literature synthesis
+
+The review mapped DLD, stuttering, aphasia, discourse, acoustic, and treatment
+personalization papers into experiment decisions.
+
+High-impact sources included:
+
+- Bishop, Snowling, Thompson, Greenhalgh, and CATALISE Consortium (2016),
+  CATALISE phase 1, DOI `10.1371/journal.pone.0158753`.
+- Bishop, Snowling, Thompson, Greenhalgh, and CATALISE-2 Consortium (2017),
+  CATALISE phase 2, DOI `10.1111/jcpp.12721`.
+- Norbury et al. (2016), SCALES prevalence/nonverbal ability, DOI
+  `10.1111/jcpp.12573`.
+- Fiveash et al. (2023), rhythmic primes and sentence repetition in DLD, DOI
+  `10.1038/s41539-023-00170-1`.
+- Kueser and Leonard (2020), frequency/predictability in sentence repetition,
+  DOI `10.1044/2019_JSLHR-19-00155`.
+- Calder, Claessen, Ebbels, and Leitao (2020), explicit grammar intervention
+  SCED, DOI `10.1044/2019_LSHSS-19-00060`.
+- Roberts and Kaiser (2015), caregiver-implemented toddler language delay RCT,
+  PMC `PMC4379460`.
+- Grauzer, Roberts, and Jones (2026), Dryad EMT-SF DLD dataset, DOI
+  `10.5061/dryad.sj3tx96g9`.
+- Sagae, Lavie, and MacWhinney (2005), automatic syntactic development
+  measurement.
+- Sagae (2021), neural language models for child language development, DOI
+  `10.3389/fpsyg.2021.674402`.
+- Yairi and Ambrose early childhood stuttering recovery work, DOI
+  `10.1044/jslhr.4205.1097`.
+- Smith and Weber (2017), multifactorial dynamic pathways theory, DOI
+  `10.1044/2017_JSLHR-S-16-0343`.
+- Spencer and Weber-Fox (2014), articulation/nonword repetition recovery
+  predictors.
+- Walsh et al. (2020), weighted disfluency/persistence risk.
+- Ratner and MacWhinney (2018), FluencyBank.
+- RELEASE Collaborators and Brady et al. (2022), aphasia dosage/intensity IPD
+  network meta-analysis, DOI `10.1161/STROKEAHA.121.035216`.
+- Kiran et al. (2026), bilingual aphasia digital twin RCT, DOI
+  `10.1038/s41746-026-02583-9`.
+- Forbes, Fromm, and MacWhinney et al. (2022), AphasiaBank discourse assessment.
+- Fromm et al. (2024), FLUCALC.
+- Pittman et al. (2025), CIU/discourse ML.
+- Adikari et al. (2025), generative AI reconstruction for aphasia, DOI
+  `10.1038/s41598-025-24725-x`.
+- Eyben et al. (2016), eGeMAPS/openSMILE acoustic standard, DOI
+  `10.1109/TAFFC.2015.2457417`.
+
+### Core lessons
+
+1. Measurement must come before treatment optimization. Clinical labels and
+   global scores are useful but heterogeneous, so the central output should be
+   multidimensional state measurement rather than one broad classifier.
+2. Natural speech should be paired with tight tasks. Sentence repetition,
+   nonword repetition, phonological probes, structured discourse tasks, and
+   acoustic/fluency measures expose mechanisms that open conversation misses.
+3. Longitudinal movement is the strongest discovery thread. Late-talker,
+   stuttering, DLD treatment, and aphasia change results all point toward
+   within-person movement as more clinically meaningful than earliest severity.
+4. Treatment-response work needs targets, dose, fidelity, repeated probes, and
+   outcomes. Aggregate treatment data can test measurement-response links but
+   cannot optimize therapy alone.
+5. The Nature-level clinical AI bar is prospective assignment. Kiran et al.
+   (2026) is the benchmark; retrospective prediction should be framed as
+   preclinical evidence.
+
+### Revised experiment order
+
+1. Full FluencyBank transcript recovery model across the newly local corpora,
+   using weighted stuttering-like disfluency, longitudinal change, task/corpus
+   structure, language features, and corpus-held-out validation.
+2. Fiveash sentence-repetition structured-task pilot.
+3. Calder repeated-probe grammar-treatment response curves.
+4. SCALES access packet and variable map.
+5. Aphasia GenAI safety/digital-twin benchmarking, preserving the measurement
+   firewall.
+
+### Current best hypothesis
+
+The most interesting cross-disorder hypothesis is:
+
+> Early within-person movement across natural speech plus structured tasks
+> predicts long-term recovery or treatment response better than baseline
+> diagnostic labels and global severity scores.
+
+This is now immediately testable in stuttering with FluencyBank transcripts,
+partially testable in DLD with Dryad/Fiveash/Calder, and theoretically aligned
+with the aphasia digital-twin and discourse-assessment literature.

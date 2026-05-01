@@ -1,18 +1,18 @@
-corpus,talkbankdb_rows,password_rows,local_downloaded,local_cha_files,languages,designs,groups
-Purdue,359,0,True,359,eng,long:359,CWS:359
-UMD-CMU,143,0,True,143,"eng, eng,spa",cross:143,"CWS:87, TD:56"
-Ulm,140,0,True,140,deu,cross:140,CWS:140
-Voices-AWS,102,0,True,102,eng,cross:102,AWS:102
-Voices-CWS,48,0,True,48,eng,cross:48,CWS:48
-Hakim,32,0,True,32,eng,cross:32,"CWS:16, TD:16"
-Brejon,8,0,True,8,fra,cross:8,CWS:8
-Voices-AWC,7,0,True,7,eng,cross:7,AWC:7
-VanZaalen,5,0,True,5,"eng, nld",null:5,null:5
-Examples,1,0,True,1,eng,null:1,null:1
-Maxfield,17,17,False,0,eng,long:17,AWS:17
-Sawyer,51,51,False,0,eng,null:51,null:51
-Ratner,60,60,False,0,eng,long:60,"CWS:44, TD:16"
-IISRP-new,89,89,False,0,eng,"long:54, null:35","CWS:49, null:35, TD:5"
-Wagovich,90,90,False,0,eng,long:90,CWS:90
-Tellis,95,95,False,0,eng,cross:95,CWS:95
-IISRP,752,752,False,0,eng,long:752,"CWS:611, TD:141"
+corpus,zip_key,talkbankdb_rows,password_rows,download_status,http_status,zip_bytes,files_extracted,local_cha_files,languages,designs,groups,url,error
+IISRP,Password/IISRP,752,752,cached,,23044315,758,752,eng,long:752,"CWS:611, TD:141",https://talkbank.org/data/fluency/Password/IISRP?f=zip,
+Purdue,Purdue,359,0,not_requested,,,,359,eng,long:359,CWS:359,https://talkbank.org/data/fluency/Purdue?f=zip,
+UMD-CMU,UMD-CMU,143,0,not_requested,,,,143,"eng, eng,spa",cross:143,"CWS:87, TD:56",https://talkbank.org/data/fluency/UMD-CMU?f=zip,
+Ulm,Ulm,140,0,not_requested,,,,140,deu,cross:140,CWS:140,https://talkbank.org/data/fluency/Ulm?f=zip,
+Voices-AWS,Voices-AWS,102,0,not_requested,,,,102,eng,cross:102,AWS:102,https://talkbank.org/data/fluency/Voices-AWS?f=zip,
+Tellis,Password/Tellis,95,95,cached,,242171,97,95,eng,cross:95,CWS:95,https://talkbank.org/data/fluency/Password/Tellis?f=zip,
+Wagovich,Password/Wagovich,90,90,cached,,976778,93,90,eng,long:90,CWS:90,https://talkbank.org/data/fluency/Password/Wagovich?f=zip,
+IISRP-new,Password/IISRP-new,89,89,cached,,2703439,90,89,eng,"long:54, null:35","CWS:49, TD:5, null:35",https://talkbank.org/data/fluency/Password/IISRP-new?f=zip,
+Ratner,Password/Ratner,60,60,cached,,1222512,65,60,eng,long:60,"CWS:44, TD:16",https://talkbank.org/data/fluency/Password/Ratner?f=zip,
+Sawyer,Password/Sawyer,51,51,cached,,817376,53,51,eng,null:51,null:51,https://talkbank.org/data/fluency/Password/Sawyer?f=zip,
+Voices-CWS,Voices-CWS,48,0,not_requested,,,,48,eng,cross:48,CWS:48,https://talkbank.org/data/fluency/Voices-CWS?f=zip,
+Hakim,Hakim,32,0,not_requested,,,,32,eng,cross:32,"CWS:16, TD:16",https://talkbank.org/data/fluency/Hakim?f=zip,
+Maxfield,Password/Maxfield,17,17,cached,,1132091,19,17,eng,long:17,AWS:17,https://talkbank.org/data/fluency/Password/Maxfield?f=zip,
+Brejon,Brejon,8,0,not_requested,,,,8,fra,cross:8,CWS:8,https://talkbank.org/data/fluency/Brejon?f=zip,
+Voices-AWC,Voices-AWC,7,0,not_requested,,,,7,eng,cross:7,AWC:7,https://talkbank.org/data/fluency/Voices-AWC?f=zip,
+VanZaalen,VanZaalen,5,0,not_requested,,,,5,"eng, nld",null:5,null:5,https://talkbank.org/data/fluency/VanZaalen?f=zip,
+Examples,Examples,1,0,not_requested,,,,1,eng,null:1,null:1,https://talkbank.org/data/fluency/Examples?f=zip,

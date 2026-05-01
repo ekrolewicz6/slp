@@ -3,6 +3,12 @@
 **Date:** 2026-05-01  
 **Scope:** web scan plus local download pass for the data/paper gaps identified after Brian MacWhinney's 2026-04-29 guidance: FluencyBank recovery corpora, Manchester/SCALES longitudinal DLD data, structured sentence/nonword repetition tasks, DLD treatment-response data, acoustic standards, aphasia discourse measurement, and recent treatment-personalization papers.
 
+**Same-day update:** the FluencyBank password-access finding in this scan was
+superseded later on 2026-05-01. Brian's access change is now confirmed: the
+current TalkBank cookie downloads IISRP, IISRP-new, Wagovich, Ratner, Maxfield,
+Tellis, and Sawyer transcript ZIPs. See
+`outputs/fluencybank_download_inventory/summary.md`.
+
 ## Local Cache
 
 Downloaded or indexed **35** literature/data-document records into gitignored `data/external/literature/` (**40.0 MB** counted from manifest records). Raw PDFs, spreadsheets, OSF CSVs, and documentation are intentionally not committed. The committed manifest is `outputs/data_access_scan/source_manifest.csv`.
@@ -48,7 +54,7 @@ Category counts:
 
 | source | current status | next action |
 |---|---|---|
-| FluencyBank IISRP, IISRP-new, Wagovich, Ratner, Maxfield | Password/consortium-gated. The current cookie downloaded all non-password corpora, but these recovery-relevant corpora remain blocked. | Brian/password access request already in progress; once available, rerun the FluencyBank download inventory and recovery replication. |
+| FluencyBank IISRP, IISRP-new, Wagovich, Ratner, Maxfield, Tellis, Sawyer | Superseded same day: these transcript ZIPs are now accessible with the current TalkBank cookie. | Use `outputs/fluencybank_download_inventory/summary.md` as the current access inventory; media access still needs separate probing before acoustic modeling. |
 | SCALES participant-level data | UK Data Service safeguarded/restricted access; public page says access may be granted on request. | Apply through UKDS or partner-lab route. This is now the top DLD access target. |
 | Manchester Language Study participant-level data | ReShare says data downloads require registered UK Data Service users; some age-23 scanned forms are closed/request-permission. | Apply through UKDS after prioritizing SCALES, because Manchester is rich for long-term outcome trajectories but less directly tied to current transcript/audio measurement. |
 | EMT-SF raw language samples/audio/session targets/dose | Not in Dryad package. | Ask Roberts/Hadley/Kaiser or collaborators only after we have a concise analysis memo from aggregate Dryad results. |
@@ -62,7 +68,7 @@ The next highest-learning step is no longer generic web searching. It is to use 
 1. Run a Fiveash sentence-repetition structured-task pilot from the OSF CSVs.
 2. Add Calder repeated-probe treatment data to the DLD treatment-response track as a single-case response-curve testbed.
 3. Prepare SCALES and Manchester access packets, with SCALES first because it directly addresses Brian's natural-plus-tight-task point and has repeated longitudinal outcomes.
-4. Continue Purdue stuttering robustness while waiting for password-gated FluencyBank corpora.
+4. Move from Purdue-only stuttering robustness to full FluencyBank transcript recovery modeling across the newly local password corpora.
 5. Treat the 2026 bilingual aphasia digital-twin RCT as a benchmark for how high the bar is: a prospective randomized treatment-assignment test, not just retrospective prediction.
 
 ## Files

@@ -11,11 +11,11 @@ None.
 
 ## Next
 
+- [ ] **4.2 Full FluencyBank transcript recovery model.** Extend the Purdue pilot to longitudinal-change features, weighted stuttering-like disfluency, disfluency classes, transcript-language features, task/corpus structure, and corpus-held-out replication across the newly local password corpora where labels permit.
+- [ ] **4.3 Stuttering robustness audit.** Add bootstrap CIs, leave-corpus/grant-out checks, shuffled-label controls beyond AUC, and replication across IISRP, IISRP-new, Wagovich, Ratner, Tellis, Maxfield, Sawyer, Purdue, and UMD-CMU where labels permit.
 - [ ] **14.1 Fiveash sentence-repetition structured-task pilot.** Use the downloaded OSF data from Fiveash et al. (2023) to model sentence-repetition performance, DLD-vs-TD separation, age/reading covariates, and the regular-vs-irregular rhythm manipulation.
 - [ ] **14.2 Calder repeated-probe treatment-response pilot.** Use the downloaded ASHA Figshare supplements from Calder et al. (2020) to build a single-case response-curve analysis for trained, untrained, extension, and control grammar probes.
 - [ ] **14.3 SCALES access packet and analysis plan.** Use the downloaded UKDS user guide to define the variable map, minimum models, and access request rationale for SCALES Study 8968.
-- [ ] **4.2 Stuttering feature ablation.** Extend the Purdue pilot to longitudinal-change features, disfluency classes, transcript-language features, and acoustic features if media access is usable.
-- [ ] **4.3 Stuttering robustness audit.** Add bootstrap CIs, leave-grant-out checks, shuffled-label controls beyond AUC, and replication on IISRP/Wagovich/Ratner if password access is obtained.
 
 ## Backlog
 
@@ -32,7 +32,7 @@ None.
 - [ ] Full AphasiaBank openSMILE streaming extraction: now technically feasible, but a full all-corpus run is multi-hour; use balanced patient-root chunks before launching all sessions.
 - [ ] EMT-SF raw language samples/audio/session targets/dose: the public Dryad package is local, but raw samples and session-level treatment details are not public.
 - [ ] Prospective clinical collection: requires consent/IRB path and partner workflow.
-- [ ] Full stuttering recovery replication: accessible Purdue data are now local and modeled, but IISRP, IISRP-new, Wagovich, Ratner, and Maxfield remain password-gated and are needed for replication.
+- [ ] Full stuttering acoustic/media replication: transcript access now works for all 1,999 FluencyBank `.cha` files in the TalkBankDB export; media access and quality still need probing before acoustic recovery modeling.
 - [ ] Full natural-plus-tight-task battery: Fiveash OSF sentence-repetition data are local, but paired natural speech plus structured tasks still require SCALES/Manchester/TalkBank access or prospective collection.
 - [ ] SCALES participant-level modeling: requires UK Data Service safeguarded/restricted access.
 
@@ -46,7 +46,7 @@ None.
 - [x] **1.3 State dimensions.** Included in `docs/minimum_language_state_battery.md`.
 - [x] **1.4 SLP-facing output requirements.** Included in `docs/minimum_language_state_battery.md`.
 - [x] **2.1 Structured-task inventory.** Created `outputs/structured_task_inventory/summary.md`.
-- [x] **2.2 Stuttering recovery inventory.** Created `outputs/stuttering_recovery_inventory/summary.md`; local recovery modeling is blocked pending FluencyBank access.
+- [x] **2.2 Stuttering recovery inventory.** Created `outputs/stuttering_recovery_inventory/summary.md`; later transcript access is now unblocked by task 13.3.
 - [x] **2.3 DLD/late-talker longitudinal inventory.** Created `outputs/dld_longitudinal_inventory/summary.md`; local data have repeated samples but no explicit outcome/literacy/school columns.
 - [x] **2.4 Treatment-response evidence inventory.** Created `outputs/treatment_response_inventory/summary.md`; identified Dryad EMT-SF DLD as the first public treatment-response pilot and FluencyBank as the first recovery-prediction target.
 - [x] **2.5 BA Web/Batchalign/CLAN/KidEval infrastructure inventory.** Created `docs/ba_web_integration_notes.md`; API details remain a Brian/Franklin question.
@@ -89,6 +89,8 @@ None.
 - [x] **13.1 FluencyBank public download inventory.** Used the local TalkBankDB transcript export to download all non-password FluencyBank corpora with the current TalkBank cookie; 845 local `.cha` transcripts are now under gitignored `data/raw/fluencybank/`.
 - [x] **4.1 First-pass stuttering recovery model.** Created `scripts/run_fluencybank_purdue_recovery_pilot.py` and `outputs/fluencybank_purdue_recovery_pilot/summary.md`; Purdue strict Rec/Per labels are usable, but earliest-transcript prediction is modest rather than publishable on its own.
 - [x] **13.2 Data access and literature scan.** Downloaded open papers/docs/supplements into gitignored `data/external/literature/` and committed `outputs/data_access_scan/summary.md`; SCALES and Manchester participant-level data are UKDS gated, FluencyBank recovery corpora remain consortium/password gated, and Fiveash/Calder are now immediate local analysis targets.
+- [x] **13.3 Full FluencyBank transcript access.** Confirmed Brian's access change worked and reran `scripts/download_fluencybank_transcripts.py --only-password`; all 1,999 FluencyBank `.cha` transcripts in the TalkBankDB export are now local, including 1,154 formerly password-gated transcript files.
+- [x] **13.4 Clinical literature review matrix.** Created `outputs/clinical_literature_review/summary.md` and `outputs/clinical_literature_review/paper_matrix.md`; the papers push the next work toward longitudinal state movement, natural-plus-structured tasks, and treatment-response datasets rather than broad diagnostic classifiers.
 
 ## Deprioritized
 
