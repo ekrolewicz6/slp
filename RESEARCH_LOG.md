@@ -8890,3 +8890,138 @@ The current best paper-like thesis is:
 > corpora already show that repeated state movement and label/state
 > disagreement expose clinically meaningful questions that standard labels,
 > MLU, and broad severity scores compress.
+
+## 2026-05-01 Local Batch 5: Dryad EMT-SF treatment-response data
+
+Dataset:
+
+- Dryad DOI `10.5061/dryad.sj3tx96g9`
+- Local extract: `data/external/dryad_emt_sf_dld/` (gitignored)
+
+Dryad describes this as de-identified baseline and short-term follow-up data
+from a randomized controlled trial of Enhanced Milieu Teaching-Sentence
+Focused (EMT-SF), an 18-month caregiver-implemented intervention for children
+at risk for DLD. The shared dataset excludes seven participants who did not
+consent to additional data sharing. It includes 30-, 36-, and 42-month primary
+analysis points plus additional repeated measures through 49 months.
+
+### Dryad EMT-SF treatment pilot
+
+Script:
+
+- `scripts/run_dryad_emt_sf_treatment_pilot.py`
+
+Outputs:
+
+- `outputs/dryad_emt_sf_treatment_pilot/summary.md`
+- `outputs/dryad_emt_sf_treatment_pilot/event_inventory.csv`
+- `outputs/dryad_emt_sf_treatment_pilot/baseline_group_balance.csv`
+- `outputs/dryad_emt_sf_treatment_pilot/key_variable_missingness.csv`
+- `outputs/dryad_emt_sf_treatment_pilot/treatment_effects.csv`
+- `outputs/dryad_emt_sf_treatment_pilot/language_sample_followup_effects.csv`
+- `outputs/dryad_emt_sf_treatment_pilot/moderator_screen.csv`
+
+Inventory:
+
+- Long-format rows: 704
+- Unique shared participant IDs: 101
+- Baseline randomized analysis participants: 98
+- EMT-SF/control at baseline: 50/48
+
+Primary transparent OLS treatment contrasts:
+
+| family | outcome | n | adjusted tx effect | 95% CI | p | adjusted d |
+|---|---|---:|---:|---:|---:|---:|
+| vocabulary | T36 vocabulary composite z | 88 | 0.281 | [-0.017, 0.580] | 0.064 | 0.400 |
+| vocabulary | T36 PPVT-5 SS | 88 | 4.449 | [-0.098, 8.996] | 0.055 | 0.415 |
+| vocabulary | T36 EVT-3 SS | 88 | 2.278 | [-1.872, 6.429] | 0.278 | 0.233 |
+| grammar | T42 grammar composite z | 90 | 0.421 | [0.089, 0.752] | 0.013 | 0.533 |
+| grammar | T42 SPELT-P2 raw | 90 | 2.825 | [0.289, 5.360] | 0.029 | 0.468 |
+| grammar | T42 SPELT-P2 SS | 90 | 6.194 | [0.902, 11.486] | 0.022 | 0.492 |
+| grammar | T42 TEGI composite | 90 | 9.941 | [0.510, 19.372] | 0.039 | 0.443 |
+
+Exploratory T49 outcomes:
+
+| outcome | n | adjusted tx effect | 95% CI | p | adjusted d |
+|---|---:|---:|---:|---:|---:|
+| T49 vocabulary composite z | 86 | 0.400 | [0.048, 0.752] | 0.026 | 0.489 |
+| T49 grammar composite z | 89 | 0.495 | [0.154, 0.836] | 0.005 | 0.614 |
+| T49 CELF-P3 SS | 92 | 5.217 | [-0.063, 10.497] | 0.053 | 0.411 |
+| T49 Renfrew Bus Story | 83 | 0.799 | [-1.355, 2.953] | 0.462 | 0.162 |
+
+Baseline moderator screen:
+
+- Tested baseline language sample, standardized-test, caregiver/behavior, and
+  family-history moderators for T36/T42/T49 composite outcomes.
+- Used BH and max-T family checks.
+- No baseline moderator survived correction.
+
+Interpretation: this is the first local dataset that directly links a
+randomized DLD intervention to later outcomes. It is more clinically relevant
+than the previous CHILDES-only DLD work. The treatment signal is clearer for
+grammar than short-term vocabulary in these transparent Python models.
+However, the shared dataset is too small and too aggregate to support
+individualized treatment matching.
+
+### Dryad early-movement response pilot
+
+Script:
+
+- `scripts/run_dryad_early_movement_response_pilot.py`
+
+Outputs:
+
+- `outputs/dryad_early_movement_response/summary.md`
+- `outputs/dryad_early_movement_response/movement_treatment_effects.csv`
+- `outputs/dryad_early_movement_response/movement_outcome_prediction.csv`
+
+This experiment tests the project's strongest current child-language idea in
+a randomized treatment dataset: early movement may be more meaningful than a
+static baseline snapshot.
+
+Does treatment move the aggregate early language-sample state?
+
+| movement window | n | tx effect | 95% CI | p |
+|---|---:|---:|---:|---:|
+| T33 | 85 | 0.371 | [-0.027, 0.768] | 0.068 |
+| T36 | 85 | 0.301 | [-0.093, 0.696] | 0.132 |
+| T39 | 83 | -0.195 | [-0.605, 0.215] | 0.347 |
+
+Does early movement predict later outcomes beyond baseline state and
+treatment group?
+
+| outcome | movement window | n | movement coef | 95% CI | p | R2 gain |
+|---|---|---:|---:|---:|---:|---:|
+| T49 grammar composite | T33 | 89 | 0.401 | [0.243, 0.559] | <0.001 | 0.176 |
+| T49 grammar composite | T39 | 89 | 0.378 | [0.225, 0.530] | <0.001 | 0.169 |
+| T42 grammar composite | T39 | 90 | 0.346 | [0.201, 0.491] | <0.001 | 0.159 |
+| T42 grammar composite | T33 | 90 | 0.325 | [0.174, 0.477] | <0.001 | 0.134 |
+| T49 vocabulary composite | T33 | 86 | 0.295 | [0.126, 0.465] | 0.001 | 0.103 |
+
+Interpretation: Dryad strengthens the early-movement thesis. Early
+language-sample movement predicts later standardized vocabulary/grammar
+outcomes beyond treatment assignment and baseline state. But treatment
+assignment only weakly moves this aggregate early state in simple models, so
+the result supports measurement science more than a treatment-mediation claim.
+
+### Batch 5 synthesis
+
+This changes the project in an important way. Before Dryad, the child-language
+thread had trajectory evidence but no randomized treatment-response dataset.
+Now we have a real intervention dataset showing:
+
+1. EMT-SF has clearer grammar than vocabulary effects in transparent models.
+2. Baseline moderators are not robust enough for treatment matching in the
+   shared aggregate dataset.
+3. Early language-sample movement predicts later outcomes, matching the
+   direction of the Rescorla late-talker result.
+
+The current best child-language claim is now stronger:
+
+> Repeated early movement in language-sample state predicts later child
+> language outcomes better than a one-time baseline profile, including inside
+> a randomized DLD intervention dataset.
+
+The remaining gap is not compute. It is data granularity: raw transcripts,
+audio, session dose, treatment targets, and clinician goals are needed before
+this can become adaptive treatment science.

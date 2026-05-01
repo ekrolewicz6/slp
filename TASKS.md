@@ -11,7 +11,7 @@ None.
 
 ## Next
 
-- [ ] **DLD EMT-SF treatment-response pilot.** Run after the Dryad dataset is downloaded into `data/external/dryad_emt_sf_dld/`.
+None.
 
 ## Backlog
 
@@ -80,6 +80,10 @@ None.
 - [x] **10.3 DLD conflict review packet.** Created `scripts/create_dld_conflict_review_packet.py`, `outputs/dld_conflict_review_packet/summary.md`, and `outputs/dld_conflict_review_packet/review_packet.md`; packaged the 15 highest-value DLD/TD conflict cases for expert review and future structured-probe design.
 - [x] **11.1 DLD conflict mechanism audit.** Created `scripts/run_dld_conflict_mechanism_audit.py` and `outputs/dld_conflict_mechanism_audit/summary.md`; the 15 review cases split into sample-constrained, possible hidden TD risk, non-MLU language-state, language-not-corpus-prior, and low-output/MLU-aligned mechanisms.
 - [x] **11.2 Late-talker bootstrap/permutation audit.** Created `scripts/run_late_talker_bootstrap_permutation_audit.py` and `outputs/late_talker_bootstrap_permutation/summary.md`; the 0.75 z early-movement effect has positive bootstrap CIs and permutation support for final TD-band lift and persistent-gap reduction.
+- [x] **12.1 Dryad EMT-SF data inventory.** Extracted the public Dryad EMT-SF dataset into gitignored `data/external/dryad_emt_sf_dld/` and audited structure/missingness in `outputs/dryad_emt_sf_treatment_pilot/summary.md`.
+- [x] **12.2 Dryad EMT-SF treatment effect replication.** Added transparent Python treatment contrasts in `scripts/run_dryad_emt_sf_treatment_pilot.py`; grammar effects are clearer than short-term vocabulary effects.
+- [x] **12.3 Dryad EMT-SF heterogeneous response pilot.** Added baseline moderator screening with BH and max-T checks; no robust moderator survived correction in the shared dataset.
+- [x] **12.4 Dryad early-movement outcome pilot.** Created `scripts/run_dryad_early_movement_response_pilot.py` and `outputs/dryad_early_movement_response/summary.md`; early language-sample movement predicts later grammar/vocabulary outcomes beyond baseline state and treatment group, but treatment assignment only weakly moves the aggregate early state.
 
 ## Deprioritized
 

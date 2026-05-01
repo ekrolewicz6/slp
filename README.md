@@ -144,6 +144,8 @@ Adding patient history improves controller decisions, especially deciding when t
 | What DLD targets would residual-state policies nominate? | `outputs/dld_target_policy_simulation/summary.md` |
 | What outcome data are needed for clinically meaningful DLD work? | `outputs/dld_data_needs/summary.md` |
 | How should Manchester Language Study data be integrated? | `outputs/dld_manchester_access_plan/summary.md` |
+| What does the Dryad EMT-SF randomized DLD dataset show? | `outputs/dryad_emt_sf_treatment_pilot/summary.md` |
+| Does early language-sample movement predict later treatment outcomes? | `outputs/dryad_early_movement_response/summary.md` |
 | How could the state model generalize across SLP disorders? | `outputs/dld_cross_disorder_generalization_plan/summary.md` |
 | What prospective DLD study would test the clinical claim? | `outputs/dld_prospective_study_blueprint/summary.md` |
 | What did Brian MacWhinney's post-call guidance change? | `docs/brian_meeting_2026-04-29.md` |
@@ -190,13 +192,15 @@ The full experiment history is in `RESEARCH_LOG.md`. The original project specif
 
 ## Current Checkpoint
 
-As of 2026-05-01, the current local-data batch is complete. The project can now stream TalkBank media with the local cookie, run standard openSMILE/eGeMAPS extraction, compare standard and custom acoustic features, audit stable-WAB discourse/acoustic movers, and run the latest DLD label-noise, task-context, late-talker persistence, expert-review-packet, and conflict-mechanism checks.
+As of 2026-05-01, the current local-data batch is complete. The project can now stream TalkBank media with the local cookie, run standard openSMILE/eGeMAPS extraction, compare standard and custom acoustic features, audit stable-WAB discourse/acoustic movers, and run the latest DLD label-noise, task-context, late-talker persistence, expert-review-packet, conflict-mechanism, and Dryad EMT-SF treatment-response checks.
 
 The main conclusion from this batch is cautious but useful: the strongest publishable direction is multidimensional state measurement, not a standalone classifier. The late-talker results now make the best current child-language discovery thread more specific: early movement appears more meaningful than earliest severity. At the 0.75 z movement threshold, the final TD-band lift is 0.533 with bootstrap 95% CI [0.167, 0.842] and one-sided permutation p=0.011; persistent-gap reduction is 0.433 with bootstrap 95% CI [0.087, 0.769] and p=0.022. The acoustic-only mover result moved in the opposite direction: utterance-aligned media review still flags most candidate pairs as medium/high technical risk, leaving only one low-risk voice/pitch candidate for manual clinical audio review.
 
 The DLD work now has a concrete expert-review path rather than only aggregate classifier metrics. The current packet contains 15 high-value DLD/TD conflict cases: 3 TD-labeled children whose language state looks risky without corpus shortcuts, and 12 cases where language-only risk remains high even when corpus/age priors do not. Mechanism audit splits those cases into sample-constrained, possible hidden TD risk, non-MLU language-state, language-not-corpus-prior, and low-output/MLU-aligned profiles. These cases define what an SLP or child-language researcher should inspect next.
 
-The next high-value work is blocked on external inputs: FluencyBank recovery access, manual Dryad EMT-SF DLD download, BA Web integration details, and SLP review of the report packets.
+The Dryad EMT-SF dataset changes the project materially because it is the first local dataset with randomized DLD intervention assignment and repeated outcomes. Transparent Python models show clearer grammar effects than short-term vocabulary effects, no robust baseline moderator after correction, and a strong early-movement signal: early language-sample movement predicts later T42/T49 grammar and vocabulary outcomes beyond baseline state and treatment group. Treatment assignment only weakly moves the aggregate early state, so this supports the measurement thesis more than a simple treatment-mediation story.
+
+The next high-value work is blocked on fewer external inputs than before: FluencyBank recovery access, BA Web integration details, SLP review of the report packets, and access to raw transcript/audio or session-level EMT-SF dose/target data.
 
 ## Current Research Direction
 
@@ -238,9 +242,9 @@ The largest remaining gaps are:
 - easy recording/upload workflows that clinicians or families will actually use
 - structured-task data paired with natural speech
 - full all-corpus acoustic extraction beyond the current balanced84/common-root pilots
-- manual download or API access for the Dryad EMT-SF DLD treatment-response dataset
 - first SLP usability review of the state report
 - a partner-based prospective pilot with consented longitudinal samples and treatment exposure
+- raw transcript/audio, treatment target, dose, and session-level metadata for the EMT-SF-style treatment-response question
 
 For adaptive treatment optimization, datasets with intervention type, dose, timing, patient goals, and repeated outcome measures are still needed.
 
@@ -252,6 +256,7 @@ The project uses public or access-controlled language datasets, including:
 - AphasiaBank transcripts and metadata for aphasia discourse and WAB-linked analyses
 - AphasiaBank media streamed from TalkBank for acoustic feature extraction when credentials are available
 - task-specific prompts such as Cinderella and related discourse tasks for content-state modeling
+- Dryad EMT-SF DLD randomized intervention data stored locally under gitignored `data/external/dryad_emt_sf_dld/`
 
 Audio is not persisted by default. The acoustic pipeline streams media, extracts features, and deletes temporary WAV files.
 
@@ -281,6 +286,8 @@ Representative commands:
 .venv/bin/python scripts/run_dld_narrative_proxy.py
 .venv/bin/python scripts/run_dld_fairness_metadata_audit.py
 .venv/bin/python scripts/run_dld_target_policy_simulation.py
+.venv/bin/python scripts/run_dryad_emt_sf_treatment_pilot.py
+.venv/bin/python scripts/run_dryad_early_movement_response_pilot.py
 ```
 
 Some experiments require AphasiaBank access, a TalkBank cookie, or a local LLM runtime.
