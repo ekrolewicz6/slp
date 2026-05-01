@@ -8896,6 +8896,12 @@ The current best paper-like thesis is:
 Dataset:
 
 - Dryad DOI `10.5061/dryad.sj3tx96g9`
+- Citation: Grauzer, Jeffrey; Roberts, Megan; Jones, Maranda (2026),
+  *Maximizing outcomes for preschoolers with developmental language
+  disorders* [Dataset], Dryad, https://doi.org/10.5061/dryad.sj3tx96g9
+- Trial registry context: ClinicalTrials.gov `NCT03782493`, *Maximizing
+  Outcomes for Preschoolers With Developmental Language Disorders*, lists
+  Megan Y. Roberts, Pamela Hadley, and Ann Kaiser as principal investigators.
 - Local extract: `data/external/dryad_emt_sf_dld/` (gitignored)
 
 Dryad describes this as de-identified baseline and short-term follow-up data
@@ -8903,7 +8909,10 @@ from a randomized controlled trial of Enhanced Milieu Teaching-Sentence
 Focused (EMT-SF), an 18-month caregiver-implemented intervention for children
 at risk for DLD. The shared dataset excludes seven participants who did not
 consent to additional data sharing. It includes 30-, 36-, and 42-month primary
-analysis points plus additional repeated measures through 49 months.
+analysis points plus additional repeated measures through 49 months. The
+Dryad package says the included R scripts reproduce the primary short-term
+outcome analyses reported in the associated manuscript; the local package and
+Dryad page do not provide a separate manuscript DOI.
 
 ### Dryad EMT-SF treatment pilot
 

@@ -198,7 +198,7 @@ The main conclusion from this batch is cautious but useful: the strongest publis
 
 The DLD work now has a concrete expert-review path rather than only aggregate classifier metrics. The current packet contains 15 high-value DLD/TD conflict cases: 3 TD-labeled children whose language state looks risky without corpus shortcuts, and 12 cases where language-only risk remains high even when corpus/age priors do not. Mechanism audit splits those cases into sample-constrained, possible hidden TD risk, non-MLU language-state, language-not-corpus-prior, and low-output/MLU-aligned profiles. These cases define what an SLP or child-language researcher should inspect next.
 
-The Dryad EMT-SF dataset changes the project materially because it is the first local dataset with randomized DLD intervention assignment and repeated outcomes. Transparent Python models show clearer grammar effects than short-term vocabulary effects, no robust baseline moderator after correction, and a strong early-movement signal: early language-sample movement predicts later T42/T49 grammar and vocabulary outcomes beyond baseline state and treatment group. Treatment assignment only weakly moves the aggregate early state, so this supports the measurement thesis more than a simple treatment-mediation story.
+The Dryad EMT-SF dataset changes the project materially because it is the first local dataset with randomized DLD intervention assignment and repeated outcomes. The dataset should be cited as Grauzer, Jeffrey; Roberts, Megan; Jones, Maranda (2026), *Maximizing outcomes for preschoolers with developmental language disorders* [Dataset], Dryad, https://doi.org/10.5061/dryad.sj3tx96g9. Dryad describes it as the shared dataset for the associated short-term outcome manuscript and as part of ClinicalTrials.gov `NCT03782493`, a trial led by Megan Y. Roberts with Pamela Hadley and Ann Kaiser listed as principal investigators. Transparent Python models show clearer grammar effects than short-term vocabulary effects, no robust baseline moderator after correction, and a strong early-movement signal: early language-sample movement predicts later T42/T49 grammar and vocabulary outcomes beyond baseline state and treatment group. Treatment assignment only weakly moves the aggregate early state, so this supports the measurement thesis more than a simple treatment-mediation story.
 
 The next high-value work is blocked on fewer external inputs than before: FluencyBank recovery access, BA Web integration details, SLP review of the report packets, and access to raw transcript/audio or session-level EMT-SF dose/target data.
 
@@ -256,7 +256,7 @@ The project uses public or access-controlled language datasets, including:
 - AphasiaBank transcripts and metadata for aphasia discourse and WAB-linked analyses
 - AphasiaBank media streamed from TalkBank for acoustic feature extraction when credentials are available
 - task-specific prompts such as Cinderella and related discourse tasks for content-state modeling
-- Dryad EMT-SF DLD randomized intervention data stored locally under gitignored `data/external/dryad_emt_sf_dld/`
+- Dryad EMT-SF DLD randomized intervention data stored locally under gitignored `data/external/dryad_emt_sf_dld/`; source citation: Grauzer, Jeffrey; Roberts, Megan; Jones, Maranda (2026), *Maximizing outcomes for preschoolers with developmental language disorders* [Dataset], Dryad, https://doi.org/10.5061/dryad.sj3tx96g9
 
 Audio is not persisted by default. The acoustic pipeline streams media, extracts features, and deletes temporary WAV files.
 

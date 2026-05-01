@@ -35,6 +35,13 @@ speech samples, treatment dose/session data, or repeated discourse measures.
 
 Dataset page: https://datadryad.org/dataset/doi:10.5061/dryad.sj3tx96g9
 
+Citation: Grauzer, Jeffrey; Roberts, Megan; Jones, Maranda (2026),
+*Maximizing outcomes for preschoolers with developmental language disorders*
+[Dataset], Dryad, https://doi.org/10.5061/dryad.sj3tx96g9. The associated
+trial is ClinicalTrials.gov `NCT03782493`, *Maximizing Outcomes for
+Preschoolers With Developmental Language Disorders*, with Megan Y. Roberts,
+Pamela Hadley, and Ann Kaiser listed as principal investigators.
+
 The public page reports:
 
 - 108 enrolled children, with 7 excluded from the shared dataset because they

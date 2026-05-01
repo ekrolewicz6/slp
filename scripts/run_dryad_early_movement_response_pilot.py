@@ -208,6 +208,8 @@ def main() -> None:
         "",
         "This experiment asks whether early language-sample movement predicts later vocabulary/grammar outcomes in the randomized EMT-SF DLD dataset.",
         "",
+        "Dataset citation: Grauzer, Jeffrey; Roberts, Megan; Jones, Maranda (2026), *Maximizing outcomes for preschoolers with developmental language disorders* [Dataset], Dryad, https://doi.org/10.5061/dryad.sj3tx96g9. Trial registry context: ClinicalTrials.gov `NCT03782493` lists Megan Y. Roberts, Pamela Hadley, and Ann Kaiser as principal investigators.",
+        "",
         "## Does Treatment Move The Early Language-Sample State?",
         "",
         md_table(movement_view),
