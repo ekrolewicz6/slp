@@ -166,8 +166,10 @@ Adding patient history improves controller decisions, especially deciding when t
 | Do acoustic-only movers survive utterance-aligned media review? | `outputs/acoustic_mover_utterance_quality_audit/summary.md` |
 | What kinds of DLD label/state conflicts are most scientifically useful? | `outputs/dld_conflict_taxonomy/summary.md` |
 | Which DLD/TD conflict cases should experts review first? | `outputs/dld_conflict_review_packet/summary.md` |
+| What mechanisms explain the highest-value DLD/TD conflict cases? | `outputs/dld_conflict_mechanism_audit/summary.md` |
 | Can late-talker trajectories be typed by early movement? | `outputs/late_talker_trajectory_typology/summary.md` |
 | Does the late-talker early-movement result survive leave-one-child-out deletion? | `outputs/late_talker_leave_one_out_robustness/summary.md` |
+| What are the bootstrap CIs and permutation nulls for late-talker early movement? | `outputs/late_talker_bootstrap_permutation/summary.md` |
 | Which discoveries are strongest right now? | `docs/current_discovery_scorecard.md` |
 | How should a recorder connect to TalkBank infrastructure? | `docs/ba_web_integration_notes.md` |
 | Which treatment-response datasets can we actually model? | `outputs/treatment_response_inventory/summary.md` |
@@ -188,11 +190,11 @@ The full experiment history is in `RESEARCH_LOG.md`. The original project specif
 
 ## Current Checkpoint
 
-As of 2026-05-01, the current local-data batch is complete. The project can now stream TalkBank media with the local cookie, run standard openSMILE/eGeMAPS extraction, compare standard and custom acoustic features, audit stable-WAB discourse/acoustic movers, and run the latest DLD label-noise, task-context, late-talker persistence, and expert-review-packet checks.
+As of 2026-05-01, the current local-data batch is complete. The project can now stream TalkBank media with the local cookie, run standard openSMILE/eGeMAPS extraction, compare standard and custom acoustic features, audit stable-WAB discourse/acoustic movers, and run the latest DLD label-noise, task-context, late-talker persistence, expert-review-packet, and conflict-mechanism checks.
 
-The main conclusion from this batch is cautious but useful: the strongest publishable direction is multidimensional state measurement, not a standalone classifier. The late-talker results now make the best current child-language discovery thread more specific: early movement appears more meaningful than earliest severity, and the 0.75 z movement threshold keeps the same direction after every one-child deletion. The acoustic-only mover result moved in the opposite direction: utterance-aligned media review still flags most candidate pairs as medium/high technical risk, leaving only one low-risk voice/pitch candidate for manual clinical audio review.
+The main conclusion from this batch is cautious but useful: the strongest publishable direction is multidimensional state measurement, not a standalone classifier. The late-talker results now make the best current child-language discovery thread more specific: early movement appears more meaningful than earliest severity. At the 0.75 z movement threshold, the final TD-band lift is 0.533 with bootstrap 95% CI [0.167, 0.842] and one-sided permutation p=0.011; persistent-gap reduction is 0.433 with bootstrap 95% CI [0.087, 0.769] and p=0.022. The acoustic-only mover result moved in the opposite direction: utterance-aligned media review still flags most candidate pairs as medium/high technical risk, leaving only one low-risk voice/pitch candidate for manual clinical audio review.
 
-The DLD work now has a concrete expert-review path rather than only aggregate classifier metrics. The current packet contains 15 high-value DLD/TD conflict cases: 3 TD-labeled children whose language state looks risky without corpus shortcuts, and 12 cases where language-only risk remains high even when corpus/age priors do not. These cases define what an SLP or child-language researcher should inspect next.
+The DLD work now has a concrete expert-review path rather than only aggregate classifier metrics. The current packet contains 15 high-value DLD/TD conflict cases: 3 TD-labeled children whose language state looks risky without corpus shortcuts, and 12 cases where language-only risk remains high even when corpus/age priors do not. Mechanism audit splits those cases into sample-constrained, possible hidden TD risk, non-MLU language-state, language-not-corpus-prior, and low-output/MLU-aligned profiles. These cases define what an SLP or child-language researcher should inspect next.
 
 The next high-value work is blocked on external inputs: FluencyBank recovery access, manual Dryad EMT-SF DLD download, BA Web integration details, and SLP review of the report packets.
 
@@ -272,8 +274,10 @@ Representative commands:
 .venv/bin/python scripts/run_dld_review_grade_audit.py
 .venv/bin/python scripts/run_dld_late_talker_catchup.py
 .venv/bin/python scripts/run_late_talker_leave_one_out_robustness.py
+.venv/bin/python scripts/run_late_talker_bootstrap_permutation_audit.py
 .venv/bin/python scripts/run_dld_corpus_deconfounding.py
 .venv/bin/python scripts/create_dld_conflict_review_packet.py
+.venv/bin/python scripts/run_dld_conflict_mechanism_audit.py
 .venv/bin/python scripts/run_dld_narrative_proxy.py
 .venv/bin/python scripts/run_dld_fairness_metadata_audit.py
 .venv/bin/python scripts/run_dld_target_policy_simulation.py

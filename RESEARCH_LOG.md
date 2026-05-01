@@ -8788,3 +8788,105 @@ optimization. It is a measurement paper:
 > separable language-state, task-context, and trajectory signals; repeated
 > early movement and label/state disagreement are more scientifically useful
 > than one-time classification.
+
+## 2026-05-01 Local Batch 4: mechanism and uncertainty audits
+
+### DLD conflict mechanism audit
+
+Script:
+
+- `scripts/run_dld_conflict_mechanism_audit.py`
+
+Outputs:
+
+- `outputs/dld_conflict_mechanism_audit/summary.md`
+- `outputs/dld_conflict_mechanism_audit/case_mechanism_audit.csv`
+- `outputs/dld_conflict_mechanism_audit/mechanism_summary.csv`
+- `outputs/dld_conflict_mechanism_audit/axis_summary.csv`
+
+This audit takes the 15 DLD/TD conflict review cases and asks what kind of
+signal makes each case interesting. It uses participant-level prediction
+deltas and child utterance feature profiles against age/corpus-matched TD
+reference pools. It does **not** publish raw transcript text.
+
+Case mechanism split:
+
+| mechanism | n | interpretation |
+|---|---:|---|
+| sample constrained language risk | 6 | mostly young/natural-conversation low-word-count cases; useful review prompts, weak clinical evidence |
+| possible hidden TD language risk | 4 | TD-labeled cases where language-state risk remains high without corpus shortcuts |
+| language risk not corpus prior | 2 | language risk exceeds corpus-age prior and appears tied to low output/structure |
+| non-MLU language-state signal | 2 | language risk is substantially above MLU risk, suggesting broader state signal |
+| low-output MLU-aligned | 1 | the conflict is mostly consistent with low-output/MLU weakness |
+
+Aggregate axis profile:
+
+| review priority | n | language-minus-MLU | language-minus-corpus | output z | syntax/argument z | lexical/predicate z |
+|---|---:|---:|---:|---:|---:|---:|
+| highest clinical fairness review | 3 | 0.341 | 0.476 | -0.924 | -0.716 | -1.015 |
+| highest scientific review | 12 | 0.384 | 0.525 | -1.313 | -0.623 | -0.846 |
+
+Interpretation: the highest-value DLD conflicts are not all the same problem.
+Some are probably underpowered samples, some are possible hidden-risk TD
+cases, and some look like non-MLU language-state signals. This sharpens the
+next human-review question: an SLP or child-language researcher should not be
+asked "is the model right?" They should be asked which mechanism explains each
+case and what structured follow-up probe would be clinically sensible.
+
+### Late-talker bootstrap and permutation audit
+
+Script:
+
+- `scripts/run_late_talker_bootstrap_permutation_audit.py`
+
+Outputs:
+
+- `outputs/late_talker_bootstrap_permutation/summary.md`
+- `outputs/late_talker_bootstrap_permutation/bootstrap_permutation_summary.csv`
+- `outputs/late_talker_bootstrap_permutation/bootstrap_effect_sample.csv`
+
+This audit quantifies uncertainty for the Rescorla late-talker early-movement
+effect using 10,000 bootstrap resamples and 20,000 permutations per test.
+
+Key threshold results:
+
+| threshold | target | effect | bootstrap 95% CI | Pr(effect > 0) | one-sided permutation p |
+|---:|---|---:|---:|---:|---:|
+| 0.50 | final TD lift | 0.465 | [0.015, 0.790] | 0.976 | 0.063 |
+| 0.50 | persistent-gap reduction | 0.342 | [-0.135, 0.833] | 0.926 | 0.123 |
+| 0.75 | final TD lift | 0.533 | [0.167, 0.842] | 0.998 | 0.011 |
+| 0.75 | persistent-gap reduction | 0.433 | [0.087, 0.769] | 0.992 | 0.022 |
+| 1.00 | final TD lift | 0.467 | [0.097, 0.800] | 0.992 | 0.029 |
+| 1.00 | persistent-gap reduction | 0.233 | [-0.081, 0.533] | 0.921 | 0.200 |
+
+Interpretation: the 0.75z early-gain threshold remains the best local signal.
+The confidence intervals are still wide, because only 25 children have
+measured 36-to-48 movement, but the main effects are no longer just a
+Fisher-test artifact. They survive bootstrap uncertainty and permutation
+nulls in the same direction.
+
+This is the strongest current child-language discovery claim:
+
+> Repeated early language-state movement may carry more clinically meaningful
+> information than a single static late-talker severity snapshot.
+
+It remains a prospective-study hypothesis rather than an individual prognosis
+rule, because current data lack treatment exposure, later literacy/school
+outcomes, and external replication.
+
+### Batch 4 synthesis
+
+Batch 4 moved the project slightly closer to a coherent paper:
+
+1. The late-talker movement result now has bootstrap and permutation support.
+2. The DLD conflict packet is no longer just a list; it has mechanism labels
+   that make expert review more targeted.
+3. The next scientific bottleneck is no longer compute. It is the absence of
+   external longitudinal outcomes, paired structured probes, and expert review.
+
+The current best paper-like thesis is:
+
+> Static labels and one-time samples are weak measurement targets. Public SLP
+> corpora already show that repeated state movement and label/state
+> disagreement expose clinically meaningful questions that standard labels,
+> MLU, and broad severity scores compress.

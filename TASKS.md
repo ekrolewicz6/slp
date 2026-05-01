@@ -78,6 +78,8 @@ None.
 - [x] **10.1 Utterance-aligned acoustic mover quality audit.** Created `scripts/run_acoustic_mover_utterance_aligned_quality_audit.py` and `outputs/acoustic_mover_utterance_quality_audit/summary.md`; task-aligned PAR spans still flag most acoustic-only stable-WAB pairs as medium/high technical risk, leaving one low-risk voice/pitch candidate for manual clinical audio review.
 - [x] **10.2 Late-talker leave-one-out robustness audit.** Created `scripts/run_late_talker_leave_one_out_robustness.py` and `outputs/late_talker_leave_one_out_robustness/summary.md`; the 0.75 z early-movement result keeps the same direction after every one-child deletion, but persistent-gap significance is not deletion-proof.
 - [x] **10.3 DLD conflict review packet.** Created `scripts/create_dld_conflict_review_packet.py`, `outputs/dld_conflict_review_packet/summary.md`, and `outputs/dld_conflict_review_packet/review_packet.md`; packaged the 15 highest-value DLD/TD conflict cases for expert review and future structured-probe design.
+- [x] **11.1 DLD conflict mechanism audit.** Created `scripts/run_dld_conflict_mechanism_audit.py` and `outputs/dld_conflict_mechanism_audit/summary.md`; the 15 review cases split into sample-constrained, possible hidden TD risk, non-MLU language-state, language-not-corpus-prior, and low-output/MLU-aligned mechanisms.
+- [x] **11.2 Late-talker bootstrap/permutation audit.** Created `scripts/run_late_talker_bootstrap_permutation_audit.py` and `outputs/late_talker_bootstrap_permutation/summary.md`; the 0.75 z early-movement effect has positive bootstrap CIs and permutation support for final TD-band lift and persistent-gap reduction.
 
 ## Deprioritized
 
