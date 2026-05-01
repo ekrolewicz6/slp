@@ -11,6 +11,9 @@ None.
 
 ## Next
 
+- [ ] **14.1 Fiveash sentence-repetition structured-task pilot.** Use the downloaded OSF data from Fiveash et al. (2023) to model sentence-repetition performance, DLD-vs-TD separation, age/reading covariates, and the regular-vs-irregular rhythm manipulation.
+- [ ] **14.2 Calder repeated-probe treatment-response pilot.** Use the downloaded ASHA Figshare supplements from Calder et al. (2020) to build a single-case response-curve analysis for trained, untrained, extension, and control grammar probes.
+- [ ] **14.3 SCALES access packet and analysis plan.** Use the downloaded UKDS user guide to define the variable map, minimum models, and access request rationale for SCALES Study 8968.
 - [ ] **4.2 Stuttering feature ablation.** Extend the Purdue pilot to longitudinal-change features, disfluency classes, transcript-language features, and acoustic features if media access is usable.
 - [ ] **4.3 Stuttering robustness audit.** Add bootstrap CIs, leave-grant-out checks, shuffled-label controls beyond AUC, and replication on IISRP/Wagovich/Ratner if password access is obtained.
 
@@ -27,10 +30,11 @@ None.
 - [ ] **6.5 BA Web integration after workflow review.** Requires API/upload contract from Brian/Franklin.
 - [ ] **5.3 Informal SLP review.** Protocol and packet are ready; requires actual SLP reviewer responses.
 - [ ] Full AphasiaBank openSMILE streaming extraction: now technically feasible, but a full all-corpus run is multi-hour; use balanced patient-root chunks before launching all sessions.
-- [ ] Dryad EMT-SF DLD data download: CLI download is blocked by Dryad/AWS WAF; manual browser download should place files in `data/external/dryad_emt_sf_dld/`.
+- [ ] EMT-SF raw language samples/audio/session targets/dose: the public Dryad package is local, but raw samples and session-level treatment details are not public.
 - [ ] Prospective clinical collection: requires consent/IRB path and partner workflow.
 - [ ] Full stuttering recovery replication: accessible Purdue data are now local and modeled, but IISRP, IISRP-new, Wagovich, Ratner, and Maxfield remain password-gated and are needed for replication.
-- [ ] Full natural-plus-tight-task battery: local headers show no sentence-repetition or nonword-repetition candidates.
+- [ ] Full natural-plus-tight-task battery: Fiveash OSF sentence-repetition data are local, but paired natural speech plus structured tasks still require SCALES/Manchester/TalkBank access or prospective collection.
+- [ ] SCALES participant-level modeling: requires UK Data Service safeguarded/restricted access.
 
 ## Done
 
@@ -84,6 +88,7 @@ None.
 - [x] **12.4 Dryad early-movement outcome pilot.** Created `scripts/run_dryad_early_movement_response_pilot.py` and `outputs/dryad_early_movement_response/summary.md`; early language-sample movement predicts later grammar/vocabulary outcomes beyond baseline state and treatment group, but treatment assignment only weakly moves the aggregate early state.
 - [x] **13.1 FluencyBank public download inventory.** Used the local TalkBankDB transcript export to download all non-password FluencyBank corpora with the current TalkBank cookie; 845 local `.cha` transcripts are now under gitignored `data/raw/fluencybank/`.
 - [x] **4.1 First-pass stuttering recovery model.** Created `scripts/run_fluencybank_purdue_recovery_pilot.py` and `outputs/fluencybank_purdue_recovery_pilot/summary.md`; Purdue strict Rec/Per labels are usable, but earliest-transcript prediction is modest rather than publishable on its own.
+- [x] **13.2 Data access and literature scan.** Downloaded open papers/docs/supplements into gitignored `data/external/literature/` and committed `outputs/data_access_scan/summary.md`; SCALES and Manchester participant-level data are UKDS gated, FluencyBank recovery corpora remain consortium/password gated, and Fiveash/Calder are now immediate local analysis targets.
 
 ## Deprioritized
 

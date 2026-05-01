@@ -9118,3 +9118,138 @@ rates than recovered children. But the signal is modest, the permutation check
 is not strong, and the all-feature model does not improve over the simple
 disfluency set. The scientific value is now in the next experiment: add
 longitudinal change features and replicate on password-gated recovery corpora.
+
+## 2026-05-01 Local Batch 7: External access and literature scan
+
+User request: after asking Brian for the remaining FluencyBank/password access,
+search the web for the other missing data sources and download relevant papers.
+
+Output:
+
+- `outputs/data_access_scan/summary.md`
+- `outputs/data_access_scan/source_manifest.csv`
+- Gitignored local cache: `data/external/literature/`
+
+### What was downloaded or indexed
+
+The scan downloaded or indexed 35 literature/data-document records, totaling
+about 40 MB in the manifest. Raw PDFs, documents, OSF CSVs, and supplements
+remain under gitignored `data/external/literature/`.
+
+Key local additions:
+
+- SCALES / UK Data Service documentation:
+  - `scales_8968_user_guide_t2_t5.pdf`
+  - Source: Courtenay Frazier Norbury, Sarah Griffiths, Deborah Gooch, Laura
+    Lucas and the SCALES Consortium, *Surrey Communication and Language in
+    Education Study: Intensive Data T2-T5, 2012-2020*, UK Data Service DOI
+    `10.5255/UKDA-SN-8968-1`.
+- Manchester Language Study documentation:
+  - age 7, age 11, age 16 blank forms, variable lists, and readmes where open;
+  - age 23 participant/interview forms and readme where open;
+  - source citations include Conti-Ramsden, Botting, Durkin, and Toseeb for the
+    age 7/11/16 ReShare deposits and Conti-Ramsden, Durkin, Pickles, and
+    Botting for the young-adult deposit.
+- Fiveash et al. (2023):
+  - article PDF and OSF sentence-repetition CSV/script files;
+  - citation: Fiveash, Ladányi, Camici, Chidiac, Bush, Canette, Bedoin, Gordon,
+    and Tillmann et al., *Regular rhythmic primes improve sentence repetition
+    in children with developmental language disorder*, npj Science of Learning,
+    DOI `10.1038/s41539-023-00170-1`.
+- Calder et al. (2020):
+  - article PDF plus all ASHA Figshare supplemental materials;
+  - citation: Samuel D. Calder, Mary Claessen, Susan Ebbels, and Suze Leitão,
+    *Explicit grammar intervention in young school-aged children with
+    developmental language disorder: An efficacy study using single-case
+    experimental design*, Language, Speech, and Hearing Services in Schools,
+    DOI `10.1044/2019_LSHSS-19-00060`;
+  - Figshare dataset DOI `10.23641/asha.11958771`.
+- Structured task / DLD marker papers:
+  - Kueser and Leonard (2020), *The effects of frequency and predictability on
+    repetition in children with developmental language disorder*, DOI
+    `10.1044/2019_JSLHR-19-00155`.
+  - Lorusso, Eikerling, and Bloder (2022), Frontiers nonword-repetition paper;
+    the Zenodo landing page is open, but the direct XLSX download returned HTTP
+    403 in this environment.
+  - Paradis (2013) TalkBank Clinical-Eng paper on nonword repetition and tense.
+- Acoustic and aphasia measurement references:
+  - Eyben et al. (2016) eGeMAPS paper.
+  - Fromm et al. (2024) FLUCALC aphasia fluency paper.
+  - MacWhinney et al. (2024) spoken-discourse reference.
+  - Pittman et al. (2025) CIU/discourse ML paper.
+  - Frontiers 2024 multimodal aphasia discourse paper.
+  - Kiran, Carpenter, Grasemann, Scimeca, Marte, Russell-Meill, Peñaloza,
+    Tripodis, Miikkulainen et al. (2026), *Predicting bilingual aphasia
+    treatment outcomes using digital twins: a double-blind randomized controlled
+    trial*, npj Digital Medicine, DOI `10.1038/s41746-026-02583-9`; the Nature
+    article page is cached locally as HTML because the PDF endpoint returned
+    HTML in this environment.
+
+### Access results
+
+FluencyBank:
+
+- The public FluencyBank page says research data are password protected and
+  restricted to consortium members, while teaching data are open.
+- Our current cookie can download non-password corpora from the TalkBankDB
+  export, but IISRP, IISRP-new, Wagovich, Ratner, Maxfield, Tellis, and Sawyer
+  still require password/consortium access.
+
+SCALES:
+
+- The University of Surrey / UK Data Service record says the intensive T2-T5
+  dataset is Safeguarded Restricted and access may be granted on request.
+- This is now the top non-TalkBank DLD access target because it directly matches
+  Brian's "both natural speech and tight tasks" guidance: the user guide lists
+  repeated language, literacy, cognition, speech/hearing, social/mental-health,
+  parent/teacher, and school variables, and the current literature specifically
+  uses SCALES sentence-repetition data.
+
+Manchester Language Study:
+
+- ReShare pages for age 7, 11, 16, and young adulthood publish open
+  documentation, but participant-level Stata/SPSS files require registered UK
+  Data Service access; some young-adult scanned forms are closed/request-only.
+- Manchester remains important for long-horizon DLD outcomes, but it is less
+  immediately aligned with our transcript/audio measurement layer than SCALES.
+
+Dryad EMT-SF:
+
+- Already local and public. Dryad provides de-identified repeated aggregate
+  data and R scripts, not raw transcripts/audio/session-by-session intervention
+  targets.
+
+BA Web:
+
+- No public upload/API contract was found. Direct integration still requires a
+  focused Brian/Franklin question about auth, upload endpoint, job status,
+  output schema, retention, and whether third-party recorder uploads are welcome.
+
+### Interpretation
+
+This scan changes the next runnable work. We are no longer waiting only on
+Brian/password access. Two small but scientifically useful structured-task and
+treatment-response datasets are local now:
+
+1. Fiveash OSF data can test whether sentence repetition exposes a DLD syntax
+   state and whether a rhythm manipulation changes that state. This is not our
+   original treatment-optimization endpoint, but it directly tests Brian's point
+   that tight tasks add information beyond natural speech.
+2. Calder Figshare supplements can test response-curve modeling on repeated
+   DLD grammar probes: trained targets, untrained targets, extension probes, and
+   control probes. This is closer to the treatment-target sequencing problem
+   than the aggregate Dryad EMT-SF dataset because it has repeated probe-level
+   measurements.
+
+The most important gated next data source is SCALES, not Manchester. Manchester
+is valuable for long-term outcome trajectories, but SCALES appears closer to the
+minimum measurement battery we now believe in: repeated longitudinal outcomes
+plus sentence repetition and broader language/cognition/literacy variables.
+
+### Next experiments added to task board
+
+- Fiveash sentence-repetition structured-task pilot.
+- Calder repeated-probe treatment-response pilot.
+- SCALES access packet and variable-map plan.
+- Continue Purdue stuttering feature ablation and robustness while waiting for
+  password-gated FluencyBank corpora.
