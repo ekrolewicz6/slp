@@ -11,13 +11,11 @@ None.
 
 ## Next
 
-None.
+- [ ] **4.2 Stuttering feature ablation.** Extend the Purdue pilot to longitudinal-change features, disfluency classes, transcript-language features, and acoustic features if media access is usable.
+- [ ] **4.3 Stuttering robustness audit.** Add bootstrap CIs, leave-grant-out checks, shuffled-label controls beyond AUC, and replication on IISRP/Wagovich/Ratner if password access is obtained.
 
 ## Backlog
 
-- [ ] **4.1 First-pass stuttering recovery model.** Run after FluencyBank access/download confirms usable recovery labels.
-- [ ] **4.2 Stuttering feature ablation.**
-- [ ] **4.3 Stuttering robustness audit.**
 - [ ] **8.2 Future update gatekeeping.**
 - [ ] **8.3 Franklin-specific technical note if needed.**
 
@@ -31,7 +29,7 @@ None.
 - [ ] Full AphasiaBank openSMILE streaming extraction: now technically feasible, but a full all-corpus run is multi-hour; use balanced patient-root chunks before launching all sessions.
 - [ ] Dryad EMT-SF DLD data download: CLI download is blocked by Dryad/AWS WAF; manual browser download should place files in `data/external/dryad_emt_sf_dld/`.
 - [ ] Prospective clinical collection: requires consent/IRB path and partner workflow.
-- [ ] Stuttering recovery modeling: local checkout lacks FluencyBank child longitudinal recovery data; requires separate FluencyBank access/download.
+- [ ] Full stuttering recovery replication: accessible Purdue data are now local and modeled, but IISRP, IISRP-new, Wagovich, Ratner, and Maxfield remain password-gated and are needed for replication.
 - [ ] Full natural-plus-tight-task battery: local headers show no sentence-repetition or nonword-repetition candidates.
 
 ## Done
@@ -84,6 +82,8 @@ None.
 - [x] **12.2 Dryad EMT-SF treatment effect replication.** Added transparent Python treatment contrasts in `scripts/run_dryad_emt_sf_treatment_pilot.py`; grammar effects are clearer than short-term vocabulary effects.
 - [x] **12.3 Dryad EMT-SF heterogeneous response pilot.** Added baseline moderator screening with BH and max-T checks; no robust moderator survived correction in the shared dataset.
 - [x] **12.4 Dryad early-movement outcome pilot.** Created `scripts/run_dryad_early_movement_response_pilot.py` and `outputs/dryad_early_movement_response/summary.md`; early language-sample movement predicts later grammar/vocabulary outcomes beyond baseline state and treatment group, but treatment assignment only weakly moves the aggregate early state.
+- [x] **13.1 FluencyBank public download inventory.** Used the local TalkBankDB transcript export to download all non-password FluencyBank corpora with the current TalkBank cookie; 845 local `.cha` transcripts are now under gitignored `data/raw/fluencybank/`.
+- [x] **4.1 First-pass stuttering recovery model.** Created `scripts/run_fluencybank_purdue_recovery_pilot.py` and `outputs/fluencybank_purdue_recovery_pilot/summary.md`; Purdue strict Rec/Per labels are usable, but earliest-transcript prediction is modest rather than publishable on its own.
 
 ## Deprioritized
 

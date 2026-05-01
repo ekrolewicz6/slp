@@ -32,6 +32,7 @@ same broad score/label
 | 5 | ASR/LLM reconstruction should not be used as the measurement source of truth. | Multiple reconstruction and controller experiments show risk of cleanup, hallucinated content, and metric fragility. | Needs human-rated safety benchmark and modern-model replication. | Human adjudication of reconstruction safety; repeat with current models and ASR confidence. | Strong safety claim. |
 | 6 | Acoustic state may be useful, but not as a standalone subtype classifier. | eGeMAPS beats random/shuffled controls but WAB severity outperforms eGeMAPS for 4-way subtype classification; custom features add modestly. | Audio results are sample-sensitive and recording artifacts are plausible. | Task-aligned audio review, all-corpus extraction, corpus-held-out tests, standard feature families. | Downgraded but still useful. |
 | 7 | Acoustic-only stable-WAB movers are not yet evidence. | Leading-clip screening flagged all 11 candidate pairs; utterance-aligned PAR spans still flag most pairs as medium/high technical risk, with only one low-risk voice/pitch candidate. | Automated technical screens do not replace clinical audio review. | Manually review the low-risk candidate and any borderline utterance-aligned pairs before making a clinical acoustic-change claim. | Falsification queue, not result. |
+| 8 | Earliest transcript state may weakly predict stuttering persistence. | FluencyBank Purdue data from Smith, Weber, Hampton Wray, Walsh, and Usler include strict Rec/Per labels; simple disfluency features reach AUC 0.597 in a first-pass earliest-transcript model. | Signal is modest, permutation support is weak, no acoustic features yet, and password-gated recovery corpora are still needed. | Add longitudinal-change/acoustic features and replicate on IISRP/Wagovich/Ratner if access is obtained. | Newly unblocked pilot. |
 
 ## Best Publishable Thread Right Now
 
@@ -63,10 +64,11 @@ This would still be exploratory, but it is scientifically coherent and falsifiab
 
 ## Current Best Next Move
 
-The Dryad EMT-SF dataset is now local and analyzed. The next highest-learning step is to get one remaining bottleneck unstuck:
+The Dryad EMT-SF dataset and public FluencyBank corpora are now local and analyzed at first pass. The next highest-learning step is to get one remaining bottleneck unstuck or deepen the newly unblocked Purdue track:
 
 1. get raw transcript/audio or session-level dose/target metadata for an EMT-SF-style treatment dataset;
-2. get FluencyBank recovery/persistence access; or
+2. get password access for IISRP/Wagovich/Ratner-style FluencyBank recovery replication;
 3. get 1-3 SLPs to review the report packets.
+4. run the Purdue longitudinal-change and robustness experiments.
 
-Without one of those inputs, the remaining local work is mostly secondary robustness analysis rather than a new discovery path. The best local-only Dryad result is early movement predicting later outcomes, but it cannot yet identify treatment targets or dosing rules.
+Without one of those inputs, the remaining local work is mostly secondary robustness analysis rather than a new discovery path. The best local-only Dryad result is early movement predicting later outcomes, but it cannot yet identify treatment targets or dosing rules. The best local-only stuttering result is feasibility plus a weak earliest-disfluency signal, not yet a discovery.

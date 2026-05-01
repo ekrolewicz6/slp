@@ -1,0 +1,18 @@
+corpus,talkbankdb_rows,password_rows,local_downloaded,local_cha_files,languages,designs,groups
+Purdue,359,0,True,359,eng,long:359,CWS:359
+UMD-CMU,143,0,True,143,"eng, eng,spa",cross:143,"CWS:87, TD:56"
+Ulm,140,0,True,140,deu,cross:140,CWS:140
+Voices-AWS,102,0,True,102,eng,cross:102,AWS:102
+Voices-CWS,48,0,True,48,eng,cross:48,CWS:48
+Hakim,32,0,True,32,eng,cross:32,"CWS:16, TD:16"
+Brejon,8,0,True,8,fra,cross:8,CWS:8
+Voices-AWC,7,0,True,7,eng,cross:7,AWC:7
+VanZaalen,5,0,True,5,"eng, nld",null:5,null:5
+Examples,1,0,True,1,eng,null:1,null:1
+Maxfield,17,17,False,0,eng,long:17,AWS:17
+Sawyer,51,51,False,0,eng,null:51,null:51
+Ratner,60,60,False,0,eng,long:60,"CWS:44, TD:16"
+IISRP-new,89,89,False,0,eng,"long:54, null:35","CWS:49, null:35, TD:5"
+Wagovich,90,90,False,0,eng,long:90,CWS:90
+Tellis,95,95,False,0,eng,cross:95,CWS:95
+IISRP,752,752,False,0,eng,long:752,"CWS:611, TD:141"

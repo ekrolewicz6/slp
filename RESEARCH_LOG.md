@@ -9034,3 +9034,87 @@ The current best child-language claim is now stronger:
 The remaining gap is not compute. It is data granularity: raw transcripts,
 audio, session dose, treatment targets, and clinician goals are needed before
 this can become adaptive treatment science.
+
+## 2026-05-01 Local Batch 6: FluencyBank public download and Purdue recovery pilot
+
+Trigger:
+
+- User downloaded `TalkBankDB_transcripts.xls`, which is actually a
+  tab-separated TalkBankDB FluencyBank transcript export.
+
+Source/data:
+
+- Local manifest copy: `data/external/fluencybank/TalkBankDB_transcripts.tsv`
+  (gitignored)
+- Local downloaded corpora: `data/raw/fluencybank/` (gitignored)
+- Purdue citation: FluencyBank English Purdue Corpus, Smith, Anne; Weber,
+  Christine; Hampton Wray, Amanda; Walsh, Bridge; Usler, Evan, DOI
+  `10.21415/P2JB-CA45`
+
+Download inventory:
+
+- Scripted download target: all non-password FluencyBank corpora in the export.
+- Downloaded corpora: Brejon, Examples, Hakim, Purdue, Ulm, UMD-CMU,
+  VanZaalen, Voices-AWC, Voices-AWS, Voices-CWS.
+- Local `.cha` transcripts downloaded: 845
+- Password-gated rows still blocked: 1,154
+- Largest blocked recovery-relevant corpora: IISRP, IISRP-new, Wagovich,
+  Ratner, Maxfield.
+
+Outputs:
+
+- `outputs/fluencybank_download_inventory/summary.md`
+- `outputs/fluencybank_download_inventory/corpus_inventory.csv`
+
+### Purdue first-pass recovered/persistent model
+
+Script:
+
+- `scripts/run_fluencybank_purdue_recovery_pilot.py`
+
+Outputs:
+
+- `outputs/fluencybank_purdue_recovery_pilot/summary.md`
+- `outputs/fluencybank_purdue_recovery_pilot/model_metrics.csv`
+- `outputs/fluencybank_purdue_recovery_pilot/permutation_auc.csv`
+- `outputs/fluencybank_purdue_recovery_pilot/label_group_feature_summary.csv`
+
+Private/intermediate feature tables are written under gitignored
+`data/parsed/fluencybank/` because they include restricted corpus IDs and
+derived transcript-level features.
+
+Data:
+
+- Purdue CHAT files parsed: 240
+- Unmatched or failed CHAT files: 119, mostly files without strict
+  demographics/workbook labels.
+- Strict Rec/Per children with an earliest transcript: 84
+- Persistent rate in modeled set: 0.500
+
+First-pass CV results:
+
+| feature set | AUC | balanced accuracy | macro-F1 |
+|---|---:|---:|---:|
+| age/sex/SES | 0.567 | 0.524 | 0.517 |
+| simple disfluency | 0.597 | 0.595 | 0.592 |
+| language structure | 0.570 | 0.524 | 0.524 |
+| baseline tests | 0.586 | 0.583 | 0.580 |
+| all transcript | 0.590 | 0.571 | 0.569 |
+| all available | 0.568 | 0.524 | 0.524 |
+
+Shuffled-label check:
+
+- Simple disfluency observed AUC: 0.597
+- Permutation mean AUC: 0.493
+- Permutation p(AUC >= observed): 0.124
+
+Interpretation:
+
+This unblocks the stuttering recovery track but does not yet produce a strong
+discovery. The accessible Purdue corpus contains a real recovered/persistent
+endpoint, and earliest transcript disfluency features point in the expected
+direction: persistent children show higher repetition and stutter-arrow marker
+rates than recovered children. But the signal is modest, the permutation check
+is not strong, and the all-feature model does not improve over the simple
+disfluency set. The scientific value is now in the next experiment: add
+longitudinal change features and replicate on password-gated recovery corpora.

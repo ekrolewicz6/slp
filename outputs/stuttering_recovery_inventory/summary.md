@@ -5,12 +5,17 @@
 
 ## Local Finding
 
-- Local FluencyBank directory present: **False**
-- Local fluency/stuttering/cluttering header/path candidates: **9**
-- The local candidates are not enough to run Brian's proposed child stuttering
-  recovery experiment. In this checkout, the only obvious fluency hits are
-  local clinical/aphasia-style files, not a child longitudinal FluencyBank
-  recovery corpus.
+- Updated 2026-05-01 after the TalkBankDB transcript export was downloaded:
+  the current TalkBank cookie can download all non-password FluencyBank corpora.
+  Local FluencyBank directory present: **True**.
+- Downloaded local `.cha` transcripts: **845** across 10 non-password corpora.
+- Purdue now supports a first-pass child stuttering recovery experiment because
+  its distributed `demographics.xlsx` includes strict `Rec/Per` labels. See
+  `outputs/fluencybank_download_inventory/summary.md` and
+  `outputs/fluencybank_purdue_recovery_pilot/summary.md`.
+- The larger replication corpora remain blocked: IISRP, IISRP-new, Wagovich,
+  Ratner, Maxfield, Tellis, and Sawyer are password-gated with the current
+  cookie.
 
 ## Local Fluency Candidates By Corpus
 

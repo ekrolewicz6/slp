@@ -146,6 +146,8 @@ Adding patient history improves controller decisions, especially deciding when t
 | How should Manchester Language Study data be integrated? | `outputs/dld_manchester_access_plan/summary.md` |
 | What does the Dryad EMT-SF randomized DLD dataset show? | `outputs/dryad_emt_sf_treatment_pilot/summary.md` |
 | Does early language-sample movement predict later treatment outcomes? | `outputs/dryad_early_movement_response/summary.md` |
+| Which FluencyBank corpora are now local? | `outputs/fluencybank_download_inventory/summary.md` |
+| Can Purdue earliest transcripts predict recovered vs persistent stuttering? | `outputs/fluencybank_purdue_recovery_pilot/summary.md` |
 | How could the state model generalize across SLP disorders? | `outputs/dld_cross_disorder_generalization_plan/summary.md` |
 | What prospective DLD study would test the clinical claim? | `outputs/dld_prospective_study_blueprint/summary.md` |
 | What did Brian MacWhinney's post-call guidance change? | `docs/brian_meeting_2026-04-29.md` |
@@ -192,7 +194,7 @@ The full experiment history is in `RESEARCH_LOG.md`. The original project specif
 
 ## Current Checkpoint
 
-As of 2026-05-01, the current local-data batch is complete. The project can now stream TalkBank media with the local cookie, run standard openSMILE/eGeMAPS extraction, compare standard and custom acoustic features, audit stable-WAB discourse/acoustic movers, and run the latest DLD label-noise, task-context, late-talker persistence, expert-review-packet, conflict-mechanism, and Dryad EMT-SF treatment-response checks.
+As of 2026-05-01, the current local-data batch is complete. The project can now stream TalkBank media with the local cookie, run standard openSMILE/eGeMAPS extraction, compare standard and custom acoustic features, audit stable-WAB discourse/acoustic movers, and run the latest DLD label-noise, task-context, late-talker persistence, expert-review-packet, conflict-mechanism, Dryad EMT-SF treatment-response, and FluencyBank Purdue recovery checks.
 
 The main conclusion from this batch is cautious but useful: the strongest publishable direction is multidimensional state measurement, not a standalone classifier. The late-talker results now make the best current child-language discovery thread more specific: early movement appears more meaningful than earliest severity. At the 0.75 z movement threshold, the final TD-band lift is 0.533 with bootstrap 95% CI [0.167, 0.842] and one-sided permutation p=0.011; persistent-gap reduction is 0.433 with bootstrap 95% CI [0.087, 0.769] and p=0.022. The acoustic-only mover result moved in the opposite direction: utterance-aligned media review still flags most candidate pairs as medium/high technical risk, leaving only one low-risk voice/pitch candidate for manual clinical audio review.
 
@@ -200,7 +202,9 @@ The DLD work now has a concrete expert-review path rather than only aggregate cl
 
 The Dryad EMT-SF dataset changes the project materially because it is the first local dataset with randomized DLD intervention assignment and repeated outcomes. The dataset should be cited as Grauzer, Jeffrey; Roberts, Megan; Jones, Maranda (2026), *Maximizing outcomes for preschoolers with developmental language disorders* [Dataset], Dryad, https://doi.org/10.5061/dryad.sj3tx96g9. Dryad describes it as the shared dataset for the associated short-term outcome manuscript and as part of ClinicalTrials.gov `NCT03782493`, a trial led by Megan Y. Roberts with Pamela Hadley and Ann Kaiser listed as principal investigators. Transparent Python models show clearer grammar effects than short-term vocabulary effects, no robust baseline moderator after correction, and a strong early-movement signal: early language-sample movement predicts later T42/T49 grammar and vocabulary outcomes beyond baseline state and treatment group. Treatment assignment only weakly moves the aggregate early state, so this supports the measurement thesis more than a simple treatment-mediation story.
 
-The next high-value work is blocked on fewer external inputs than before: FluencyBank recovery access, BA Web integration details, SLP review of the report packets, and access to raw transcript/audio or session-level EMT-SF dose/target data.
+FluencyBank is no longer completely blocked. The current TalkBank cookie downloads all non-password FluencyBank corpora in the TalkBankDB export, including the Purdue corpus. Purdue should be cited as the FluencyBank English Purdue Corpus by Anne Smith, Christine Weber, Amanda Hampton Wray, Bridge Walsh, and Evan Usler, DOI `10.21415/P2JB-CA45`. Its `demographics.xlsx` includes strict recovered/persistent labels. A first-pass earliest-transcript model is feasible but modest: simple disfluency features reach AUC 0.597, balanced accuracy 0.595, and permutation p=0.124. That is enough to keep the stuttering recovery track alive, but not enough to claim a strong discovery without longitudinal-change features and password-corpus replication.
+
+The next high-value work is blocked on fewer external inputs than before: BA Web integration details, SLP review of the report packets, access to raw transcript/audio or session-level EMT-SF dose/target data, and password access to the larger FluencyBank recovery corpora such as IISRP, Wagovich, Ratner, IISRP-new, and Maxfield.
 
 ## Current Research Direction
 
@@ -257,6 +261,7 @@ The project uses public or access-controlled language datasets, including:
 - AphasiaBank media streamed from TalkBank for acoustic feature extraction when credentials are available
 - task-specific prompts such as Cinderella and related discourse tasks for content-state modeling
 - Dryad EMT-SF DLD randomized intervention data stored locally under gitignored `data/external/dryad_emt_sf_dld/`; source citation: Grauzer, Jeffrey; Roberts, Megan; Jones, Maranda (2026), *Maximizing outcomes for preschoolers with developmental language disorders* [Dataset], Dryad, https://doi.org/10.5061/dryad.sj3tx96g9
+- FluencyBank non-password corpora stored locally under gitignored `data/raw/fluencybank/`, including the Purdue recovered/persistent stuttering corpus; source citation: FluencyBank English Purdue Corpus, Smith, Anne; Weber, Christine; Hampton Wray, Amanda; Walsh, Bridge; Usler, Evan, DOI `10.21415/P2JB-CA45`
 
 Audio is not persisted by default. The acoustic pipeline streams media, extracts features, and deletes temporary WAV files.
 
