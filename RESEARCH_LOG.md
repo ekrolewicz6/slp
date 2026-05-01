@@ -8649,3 +8649,142 @@ Current ranking:
 This scorecard clarifies the current research journey: the project is still
 aligned with the original vision, but the next publishable science is
 measurement and trajectory discovery, not treatment optimization yet.
+
+## 2026-05-01 Local Batch 3: robustness and expert-review handoff
+
+### Utterance-aligned acoustic mover quality audit
+
+Script:
+
+- `scripts/run_acoustic_mover_utterance_aligned_quality_audit.py`
+
+Outputs:
+
+- `outputs/acoustic_mover_utterance_quality_audit/summary.md`
+- `outputs/acoustic_mover_utterance_quality_audit/pair_utterance_quality_audit.csv`
+- `outputs/acoustic_mover_utterance_quality_audit/session_utterance_quality_metrics.csv`
+- `outputs/acoustic_mover_utterance_quality_audit/risk_summary.csv`
+
+The earlier media-quality audit used leading clips and could over-flag setup
+silence. This rerun streams transcript-aligned PAR utterance spans for the
+11 acoustic-only stable-WAB mover pairs.
+
+Risk summary:
+
+| prior audit label | high utterance risk | medium utterance risk | low utterance risk |
+|---|---:|---:|---:|
+| likely voice/pitch state change | 2 | 3 | 1 |
+| possible recording/sample artifact | 0 | 3 | 0 |
+| quantity/transcription shift | 2 | 0 | 0 |
+
+The key result is a downgrade. Task-aligned audio review still flags most
+acoustic-only mover candidates as technically risky. Only one pair,
+`1012-5 -> 1012-6`, is low-risk under this automated screen, and even that
+requires manual clinical audio review before being treated as evidence.
+
+Interpretation: the acoustic-only stable-WAB result should remain a
+falsification queue, not a discovery claim. The broader acoustic state idea is
+still plausible, but these specific acoustic-only mover cases are not strong
+enough to carry a publishable argument.
+
+### Late-talker leave-one-out robustness
+
+Script:
+
+- `scripts/run_late_talker_leave_one_out_robustness.py`
+
+Outputs:
+
+- `outputs/late_talker_leave_one_out_robustness/summary.md`
+- `outputs/late_talker_leave_one_out_robustness/baseline_threshold_summary.csv`
+- `outputs/late_talker_leave_one_out_robustness/leave_one_out_threshold_summary.csv`
+- `outputs/late_talker_leave_one_out_robustness/influential_deletions.csv`
+- `outputs/late_talker_leave_one_out_robustness/stability_summary.csv`
+
+This audit tests whether the Rescorla early-movement result is dominated by
+one or two children. It uses the 25 late talkers with measured 36-to-48 month
+movement and recomputes the threshold result after deleting each child.
+
+Baseline threshold effects:
+
+| threshold | target | gain rate | no-gain rate | effect | Fisher p |
+|---:|---|---:|---:|---:|---:|
+| 0.75 | final TD band | 0.733 | 0.200 | +0.533 | 0.015 |
+| 0.75 | persistent gap | 0.067 | 0.500 | -0.433 | 0.023 |
+| 1.00 | final TD band | 0.800 | 0.333 | +0.467 | 0.041 |
+| 1.00 | persistent gap | 0.100 | 0.333 | -0.233 | 0.345 |
+
+Leave-one-child-out stability at the 0.75z threshold:
+
+| target | baseline effect | LOO min | LOO median | LOO max | same direction? | p < .05 deletions |
+|---|---:|---:|---:|---:|---|---:|
+| final TD lift | 0.533 | 0.511 | 0.514 | 0.622 | yes | 25/25 |
+| persistent-gap reduction | 0.433 | 0.378 | 0.429 | 0.500 | yes | 11/25 |
+
+Interpretation: the early-movement clue is directionally robust but still
+small-N. It is strong enough to justify prospective measurement of early
+state movement, but not strong enough to claim an individual prognosis rule.
+
+This is now the best child-language discovery thread in the project:
+
+> For late talkers, early change may be more scientifically meaningful than
+> the earliest static severity snapshot.
+
+The missing next data are treatment exposure, later literacy/school outcomes,
+and external longitudinal replication.
+
+### DLD conflict review packet
+
+Script:
+
+- `scripts/create_dld_conflict_review_packet.py`
+
+Outputs:
+
+- `outputs/dld_conflict_review_packet/summary.md`
+- `outputs/dld_conflict_review_packet/review_packet.md`
+- `outputs/dld_conflict_review_packet/review_cases.csv`
+
+This packet turns the DLD conflict taxonomy into a concrete expert-review
+queue. It selects the 15 highest-value cases:
+
+- 3 `highest_clinical_fairness_review` cases: TD-labeled children whose
+  language state looks risky without corpus shortcuts.
+- 12 `highest_scientific_review` cases: language-only risk remains high even
+  when corpus/age priors do not explain the case.
+
+Corpus and task mix:
+
+| category | n |
+|---|---:|
+| ENNI | 7 |
+| Feldman | 6 |
+| EisenbergGuo | 2 |
+| narrative story | 7 |
+| natural conversation | 6 |
+| unknown task | 2 |
+
+Interpretation: these cases are the most concrete bridge between model output
+and field question. They ask whether the model is exposing label/context
+noise, missed-risk TD cases, or a real non-MLU language-state signal. The
+next useful step is expert review of the source transcripts and metadata,
+ideally paired later with structured sentence repetition and nonword
+repetition.
+
+### Batch 3 synthesis
+
+Local-only work still matters, but the frontier has shifted:
+
+1. The strongest positive local signal is late-talker early movement.
+2. The strongest DLD next step is expert review of conflict cases, not more
+   classifier tuning.
+3. The acoustic-only stable-WAB result is weaker after task-aligned media
+   screening and should not be overclaimed.
+
+The current publishable shape is therefore not diagnosis or treatment
+optimization. It is a measurement paper:
+
+> Public SLP corpora show that static labels and broad scores collapse
+> separable language-state, task-context, and trajectory signals; repeated
+> early movement and label/state disagreement are more scientifically useful
+> than one-time classification.

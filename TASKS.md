@@ -7,7 +7,7 @@ This is the working board. The detailed rationale lives in the ordered plan; thi
 
 ## Doing
 
-- [ ] None. Local Batch 2 is complete; next high-learning tasks require external data/access/review.
+None.
 
 ## Next
 
@@ -75,6 +75,9 @@ This is the working board. The detailed rationale lives in the ordered plan; thi
 - [x] **9.2 DLD high-conflict taxonomy.** Created `scripts/run_dld_conflict_taxonomy.py` and `outputs/dld_conflict_taxonomy/summary.md`; the 82 high-confidence conflicts split into label-history/resolved-state cases, corpus-age deconfounding warnings, 12 highest-scientific-review language-risk cases, and 3 highest-clinical-fairness review cases.
 - [x] **9.3 Late-talker trajectory typology.** Created `scripts/run_late_talker_trajectory_typology.py` and `outputs/late_talker_trajectory_typology/summary.md`; strong 36-to-48-month gains predict higher final TD-band rates and lower persistent-gap rates in Rescorla, while earliest severity remains weak.
 - [x] **9.4 Current discovery scorecard.** Created `docs/current_discovery_scorecard.md`; the current top discovery thread is early movement/state disagreement rather than standalone diagnosis or acoustic subtype classification.
+- [x] **10.1 Utterance-aligned acoustic mover quality audit.** Created `scripts/run_acoustic_mover_utterance_aligned_quality_audit.py` and `outputs/acoustic_mover_utterance_quality_audit/summary.md`; task-aligned PAR spans still flag most acoustic-only stable-WAB pairs as medium/high technical risk, leaving one low-risk voice/pitch candidate for manual clinical audio review.
+- [x] **10.2 Late-talker leave-one-out robustness audit.** Created `scripts/run_late_talker_leave_one_out_robustness.py` and `outputs/late_talker_leave_one_out_robustness/summary.md`; the 0.75 z early-movement result keeps the same direction after every one-child deletion, but persistent-gap significance is not deletion-proof.
+- [x] **10.3 DLD conflict review packet.** Created `scripts/create_dld_conflict_review_packet.py`, `outputs/dld_conflict_review_packet/summary.md`, and `outputs/dld_conflict_review_packet/review_packet.md`; packaged the 15 highest-value DLD/TD conflict cases for expert review and future structured-probe design.
 
 ## Deprioritized
 

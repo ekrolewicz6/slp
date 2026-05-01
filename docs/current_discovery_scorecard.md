@@ -25,13 +25,13 @@ same broad score/label
 
 | rank | claim | current evidence | main weakness | next required test | status |
 | ---: | --- | --- | --- | --- | --- |
-| 1 | Early movement is more meaningful than earliest late-talker severity. | Rescorla late talkers with strong 36-to-48 month gains show higher final TD-band rates and lower persistent-gap rates. | Small N, no treatment exposure, no external outcome/literacy endpoint. | Replicate in Manchester/Ellis Weismer/other longitudinal child datasets; add literacy/school outcomes. | Most promising child-language discovery. |
+| 1 | Early movement is more meaningful than earliest late-talker severity. | Rescorla late talkers with strong 36-to-48 month gains show higher final TD-band rates and lower persistent-gap rates; at the 0.75 z threshold the direction survives every one-child deletion. | Small N, no treatment exposure, no external outcome/literacy endpoint; persistent-gap significance is not deletion-proof. | Replicate in Manchester/Ellis Weismer/other longitudinal child datasets; add literacy/school outcomes. | Most promising child-language discovery. |
 | 2 | Broad clinical scores hide different discourse states. | Same-WAB pairs and stable-WAB movers show large state differences despite similar WAB-AQ. | Needs clinician review and stronger task/corpus replication. | SLP review of report packets; corpus-held-out same-score examples. | Strong measurement claim. |
 | 3 | DLD labels should be treated as noisy anchors, not ground truth. | 82 high-confidence label/corpus/state conflicts; only a subset are language-driven review cases. | Current public metadata cannot resolve whether conflicts are true label errors, task artifacts, context effects, or compensation. | Corpus-level review, demographic/dialect/bilingual metadata, structured-task replication. | Strong cautionary claim. |
 | 4 | Natural speech and structured tasks are not interchangeable. | Within-task DLD signal is strong; cross-task transfer between narrative and natural speech is weak. | Current local data lack sentence repetition/nonword repetition overlap. | Acquire or collect paired natural speech plus sentence/nonword repetition. | Strong design claim. |
 | 5 | ASR/LLM reconstruction should not be used as the measurement source of truth. | Multiple reconstruction and controller experiments show risk of cleanup, hallucinated content, and metric fragility. | Needs human-rated safety benchmark and modern-model replication. | Human adjudication of reconstruction safety; repeat with current models and ASR confidence. | Strong safety claim. |
 | 6 | Acoustic state may be useful, but not as a standalone subtype classifier. | eGeMAPS beats random/shuffled controls but WAB severity outperforms eGeMAPS for 4-way subtype classification; custom features add modestly. | Audio results are sample-sensitive and recording artifacts are plausible. | Task-aligned audio review, all-corpus extraction, corpus-held-out tests, standard feature families. | Downgraded but still useful. |
-| 7 | Acoustic-only stable-WAB movers are not yet evidence. | All 11 acoustic-only candidate pairs show medium/high recording-artifact risk in leading-clip technical screening. | Leading clips may include setup silence; task-aligned review is still needed. | Review exact utterance-aligned audio windows before making any clinical acoustic-change claim. | Falsification queue, not result. |
+| 7 | Acoustic-only stable-WAB movers are not yet evidence. | Leading-clip screening flagged all 11 candidate pairs; utterance-aligned PAR spans still flag most pairs as medium/high technical risk, with only one low-risk voice/pitch candidate. | Automated technical screens do not replace clinical audio review. | Manually review the low-risk candidate and any borderline utterance-aligned pairs before making a clinical acoustic-change claim. | Falsification queue, not result. |
 
 ## Best Publishable Thread Right Now
 
@@ -49,8 +49,8 @@ This would still be exploratory, but it is scientifically coherent and falsifiab
 
 1. External longitudinal child-language dataset with later functional outcomes.
 2. Paired natural speech and sentence/nonword repetition.
-3. SLP review of same-score/different-state report packets.
-4. Task-aligned audio review for acoustic movers.
+3. SLP review of same-score/different-state report packets and the 15-case DLD conflict packet.
+4. Manual clinical audio review for the one low-risk acoustic-only mover candidate.
 5. A prospective collection workflow that captures repeated samples, treatment exposure, and outcomes.
 
 ## What To Stop Overclaiming
@@ -69,4 +69,4 @@ The next highest-learning step is to get one external bottleneck unstuck:
 2. get FluencyBank recovery/persistence access; or
 3. get 1-3 SLPs to review the report packets.
 
-Without one of those inputs, the remaining local work is mostly secondary robustness analysis rather than a new discovery path.
+Without one of those inputs, the remaining local work is mostly secondary robustness analysis rather than a new discovery path. The best local-only thread remaining is transcript-level review of the 15 DLD conflict cases, but the scientific value rises sharply if an SLP or child-language researcher reviews them.
