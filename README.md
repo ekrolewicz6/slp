@@ -162,6 +162,10 @@ Adding patient history improves controller decisions, especially deciding when t
 | Can the same WAB score hide different state profiles? | `outputs/same_score_different_state_demo/summary.md` |
 | Do stable-WAB patients show discourse or acoustic movement? | `outputs/stable_wab_movers/summary.md` |
 | Are acoustic-only stable-WAB movers plausible signal or artifact? | `outputs/acoustic_mover_artifact_audit/summary.md` |
+| Do acoustic-only movers survive a media-quality screen? | `outputs/acoustic_mover_media_quality_audit/summary.md` |
+| What kinds of DLD label/state conflicts are most scientifically useful? | `outputs/dld_conflict_taxonomy/summary.md` |
+| Can late-talker trajectories be typed by early movement? | `outputs/late_talker_trajectory_typology/summary.md` |
+| Which discoveries are strongest right now? | `docs/current_discovery_scorecard.md` |
 | How should a recorder connect to TalkBank infrastructure? | `docs/ba_web_integration_notes.md` |
 | Which treatment-response datasets can we actually model? | `outputs/treatment_response_inventory/summary.md` |
 | What data-quality gates must future experiments pass? | `outputs/data_quality_gates/summary.md` |
@@ -183,7 +187,9 @@ The full experiment history is in `RESEARCH_LOG.md`. The original project specif
 
 As of 2026-05-01, the current local-data batch is complete. The project can now stream TalkBank media with the local cookie, run standard openSMILE/eGeMAPS extraction, compare standard and custom acoustic features, audit stable-WAB discourse/acoustic movers, and run the latest DLD label-noise, task-context, and late-talker persistence checks.
 
-The main conclusion from this batch is cautious but useful: the strongest publishable direction is multidimensional state measurement, not a standalone classifier. The next high-value work is blocked on external inputs: FluencyBank recovery access, manual Dryad EMT-SF DLD download, BA Web integration details, and SLP review of the report packets.
+The main conclusion from this batch is cautious but useful: the strongest publishable direction is multidimensional state measurement, not a standalone classifier. The late-talker results now make the best current child-language discovery thread more specific: early movement appears more meaningful than earliest severity. The acoustic-only mover result moved in the opposite direction: those cases should be treated as a falsification/review queue, not evidence, because the media-quality screen found medium/high recording-artifact risk.
+
+The next high-value work is blocked on external inputs: FluencyBank recovery access, manual Dryad EMT-SF DLD download, BA Web integration details, and SLP review of the report packets.
 
 ## Current Research Direction
 

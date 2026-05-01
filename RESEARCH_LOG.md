@@ -8517,3 +8517,135 @@ Blocked next steps:
 - SLP-facing report validation requires actual SLP review.
 - Prospective treatment-response science requires consent/IRB and repeated
   samples with treatment type, dose, goals, and outcomes.
+
+## 2026-05-01 Local Batch 2: falsification and trajectory sharpening
+
+### Acoustic mover media-quality audit
+
+Script:
+
+- `scripts/run_acoustic_mover_media_quality_audit.py`
+
+Outputs:
+
+- `outputs/acoustic_mover_media_quality_audit/summary.md`
+- `outputs/acoustic_mover_media_quality_audit/session_quality_metrics.csv`
+- `outputs/acoustic_mover_media_quality_audit/pair_quality_audit.csv`
+- `outputs/acoustic_mover_media_quality_audit/risk_summary.csv`
+
+This audit streamed bounded leading clips for the 20 sessions involved in the
+11 acoustic-only stable-WAB mover pairs. All sessions streamed successfully,
+but every pair showed medium or high recording-artifact risk on the technical
+screen:
+
+| prior audit label | high risk | medium risk | low risk |
+|---|---:|---:|---:|
+| likely voice/pitch state change | 4 | 2 | 0 |
+| possible recording/sample artifact | 1 | 2 | 0 |
+| quantity/transcription shift | 2 | 0 | 0 |
+
+Main interpretation: acoustic-only stable-WAB movers are not publishable
+evidence yet. The leading-clip screen often found mostly silence and/or large
+recording-level RMS/dynamic-range shifts. Because the screen uses the first
+180 seconds, it can over-flag setup silence and does not replace task-aligned
+manual review. But it does weaken the acoustic-only claim enough that these
+cases should be treated as a falsification queue.
+
+### DLD high-conflict taxonomy
+
+Script:
+
+- `scripts/run_dld_conflict_taxonomy.py`
+
+Outputs:
+
+- `outputs/dld_conflict_taxonomy/summary.md`
+- `outputs/dld_conflict_taxonomy/participant_conflict_taxonomy.csv`
+- `outputs/dld_conflict_taxonomy/high_conflict_taxonomy.csv`
+- `outputs/dld_conflict_taxonomy/archetype_summary.csv`
+
+This audit reclassified the 82 high-confidence DLD label/corpus/state
+conflicts into review priorities.
+
+| review priority | n |
+|---|---:|
+| review for label history or resolved state | 31 |
+| deconfounding, not clinical claim | 27 |
+| highest scientific review | 12 |
+| review for hidden risk or context | 9 |
+| highest clinical fairness review | 3 |
+
+The most important result is that the conflicts are not all equally valuable.
+The 27 corpus-age-prior cases should mostly be treated as deconfounding
+warnings. The 12 language-risk-without-corpus cases and 3 TD-label but
+language-driven-risk cases are the highest-value review set, because they are
+where measured language state disagrees with labels without being explained by
+the corpus/age prior.
+
+Corpus concentration matters:
+
+- EisenbergGuo conflict rate: 0.344
+- Feldman conflict rate: 0.170
+- ENNI conflict rate: 0.112
+- EllisWeismer, Nicholas, Rescorla, Rondal, and Ambrose: 0 conflicts under this
+  high-confidence rule
+
+This further supports the revised DLD framing: do not build a diagnostic
+classifier. Build a label/state disagreement detector and use it to define
+where better metadata, structured tasks, and clinician review are needed.
+
+### Late-talker trajectory typology
+
+Script:
+
+- `scripts/run_late_talker_trajectory_typology.py`
+
+Outputs:
+
+- `outputs/late_talker_trajectory_typology/summary.md`
+- `outputs/late_talker_trajectory_typology/late_talker_trajectory_classes.csv`
+- `outputs/late_talker_trajectory_typology/early_gain_threshold_sensitivity.csv`
+
+This experiment turned the earlier Rescorla result into trajectory classes.
+Using a strong early-gain threshold of >= 0.75z improvement from 36 to 48
+months:
+
+| trajectory class | n | final TD-band rate | persistent-gap rate |
+|---|---:|---:|---:|
+| early gain recovered | 11 | 1.000 | 0.000 |
+| low early gain persistent gap | 5 | 0.000 | 1.000 |
+| early gain partial recovery | 3 | 0.000 | 0.000 |
+| low early gain partial/unresolved | 3 | 0.000 | 0.000 |
+| late or low-early-gain recovered | 2 | 1.000 | 0.000 |
+| early gain but persistent gap | 1 | 0.000 | 1.000 |
+| missing 36-to-48 movement | 13 | 0.615 | 0.154 |
+
+Threshold sensitivity supports the same direction. At the 0.75z threshold,
+children with early gain had a final TD-band rate of 0.733 versus 0.200 for
+children without early gain, and a persistent-gap rate of 0.067 versus 0.500.
+
+This is currently the most promising child-language discovery thread. It still
+does not support treatment-response prediction, because treatment exposure and
+later functional/literacy outcomes are absent. But it gives a concrete
+prospective-study hypothesis: repeated early samples may be more informative
+than a one-time static late-talker profile.
+
+### Current discovery scorecard
+
+Document:
+
+- `docs/current_discovery_scorecard.md`
+
+Current ranking:
+
+1. Early movement is more meaningful than earliest late-talker severity.
+2. Broad clinical scores hide different discourse states.
+3. DLD labels should be treated as noisy anchors, not ground truth.
+4. Natural speech and structured tasks are not interchangeable.
+5. ASR/LLM reconstruction should not be used as the measurement source of truth.
+6. Acoustic state may be useful, but not as a standalone subtype classifier.
+7. Acoustic-only stable-WAB movers are not yet evidence.
+
+This scorecard clarifies the current research journey: the project is still
+aligned with the original vision, but the next publishable science is
+measurement and trajectory discovery, not treatment optimization yet.

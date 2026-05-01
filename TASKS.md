@@ -7,7 +7,7 @@ This is the working board. The detailed rationale lives in the ordered plan; thi
 
 ## Doing
 
-- [ ] None. Current local-data work is either completed or blocked on external data/access/review.
+- [ ] None. Local Batch 2 is complete; next high-learning tasks require external data/access/review.
 
 ## Next
 
@@ -71,6 +71,10 @@ This is the working board. The detailed rationale lives in the ordered plan; thi
 - [x] **7.3 Prospective pilot design.** Created `docs/prospective_pilot_design.md`; recommended order is SLP report usability, non-sensitive recorder feasibility, then one partner-based longitudinal pilot.
 - [x] **7.4 Funding path memo.** Created `docs/funding_path_memo.md`; recommended route is partner-led science first, then SBIR/STTR product translation only after the recorder/report workflow has stronger evidence.
 - [x] **8.1 Post-call thank-you and GitHub link.** Drafted in `docs/brian_research_update.md`; send after the pushed GitHub branch is available.
+- [x] **9.1 Acoustic mover media-quality audit.** Created `scripts/run_acoustic_mover_media_quality_audit.py` and `outputs/acoustic_mover_media_quality_audit/summary.md`; all 11 acoustic-only stable-WAB pairs show medium/high recording-artifact risk on the leading-clip technical screen, so acoustic-only claims need task-aligned manual audio review before being treated as evidence.
+- [x] **9.2 DLD high-conflict taxonomy.** Created `scripts/run_dld_conflict_taxonomy.py` and `outputs/dld_conflict_taxonomy/summary.md`; the 82 high-confidence conflicts split into label-history/resolved-state cases, corpus-age deconfounding warnings, 12 highest-scientific-review language-risk cases, and 3 highest-clinical-fairness review cases.
+- [x] **9.3 Late-talker trajectory typology.** Created `scripts/run_late_talker_trajectory_typology.py` and `outputs/late_talker_trajectory_typology/summary.md`; strong 36-to-48-month gains predict higher final TD-band rates and lower persistent-gap rates in Rescorla, while earliest severity remains weak.
+- [x] **9.4 Current discovery scorecard.** Created `docs/current_discovery_scorecard.md`; the current top discovery thread is early movement/state disagreement rather than standalone diagnosis or acoustic subtype classification.
 
 ## Deprioritized
 
