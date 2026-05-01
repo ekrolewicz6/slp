@@ -2,9 +2,9 @@
 
 ## Overall
 
-| n_pairs | stable_wab_pairs | stable_wab_discourse_movers | stable_wab_discourse_mover_rate | wab_changed_pairs | wab_mover_discourse_stable | delta_content_vs_delta_wab_r | abs_content_vs_abs_wab_r |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| 405 | 370 | 66 | 0.178 | 27 | 17 | 0.178 | 0.236 |
+| n_pairs | stable_wab_pairs | stable_wab_discourse_movers | stable_wab_discourse_mover_rate | wab_changed_pairs | wab_mover_discourse_stable | delta_content_vs_delta_wab_r | abs_content_vs_abs_wab_r | pairs_with_acoustics | stable_wab_pairs_with_acoustics | stable_wab_acoustic_movers | stable_wab_acoustic_mover_rate | stable_wab_acoustic_only_movers | stable_wab_discourse_and_acoustic_movers | abs_acoustic_no_token_vs_abs_wab_r | abs_acoustic_no_token_vs_abs_content_r |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 405 | 370 | 66 | 0.178 | 27 | 17 | 0.178 | 0.236 | 112 | 110 | 17 | 0.155 | 11 | 6 | -0.056 | -0.097 |
 
 ## Mover Types
 
@@ -65,6 +65,31 @@
 | 1046 | 1046-5 | 1046-1 | Fridriksson-2 | Anomic | 82.300 | 82.300 | 0.000 | -0.676 | -0.106 | stable_wab_other_discourse_mover | maintenance/generalization | event-concept expansion |
 | 1114 | 1114-5 | 1114-6 | Fridriksson-2 | Conduction | 51.900 | 51.900 | 0.000 | 0.659 | 0.083 | stable_wab_other_discourse_mover | high-support intent clarification | high-support intent clarification |
 
+## Acoustic Reliable-Change Thresholds
+
+| family | n_features | stable_wab_pairs_with_acoustics | stable_wab_q95_distance | all_pair_mean_distance |
+| --- | --- | --- | --- | --- |
+| custom_no_token_count_acoustic | 28 | 110 | 1.547 | 0.702 |
+| voice_pitch_intensity | 26 | 110 | 1.596 | 0.716 |
+| duration_intensity | 6 | 110 | 1.678 | 0.418 |
+| token_rate_count | 6 | 110 | 0.992 | 0.437 |
+
+## Top Stable-WAB Acoustic-Only Examples
+
+| longitudinal_root | from_participant_id | to_participant_id | from_meta_corpus | from_meta_subtype | from_wab_aq | to_wab_aq | delta_wab_aq | delta_custom_no_token_count_acoustic_distance | reliable_custom_no_token_count_acoustic_change | delta_voice_pitch_intensity_distance | reliable_voice_pitch_intensity_change | delta_duration_intensity_distance | reliable_duration_intensity_change | delta_token_rate_count_distance | reliable_token_rate_count_change | delta_core_content_mean_z | mover_type |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1012 | 1012-4 | 1012-5 | Fridriksson-2 | Broca | 40.600 | 40.600 | 0.000 | 2.602 | True | 2.700 | True | 1.130 | False | 0.294 | False | 0.734 | stable_or_small_change |
+| 1014 | 1014-2 | 1014-3 | Fridriksson-2 | Anomic | 85.800 | 85.800 | 0.000 | 2.469 | True | 2.562 | True | 0.282 | False | 0.377 | False | 0.150 | stable_or_small_change |
+| 1012 | 1012-2 | 1012-3 | Fridriksson-2 | Broca | 40.600 | 40.600 | 0.000 | 2.178 | True | 2.260 | True | 1.363 | False | 0.789 | False | -0.095 | stable_or_small_change |
+| 1046 | 1046-2 | 1046-3 | Fridriksson-2 | Anomic | 82.300 | 82.300 | 0.000 | 1.548 | True | 1.560 | False | 0.875 | False | 0.646 | False | -0.462 | stable_or_small_change |
+| 1012 | 1012-5 | 1012-6 | Fridriksson-2 | Broca | 40.600 | 40.600 | 0.000 | 1.545 | False | 1.603 | True | 1.575 | False | 0.308 | False | -0.517 | stable_or_small_change |
+| 1060 | 1060-2 | 1060-3 | Fridriksson-2 | Conduction | 63.100 | 63.100 | 0.000 | 1.529 | False | 1.587 | False | 2.032 | True | 0.759 | False | 0.338 | stable_or_small_change |
+| 1108 | 1108-1 | 1108-2 | Fridriksson-2 | Broca | 54.900 | 54.900 | 0.000 | 1.463 | False | 1.517 | False | 2.949 | True | 0.250 | False | 0.723 | stable_or_small_change |
+| 1060 | 1060-1 | 1060-2 | Fridriksson-2 | Conduction | 63.100 | 63.100 | 0.000 | 1.131 | False | 1.172 | False | 2.123 | True | 0.423 | False | -0.167 | stable_or_small_change |
+| 1117 | 1117-5 | 1117-6 | Fridriksson-2 | Conduction | 72.900 | 72.900 | 0.000 | 0.902 | False | 0.933 | False | 1.734 | True | 0.241 | False | -0.583 | stable_or_small_change |
+| 1033 | 1033-4 | 1033-5 | Fridriksson-2 | Anomic | 80.300 | 80.300 | 0.000 | 0.510 | False | 0.517 | False | 0.289 | False | 1.337 | True | 0.177 | stable_or_small_change |
+| Kurland21 | Kurland21a | Kurland21b | Kurland | Anomic | 81.800 | 81.800 | 0.000 | 0.454 | False | 0.452 | False | 0.283 | False | 1.039 | True | -0.328 | stable_or_small_change |
+
 ## Interpretation
 
-These are cases where standardized WAB-AQ is stable but discourse state moves beyond the empirical 95% reliable-change threshold estimated from stable-WAB pairs. They are candidates for the clinical claim that discourse monitoring can detect meaningful movement that a broad aphasia score misses. The analysis does not prove functional improvement without external outcome ratings, but it identifies patient/session pairs that should be manually reviewed or targeted in future prospective work.
+These are cases where standardized WAB-AQ is stable but discourse state moves beyond the empirical 95% reliable-change threshold estimated from stable-WAB pairs. They are candidates for the clinical claim that discourse monitoring can detect meaningful movement that a broad aphasia score misses. The analysis does not prove functional improvement without external outcome ratings, but it identifies patient/session pairs that should be manually reviewed or targeted in future prospective work. Acoustic-only movers are especially useful falsification cases: if manual review finds no clinically visible speech-state change, the acoustic state should be downgraded; if it does, the broad WAB score is missing a measurable dimension of change.

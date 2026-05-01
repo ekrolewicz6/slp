@@ -38,6 +38,7 @@ outputs/**/task_segments.csv
 outputs/**/segment_error_features.csv
 outputs/**/screening_predictions.csv
 outputs/**/participant_predictions*.csv
+outputs/**/*predictions*.csv
 outputs/**/selected_targets_by_policy.csv
 outputs/**/item_predictions.csv
 outputs/**/item_observations.csv
@@ -45,3 +46,16 @@ outputs/**/noisy_state_replicates.csv
 outputs/**/rescorla_windows_age_repaired.csv
 outputs/**/narrative_windows.csv
 outputs/**/ranked_candidates_with_scores.csv
+outputs/**/*rows.csv
+outputs/**/*items.csv
+outputs/**/*examples.csv
+outputs/**/*candidates.csv
+outputs/**/*matched_pairs.csv
+outputs/**/*classified_pairs.csv
+outputs/**/*pair_details.csv
+outputs/**/*segments.csv
+outputs/**/*clip*.csv
+outputs/**/*scored*.csv
+
+# Private meeting transcripts / planning notes. Keep local only; do not push.
+docs/private/

@@ -1,0 +1,31 @@
+# AphasiaBank openSMILE Extraction
+
+- Feature set: `egemaps`
+- Output parquet: `data/features/aphasia_opensmile_egemaps_neural2_pilot.parquet`
+- Window rows: 65
+- Sessions: 17
+- Feature columns: 92
+- Limit: 60
+- Max MP4 MB: 250
+
+## Skips
+
+| reason | count |
+|---|---:|
+| auth_or_html_response | 0 |
+| exception | 0 |
+| ffmpeg_failure | 0 |
+| missing_cha | 0 |
+| missing_url | 0 |
+| no_window_features | 0 |
+| too_large | 45 |
+
+## Sessions By Corpus
+
+| corpus | sessions |
+|---|---:|
+| NEURAL-2 | 17 |
+
+## Notes
+
+Window-level openSMILE features are computed from concatenated participant utterance audio inside each 100-utterance PAR window. This avoids examiner speech but does not preserve between-utterance pause durations, so timing features from transcript time marks remain separate.

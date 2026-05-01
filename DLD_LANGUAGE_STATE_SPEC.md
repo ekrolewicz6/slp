@@ -6,6 +6,8 @@ This spec adds a Developmental Language Disorder and child-language track to the
 
 The project should not become only an aphasia project. Aphasia gave us a strong test case because AphasiaBank has discourse samples, clinical scores, subtype labels, and repeated sessions. DLD is the natural next test because it asks whether the same state framework can help earlier in life, before language difficulties become entrenched in school, literacy, social participation, and long-term educational outcomes.
 
+After the 2026-04-29 discussion with Brian MacWhinney, this spec has one important constraint: DLD should not be treated as a clean label-prediction problem. The diagnosis itself can be impressionistic and confounded by bilingualism, dialect, socioeconomic context, school fit, personality, and task conditions. The goal is therefore not "predict DLD labels from transcripts." The goal is to model language state, persistent risk, recovery, and treatment-relevant profiles while auditing how much the labels reflect corpus and context.
+
 The cross-lifespan thesis is:
 
 > Language ability can be represented as a measurable state across development, disorder, injury, and recovery, but the same surface score can hide different mechanisms.
@@ -49,6 +51,56 @@ Current limitations:
 - DLD labels are historically named SLI or LI in many corpora.
 - Many corpora mix task type, age, site, and diagnostic group, so corpus-held-out tests are mandatory.
 - Literacy, school, participation, and treatment outcomes are not yet consistently available locally.
+- Natural language samples alone are not enough for the strongest clinical claims; structured tasks such as sentence repetition, nonword repetition, comprehension, narrative, and picture description should be paired with spontaneous speech where available.
+- Acoustic features should be standardized with established toolchains such as openSMILE/eGeMAPS, AVQI, and FluCalc where relevant, rather than relying only on custom hand-engineered features.
+- The best longitudinal recovery data may be outside DLD, especially in child stuttering; the DLD track should therefore remain connected to a broader cross-disorder recovery track.
+
+## Post-Meeting Amendments From Brian MacWhinney
+
+### Measurement Before Treatment Response
+
+Treatment-response prediction remains the long-term goal, but it is not credible without longitudinal data and treatment details. Near-term DLD work should establish a reliable language-state measurement layer first.
+
+Required stance:
+
+- distinguish developmental norming, disorder/risk identification, and treatment-response prediction
+- treat DLD/SLI labels as noisy clinical anchors, not ground truth
+- test whether early state predicts later state before claiming treatment utility
+- avoid therapy recommendations until treatment, dose, and outcome data exist
+
+### Natural Speech Plus Tight Tasks
+
+Brian emphasized that normal conversation and tight tasks answer different questions. The strongest child-language assessment should include both.
+
+Priority tasks:
+
+- sentence repetition
+- nonword repetition
+- comprehension tasks
+- narrative or story retell
+- picture description
+- natural conversation
+
+Sentence repetition is especially important because it is structured, clinically interpretable, and potentially automatable.
+
+### Data Collection Is Part Of The Science
+
+Clinicians often do not collect language samples because the workflow is too slow. A practical recorder/upload path may therefore be central to the scientific program.
+
+Design implications:
+
+- make recording and upload extremely easy
+- align with BA Web and TalkBank infrastructure when possible
+- collect pseudonymized identifiers and age, not names or dates of birth
+- avoid spoken names in recordings
+- include consent and IRB planning from the start
+- produce outputs that an SLP can interpret without reading raw feature tables
+
+### Add Stuttering Recovery As A Longitudinal Testbed
+
+Brian noted that TalkBank has stronger longitudinal recovery data for children who stutter than for child language delay. That makes stuttering a high-priority adjacent track for testing whether early state predicts persistence versus recovery.
+
+This does not replace DLD. It provides a better near-term recovery-prediction sandbox.
 
 ## Main Scientific Questions
 
@@ -263,6 +315,62 @@ Output:
 - low-output DLD versus Broca separability
 - shared versus disorder-specific state axes
 
+### DLD-09: Sentence Repetition And Structured-Task Inventory
+
+Inventory child-language and clinical corpora for structured tasks that can be paired with natural speech.
+
+Output:
+
+- list of corpora containing sentence repetition, nonword repetition, comprehension, narrative, picture description, and conversation
+- availability of audio and transcript alignment
+- participant overlap between natural speech and tight tasks
+- feasibility of combined natural-plus-structured models
+
+### DLD-10: DLD Label-Weakness And Fairness Audit
+
+Treat DLD/SLI labels as noisy clinical anchors and test how sensitive results are to label definition, corpus, task, and demographic context.
+
+Output:
+
+- corpus/task artifact strength
+- bilingual/dialect/SES metadata coverage
+- label-definition sensitivity
+- false-positive risk discussion for language difference versus disorder
+
+### DLD-11: openSMILE/eGeMAPS Child Acoustic Baseline
+
+Extract standardized acoustic features for child-language corpora where licensed audio is available.
+
+Output:
+
+- openSMILE/eGeMAPS feature tables
+- comparison with lexical/syntactic state features
+- ASR failure and child-speech recognition caveats
+- feature selection and stability by age/task/corpus
+
+### DLD-12: Stuttering Recovery Extension
+
+Use longitudinal stuttering data as a recovery-prediction testbed.
+
+Output:
+
+- spontaneous recovery versus persistence labels where available
+- early disfluency/acoustic/lexical/syntactic predictors
+- baseline models against age and simple fluency counts
+- cross-check against the DLD persistent-risk framework
+
+### DLD-13: BA Web Recorder Workflow Spec
+
+Define a practical data-collection workflow that could feed TalkBank/BA Web.
+
+Output:
+
+- minimal mobile/web recorder design
+- metadata and consent schema
+- upload and analysis flow
+- clinician-facing report requirements
+- independent IRB or partner-lab considerations
+
 ## Success Criteria
 
 A DLD result becomes publishable only if it survives:
@@ -289,4 +397,3 @@ This track matters if it can help answer one of these:
 - Which children are being over-flagged because the model confuses language difference with disorder?
 
 Until those are validated, this remains a measurement and discovery program.
-

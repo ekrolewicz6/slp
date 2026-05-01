@@ -16,7 +16,6 @@ or ffmpeg returns errors.
 from __future__ import annotations
 
 import argparse
-import os
 import subprocess
 import sys
 import tempfile
@@ -29,11 +28,16 @@ import parselmouth
 import pylangacq as pla
 from tqdm import tqdm
 
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 from src.features.acoustic import (
     aggregate_window_features,
     utterance_features,
 )
 from src.features.windowed import window_utterances
+from src.ingestion.talkbank_media import ffmpeg_headers, load_dotenv, request_headers
 
 
 def parse_args() -> argparse.Namespace:
@@ -60,17 +64,6 @@ def parse_args() -> argparse.Namespace:
     return p.parse_args()
 
 
-def _load_dotenv(path: Path = Path(".env")) -> None:
-    if not path.exists():
-        return
-    for line in path.read_text().splitlines():
-        line = line.strip()
-        if not line or line.startswith("#") or "=" not in line:
-            continue
-        k, v = line.split("=", 1)
-        os.environ.setdefault(k.strip(), v.strip())
-
-
 def cha_to_media_url(cha_abs_path: Path) -> str | None:
     """Translate a .cha file path under data/raw/aphasiabank/... into the
     corresponding media URL on media.talkbank.org."""
@@ -84,11 +77,10 @@ def cha_to_media_url(cha_abs_path: Path) -> str | None:
     return f"https://media.talkbank.org/aphasia/English/{rel_url}"
 
 
-def get_remote_size_mb(url: str, cookie: str) -> int | None:
+def get_remote_size_mb(url: str, headers: dict[str, str]) -> int | None:
     """Probe HTTP Content-Range to get total file size in MB."""
     import requests
-    headers = {"Cookie": f"talkbank={cookie}; connect.sid={cookie}",
-               "Range": "bytes=0-1"}
+    headers = {**headers, "Range": "bytes=0-1"}
     try:
         r = requests.head(url, headers=headers, timeout=15,
                           allow_redirects=True)
@@ -105,13 +97,13 @@ def get_remote_size_mb(url: str, cookie: str) -> int | None:
 
 
 def stream_extract_audio(url: str, dest_wav: Path,
-                         cookie: str, timeout_s: int = 300) -> bool:
+                         headers: dict[str, str], timeout_s: int = 300) -> bool:
     """Run ffmpeg with HTTP-direct read + cookies → write 16kHz mono WAV.
     Returns True on success."""
     dest_wav.parent.mkdir(parents=True, exist_ok=True)
     cmd = [
         "ffmpeg", "-hide_banner", "-loglevel", "error",
-        "-headers", f"Cookie: talkbank={cookie}; connect.sid={cookie}\r\n",
+        "-headers", ffmpeg_headers(headers),
         "-i", url,
         "-vn", "-ar", "16000", "-ac", "1",
         "-y", str(dest_wav),
@@ -177,10 +169,11 @@ def session_acoustic_windows(cha_path: Path, audio_path: Path,
 
 def main() -> None:
     args = parse_args()
-    _load_dotenv()
-    cookie = os.environ.get("APHASIABANK_COOKIE", "")
-    if not cookie:
-        print("[!] Set APHASIABANK_COOKIE in .env", file=sys.stderr)
+    load_dotenv()
+    headers, _, _ = request_headers(range_value=None)
+    if "Cookie" not in headers:
+        print("[!] Set TALKBANK_COOKIE_HEADER or APHASIABANK_COOKIE in .env",
+              file=sys.stderr)
         sys.exit(1)
 
     feats = pd.read_parquet(args.features_path)
@@ -227,14 +220,14 @@ def main() -> None:
 
         # Skip files larger than the threshold to keep moving
         if args.max_mp4_mb > 0:
-            size_mb = get_remote_size_mb(url, cookie)
+            size_mb = get_remote_size_mb(url, headers)
             if size_mb is not None and size_mb > args.max_mp4_mb:
                 tqdm.write(f"[skip] {tid}: too big ({size_mb} MB > "
                            f"{args.max_mp4_mb} MB)")
                 continue
 
         wav_path = args.audio_tmp / f"{Path(cha_path).stem}.wav"
-        ok = stream_extract_audio(url, wav_path, cookie)
+        ok = stream_extract_audio(url, wav_path, headers)
         if not ok:
             tqdm.write(f"[skip] {tid}: ffmpeg failure")
             wav_path.unlink(missing_ok=True)

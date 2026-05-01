@@ -8,23 +8,26 @@ The original vision was a closed-loop system for speech-language pathology:
 speech sample -> language state -> predicted change -> treatment target -> new speech sample
 ```
 
-The current work has moved from a developmental proof of concept into aphasia, where the practical question is sharper: can transcripts, discourse tasks, and audio reveal clinically meaningful differences that standard aphasia scores compress or miss?
+The current work has three connected tracks: child language and DLD as the highest-impact long-term clinical target, aphasia as the strongest current validation sandbox, and stuttering/recovery as a promising longitudinal testbed. Across all three, the practical question is the same: can transcripts, structured tasks, and audio reveal clinically meaningful state differences that broad scores and labels compress or miss?
 
 This repository is research software. It is not a diagnostic tool, treatment recommender, or replacement for a speech-language pathologist.
 
 ## Current Thesis
 
-Aphasia is not well described by one score or one subtype label. The data support a richer state model with at least these separable dimensions:
+Language difficulty is not well described by one score, one subtype label, or one surface measure like MLU. The data support a richer state model with at least these separable dimensions:
 
 - how much expected content a speaker communicates
 - how often the listener can infer the intended meaning
 - whether missed content is known and repairable versus unknown
 - how speech timing, pitch, voice quality, and other acoustic signals differ by subtype
 - whether a patient is changing in discourse even when a broad clinical score is stable
+- whether a child or adult is low-output for developmental, acquired, acoustic/motor, lexical, syntactic, task, or contextual reasons
 
 The strongest current claim is not "AI can score aphasia." It is:
 
-> A patient's speech contains multiple measurable state variables, and those variables expose different clinical problems that broad scores and labels often collapse together.
+> Speech and language samples contain multiple measurable state variables, and those variables expose different clinical problems that broad scores and labels often collapse together.
+
+After the 2026-04-29 discussion with Brian MacWhinney, the project direction is more concrete: measurement must come before treatment optimization; natural speech should be paired with tight tasks such as sentence repetition and nonword repetition; acoustic features should be standardized around tools such as openSMILE/eGeMAPS where possible; and data collection itself may be a central scientific bottleneck.
 
 ## Plain-English Summary
 
@@ -32,13 +35,15 @@ Many aphasia assessments produce a broad score that says roughly how impaired so
 
 Two people can have similar scores but very different communication problems. One may say very little. Another may say many words but miss the main point. Another may produce understandable pieces that need targeted clarification. Another may mainly show acoustic or fluency changes. A useful treatment system should not treat these as the same state.
 
-This project is building the measurement layer for that idea. It asks whether existing public language datasets can show:
+This project is building the measurement layer for that idea. It asks whether existing public language datasets and future easy-to-collect samples can show:
 
 - what information survived in a speech sample
 - what information was expected but missing
 - which errors are stable versus changing over time
 - which changes are visible before standard clinical scores move
 - where AI systems are useful, and where they are unsafe because they silently alter the evidence
+
+The long-term goal remains treatment-response prediction. The near-term requirement is more basic: define reliable state measures, collect better longitudinal samples, and validate that the resulting reports mean something to SLPs.
 
 ## What We Have Learned
 
@@ -70,11 +75,11 @@ Across picture and story prompts, expected event content is highly informative. 
 
 The cross-prompt content experiments showed that observed content plus task information predicts aphasia severity well, and subtype plus content performs better still. This supports a practical direction for SLP: measure whether communication carries the intended ideas, not only whether it is grammatically rich.
 
-### 5. Audio changes the subtype picture
+### 5. Audio is useful, but not as a simple subtype classifier
 
-Text alone has trouble with some fluent aphasia distinctions, especially Wernicke-like profiles. Acoustic features improved subtype separation substantially in the latest acoustic experiments.
+The stricter openSMILE/eGeMAPS replication changed the acoustic story. Standard eGeMAPS features beat random and shuffled controls, but WAB severity still outperformed eGeMAPS for broad 4-way subtype classification.
 
-This suggests that some aphasia states are not only lexical or syntactic. Timing, rhythm, pitch variability, intensity, and voice quality may carry clinically relevant information that transcripts miss.
+The more defensible acoustic claim is narrower: timing, coverage, voice, pitch, and intensity features may add state information, especially when combined with clinical severity or discourse features. Audio should be treated as part of a mechanistic state report, not as a standalone aphasia-subtype diagnostic.
 
 ### 6. "Severe" or "floor" performance is not one thing
 
@@ -130,20 +135,59 @@ Adding patient history improves controller decisions, especially deciding when t
 | Are DLD, late talking, and Broca aphasia the same low-output state? | `outputs/dld_cross_lifespan_state/summary.md` |
 | Does the DLD screening signal survive uncertainty and corpus balancing? | `outputs/dld_review_grade_audit/summary.md` |
 | Do late talkers catch up, and can early state predict that? | `outputs/dld_late_talker_catchup/summary.md` |
+| Does early movement predict late-talker persistence better than earliest state? | `outputs/dld_late_talker_persistence_sensitivity/summary.md` |
 | Is DLD screening mostly corpus/task artifact? | `outputs/dld_corpus_deconfounding/summary.md` |
+| How sensitive are DLD results to noisy labels? | `outputs/dld_label_noise_sensitivity/summary.md` |
 | Do child narrative tasks show a DLD state signal? | `outputs/dld_narrative_proxy/summary.md` |
+| Does DLD signal transfer across narrative and natural-speech contexts? | `outputs/dld_task_context_comparison/summary.md` |
 | What fairness audits are possible with current child metadata? | `outputs/dld_fairness_metadata_audit/summary.md` |
 | What DLD targets would residual-state policies nominate? | `outputs/dld_target_policy_simulation/summary.md` |
 | What outcome data are needed for clinically meaningful DLD work? | `outputs/dld_data_needs/summary.md` |
 | How should Manchester Language Study data be integrated? | `outputs/dld_manchester_access_plan/summary.md` |
 | How could the state model generalize across SLP disorders? | `outputs/dld_cross_disorder_generalization_plan/summary.md` |
 | What prospective DLD study would test the clinical claim? | `outputs/dld_prospective_study_blueprint/summary.md` |
+| What did Brian MacWhinney's post-call guidance change? | `docs/brian_meeting_2026-04-29.md` |
+| What should we do next, in order? | `docs/post_brian_ordered_task_list.md` |
+| What is the current operating charter? | `docs/project_charter.md` |
+| What is the minimum measurement battery? | `docs/minimum_language_state_battery.md` |
+| Which local corpora contain structured tasks? | `outputs/structured_task_inventory/summary.md` |
+| Can we run stuttering recovery locally now? | `outputs/stuttering_recovery_inventory/summary.md` |
+| Which DLD/late-talker longitudinal data are local? | `outputs/dld_longitudinal_inventory/summary.md` |
+| How do features map to SLP-readable state dimensions? | `docs/state_feature_schema.md` |
+| Can the local environment compute standard openSMILE features? | `outputs/opensmile_smoke/summary.md` |
+| Can AphasiaBank media be streamed for standard acoustic extraction? | `outputs/opensmile_aphasia_smoke/summary.md` |
+| Do standard eGeMAPS features carry subtype signal under strict balanced-root tests? | `outputs/aphasia_standard_acoustic_replication/balanced84_model_summary.md` |
+| Do custom Praat-style acoustic features outperform standard eGeMAPS on the same roots? | `outputs/aphasia_standard_acoustic_replication/feature_set_comparison_summary.md` |
+| What is the current standard-acoustic replication takeaway? | `outputs/aphasia_standard_acoustic_replication/summary.md` |
+| Can the same WAB score hide different state profiles? | `outputs/same_score_different_state_demo/summary.md` |
+| Do stable-WAB patients show discourse or acoustic movement? | `outputs/stable_wab_movers/summary.md` |
+| Are acoustic-only stable-WAB movers plausible signal or artifact? | `outputs/acoustic_mover_artifact_audit/summary.md` |
+| How should a recorder connect to TalkBank infrastructure? | `docs/ba_web_integration_notes.md` |
+| Which treatment-response datasets can we actually model? | `outputs/treatment_response_inventory/summary.md` |
+| What data-quality gates must future experiments pass? | `outputs/data_quality_gates/summary.md` |
+| What should the SLP-facing state report contain? | `docs/slp_state_report_v2_spec.md` |
+| What does the richer SLP report prototype produce? | `outputs/slp_state_report_v2/summary.md` |
+| What packets can SLPs review now? | `outputs/slp_report_packets/summary.md` |
+| What should a BA-Web-compatible recorder export? | `docs/ba_web_recorder_workflow_spec.md` |
+| What task scripts should the recorder use? | `docs/recording_protocols.md` |
+| What privacy/IRB posture should future collection use? | `docs/privacy_irb_plan.md` |
+| Can we create a local recording package now? | `outputs/recorder_package_demo/summary.md` |
+| What partner profiles should we pursue first? | `docs/partner_profile_list.md` |
+| Is independent IRB feasible without university affiliation? | `docs/independent_irb_options.md` |
+| What prospective pilot should we run first? | `docs/prospective_pilot_design.md` |
+| What funding path fits this project? | `docs/funding_path_memo.md` |
 
 The full experiment history is in `RESEARCH_LOG.md`. The original project specification is in `SPEC.md`.
 
+## Current Checkpoint
+
+As of 2026-05-01, the current local-data batch is complete. The project can now stream TalkBank media with the local cookie, run standard openSMILE/eGeMAPS extraction, compare standard and custom acoustic features, audit stable-WAB discourse/acoustic movers, and run the latest DLD label-noise, task-context, and late-talker persistence checks.
+
+The main conclusion from this batch is cautious but useful: the strongest publishable direction is multidimensional state measurement, not a standalone classifier. The next high-value work is blocked on external inputs: FluencyBank recovery access, manual Dryad EMT-SF DLD download, BA Web integration details, and SLP review of the report packets.
+
 ## Current Research Direction
 
-The project should now be understood as a language-state measurement project for SLP, with three near-term scientific goals:
+The project should now be understood as a language-state measurement project for SLP, with five near-term scientific goals:
 
 1. Harden the state model.
    - Replicate headline results under stricter patient-level splits, corpus-held-out tests, duplicate checks, and fold-clean preprocessing.
@@ -153,11 +197,19 @@ The project should now be understood as a language-state measurement project for
    - Separate content carried, unknown intent risk, known repair opportunities, acoustic/prosodic state, and longitudinal change.
    - Test whether these state dimensions explain different treatment-relevant problems hidden under the same WAB score.
 
-3. Build safe AI support around the measurement firewall.
+3. Pair natural language samples with tighter tasks.
+   - Inventory and model sentence repetition, nonword repetition, comprehension, narrative, picture description, and open conversation where data permit.
+   - Treat natural speech as ecologically important but not sufficient by itself.
+
+4. Build the data-collection path.
+   - Explore a simple recorder/front end that can feed BA Web or TalkBank-compatible analysis rather than duplicating existing infrastructure.
+   - Use pseudonyms and age, avoid names and dates of birth, and design around consent, IRB, and clinician workload from the start.
+
+5. Build safe AI support around the measurement firewall.
    - Use raw transcript/audio for assessment.
    - Use ASR and generative models only for communication assistance, clarification, target discovery, and clinician-facing summaries unless clinically validated.
 
-The project now also has a DLD and cross-lifespan extension in `DLD_LANGUAGE_STATE_SPEC.md`. That track asks whether the same state framework can explain developmental language disorder, late-talker catch-up, hidden DLD profiles, and early speech-state predictors of literacy or school outcomes.
+The project now also has a DLD and cross-lifespan extension in `DLD_LANGUAGE_STATE_SPEC.md`. That track asks whether the same state framework can explain developmental language disorder, late-talker catch-up, hidden DLD profiles, and early speech-state predictors of literacy or school outcomes. After Brian's feedback, DLD labels should be treated as noisy targets, not clean ground truth. Stuttering recovery should also be added as a high-priority longitudinal testbed because the available recovery data may be stronger than the current child language delay data.
 
 ## What Is Not Solved Yet
 
@@ -170,6 +222,12 @@ The largest remaining gaps are:
 - external replication outside AphasiaBank-style tasks
 - robust ASR uncertainty handling for impaired speech
 - clinician review of whether the proposed state reports match useful decision-making
+- easy recording/upload workflows that clinicians or families will actually use
+- structured-task data paired with natural speech
+- full all-corpus acoustic extraction beyond the current balanced84/common-root pilots
+- manual download or API access for the Dryad EMT-SF DLD treatment-response dataset
+- first SLP usability review of the state report
+- a partner-based prospective pilot with consented longitudinal samples and treatment exposure
 
 For adaptive treatment optimization, datasets with intervention type, dose, timing, patient goals, and repeated outcome measures are still needed.
 
@@ -226,6 +284,6 @@ README.md             Current project overview
 
 The project began as a search for a general language-state trajectory. It has become a more specific and more clinically grounded hypothesis:
 
-> Better SLP measurement may come from modeling what information a person communicates, what remains ambiguous, what is repairable, how the acoustic signal behaves, and how those variables change over time.
+> Better SLP measurement may come from modeling what information a person communicates, what remains ambiguous, what is repairable, how the acoustic signal behaves, how the person performs on tight elicitation tasks, and how those variables change over time.
 
 That is the layer needed before closed-loop adaptive therapy can be scientifically credible.

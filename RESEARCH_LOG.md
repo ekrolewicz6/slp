@@ -7463,3 +7463,1057 @@ At this point the DLD local-data queue is complete through DLD-17. The main
 scientific conclusion is that DLD is worth pursuing as a cross-lifespan
 generalization track, but the local CHILDES/Clinical-Eng data support mechanism
 discovery better than clinical screening or prognosis.
+
+## Brian MacWhinney Post-Call Update
+
+**Date:** 2026-04-30
+**Meeting date:** 2026-04-29
+**Reference memo:** `docs/brian_meeting_2026-04-29.md`
+
+Brian read the pre-call project update and said the summary was accurate. The
+conversation sharpened the project direction in several important ways.
+
+### Main Takeaways
+
+**1. The goal is right, but the hard part is infrastructure and data.**
+
+Brian did not push back on the overall goal of connecting language profiles to
+development, recovery, and treatment planning. His main caution was practical:
+this is like a moon mission. The idea is much easier than the data collection,
+quality control, workflow, longitudinal follow-up, and implementation.
+
+**2. Measurement must come before treatment optimization.**
+
+The most consequential problem is longitudinal recovery and treatment response,
+but the necessary data are sparse. Child language delay/DLD has limited
+longitudinal data, mainly Rescorla and Ellis Weismer-style sources, and the
+available data are weak for treatment-response modeling. The near-term
+research goal should therefore be reliable language-state measurement and
+recovery prediction where data allow.
+
+**3. DLD labels are noisy clinical anchors, not clean ground truth.**
+
+Brian described DLD diagnosis as often impressionistic and vulnerable to
+confounds such as bilingualism, socioeconomic context, school fit,
+marginalization, personality/shyness, and language difference. Any model that
+learns DLD labels without testing these issues risks automating a weak target.
+
+**4. Stuttering may be the best near-term recovery-prediction dataset.**
+
+Brian noted that TalkBank has stronger longitudinal recovery data for children
+who stutter than for child language delay. This makes stuttering a high-value
+adjacent testbed for the language-state trajectory hypothesis: can early
+speech state predict spontaneous recovery versus persistence?
+
+**5. Natural conversation and structured tasks are both needed.**
+
+Brian's answer to "conversation or tight tasks?" was both. Natural samples are
+ecologically valid, but structured tasks such as sentence repetition, nonword
+repetition, comprehension, narrative, and picture description provide tighter,
+more interpretable probes. Sentence repetition is especially important because
+it can be automated and may sit between free discourse and traditional tests.
+
+**6. Data collection workflow is itself a major scientific bottleneck.**
+
+Clinicians are taught that data collection matters, but often do not collect
+audio/language samples in real practice because workload is high and the
+workflow is not easy enough. Brian showed BA Web and said that a recorder app
+or front end feeding BA Web could be valuable. He distinguished opening the
+web service from opening the database and was open to the former in principle.
+
+Important design constraints:
+
+- collect age, not date of birth
+- use pseudonyms or codes, not names
+- avoid names in the recording
+- align with BA Web/TalkBank infrastructure rather than duplicating it
+- return outputs that SLPs can interpret
+- do not rely on EHR extraction as a near-term path because HIPAA/data
+  transfer agreements are too slow
+
+**7. Acoustic work should standardize on established feature sets.**
+
+Brian pointed to openSMILE, eGeMAPS, AVQI, and FluCalc as standard acoustic or
+fluency feature sources. The current custom acoustic feature work should be
+replicated or supplemented with standard feature sets, then pruned with feature
+selection and stability analysis. His comment that "the measures are better
+than the data" is a useful caution.
+
+**8. Clinicians need rich profiles, not one score.**
+
+Brian pointed to CAF from second-language research: complexity, accuracy,
+lexicon, and fluency. For SLP, the state report should likely combine CAF with
+content/informativeness, recoverability/repairability, acoustics, and change.
+
+### Updated Active Task Queue From The Call
+
+- [ ] **Brian-01 BA Web recorder/app feasibility spec.** Define a mobile/web
+  workflow that records speech, captures pseudonym plus age metadata, avoids
+  names/DOB, uploads to BA Web or a TalkBank-compatible service, retrieves
+  results, and returns SLP-interpretable outputs.
+- [ ] **Brian-02 Structured-task inventory.** Inventory TalkBank/CHILDES/
+  clinical corpora for sentence repetition, nonword repetition, comprehension,
+  narrative, picture description, and open conversation; identify participant
+  overlap and audio availability.
+- [ ] **Brian-03 Stuttering recovery track.** Inventory FluencyBank/stuttering
+  longitudinal data and run first-pass recovery versus persistence models using
+  disfluency, acoustic, lexical, syntactic, and task features.
+- [ ] **Brian-04 openSMILE/eGeMAPS acoustic replication.** Replicate aphasia
+  acoustic subtype/state results with standard features and compare against
+  the current custom feature set.
+- [ ] **Brian-05 CAF plus content state report.** Redesign the SLP-facing
+  report around complexity, accuracy, lexicon, fluency/acoustics,
+  content/informativeness, recoverability/repairability, and trajectory.
+- [ ] **Brian-06 DLD label-weakness audit.** Treat DLD/SLI labels as noisy
+  anchors and test sensitivity to corpus, task, bilingual/dialect/SES metadata,
+  and label definitions.
+- [ ] **Brian-07 Treatment-response evidence inventory.** Inventory
+  intervention evidence across child language/DLD, aphasia, apraxia/script
+  therapy, stuttering, and dementia where relevant. Record whether each source
+  has individual-level data, transcripts, audio, dose, goals, outcomes, and
+  follow-up.
+- [ ] **Brian-08 Independent IRB / partner-lab path.** Document options for
+  prospective data collection outside a university lab, including independent
+  IRB, local assistant-professor partnership, SBIR constraints, and consent
+  language.
+
+### Revised Bottom Line
+
+The original closed-loop treatment vision remains valid, but the next step is
+not to claim therapy optimization. The next step is to build the state
+measurement and data-collection layer that would make treatment optimization
+scientifically credible:
+
+```text
+easy recording -> transcript/audio/state measures -> rich SLP report ->
+longitudinal recovery model -> treatment-response model
+```
+
+The highest-learning next experiments are therefore stuttering recovery,
+structured-task inventory, standard acoustic replication, and BA Web recorder
+workflow design.
+
+## Post-Brian Execution Start
+
+**Date:** 2026-04-30
+**Scripts:** `scripts/run_post_brian_data_inventory.py`
+**Planning docs:** `docs/project_charter.md`,
+`docs/minimum_language_state_battery.md`,
+`docs/post_brian_ordered_task_list.md`, `TASKS.md`
+
+### Phase 0 and Phase 1 completion
+
+The project now has an explicit operating charter and minimum
+language-state battery. The charter locks the near-term goal:
+
+> validate multidimensional language-state measurement and recovery
+> prediction before claiming treatment optimization.
+
+The first three publishable claims to test are:
+
+1. broad scores and labels hide separable state dimensions;
+2. early state predicts recovery better than simple baselines in at least one
+   longitudinal disorder dataset;
+3. SLPs need rich state reports, not one-score classifiers.
+
+The minimum battery now pairs natural speech with tighter tasks:
+conversation/interview, picture description, narrative/story retell, sentence
+repetition, nonword repetition, optional comprehension, and functional context
+ratings.
+
+### Structured-task inventory
+
+Output: `outputs/structured_task_inventory/summary.md`
+
+The inventory scanned **17,913** local CHAT files under `data/raw/`, using
+paths and CHAT headers rather than utterance text.
+
+Findings:
+
+- conversation/interview/play candidates: **10,566** file-category hits;
+- narrative/story candidates: **4,785**;
+- picture-description candidates: **2,475**;
+- reading candidates: **994**;
+- comprehension candidates: **76**;
+- sentence-repetition candidates: **0**;
+- nonword-repetition candidates: **0**.
+
+Interpretation: current local data are adequate for narrative, conversation,
+picture-description, and AphasiaBank task-conditioned content work. They do
+not yet support Brian's full natural-plus-tight-task battery because sentence
+repetition and nonword repetition are missing or not discoverable from local
+headers/paths.
+
+### Stuttering recovery inventory
+
+Output: `outputs/stuttering_recovery_inventory/summary.md`
+
+Local FluencyBank directory present: **False**. The scan found only **9**
+fluency/stuttering/cluttering header/path candidates, mostly AphasiaBank or
+non-child-recovery material. This is not sufficient for the child stuttering
+recovery experiment Brian suggested.
+
+External priority targets identified from TalkBank FluencyBank pages:
+
+- FluencyBank main access page: consortium/password-restricted research data;
+- Purdue: large child stuttering corpus with persistence/recovery-related
+  publications;
+- Wagovich: preschool children who stutter followed for 10 months;
+- Ratner: children who stutter and matched fluent peers;
+- UMD-CMU: child disfluency/language predictors;
+- Voices-CWS: teaching corpus useful for reading/conversation contrast but
+  likely not recovery-focused.
+
+Interpretation: stuttering remains the highest-value recovery testbed, but it
+is locally blocked until FluencyBank access/download is available. Immediate
+local work should shift to DLD/late-talker longitudinal inventory and
+standard acoustic replication while access is pursued.
+
+### DLD / late-talker longitudinal inventory
+
+Script: `scripts/run_dld_longitudinal_inventory.py`
+Output: `outputs/dld_longitudinal_inventory/summary.md`
+
+The inventory loaded `phase1_windowed_features.parquet`, restricted to
+Clinical-Eng, repaired Rescorla and common EllisWeismer path-encoded ages, and
+reused the DLD participant-root logic.
+
+Headline counts:
+
+- Clinical-Eng windows: **4,067**
+- transcripts: **2,307**
+- reconstructed participant roots: **1,562**
+- participants with repeated transcripts or ages: **271**
+- participants with at least two distinct ages: **219**
+- explicit outcome/literacy/school columns in the feature table: **0**
+
+Best local longitudinal candidates:
+
+- EllisWeismer TD: **66** longitudinal participants;
+- EllisWeismer LateTalker: **53**;
+- Rescorla LateTalker: **38**;
+- Rescorla TD: **21**;
+- Feldman DLD/SLI: **17**;
+- Ambrose TD/HL: smaller repeated samples.
+
+Interpretation: local child-language data support trajectory description and
+persistent-gap mechanism work, especially Rescorla and EllisWeismer, but they
+do not contain the explicit outcome fields needed for the final clinical
+claim. Manchester/E-DLD or prospective data remain necessary for
+literacy/school/treatment-response endpoints.
+
+### CAF-plus-content state feature schema
+
+Doc: `docs/state_feature_schema.md`
+
+The state schema now maps computable features to SLP-readable dimensions:
+
+- complexity;
+- accuracy/error profile;
+- lexicon;
+- fluency/acoustics;
+- content/informativeness;
+- recoverability/repairability;
+- task sensitivity;
+- longitudinal change;
+- context/fairness.
+
+This schema is now the bridge between raw features and the next SLP report
+prototype. It also creates a stricter rule for future experiments: every
+headline model should report which state dimensions it uses, what simple
+baselines it beats, and what caveats apply.
+
+### Standard acoustic path
+
+Scripts:
+
+- `scripts/extract_opensmile_features.py`
+- `scripts/extract_aphasia_opensmile.py`
+
+Outputs:
+
+- `outputs/opensmile_smoke/summary.md`
+- `outputs/opensmile_aphasia_smoke/summary.md`
+
+The local openSMILE/eGeMAPS smoke test succeeds on `data/audio/cmu01a_test.wav`:
+**88** eGeMAPS functionals, **1** row, no missing values in the single-file
+test. This gives us a standard acoustic feature path to compare against the
+custom Praat/parselmouth features.
+
+The AphasiaBank streaming openSMILE smoke currently writes **0** rows because
+the media server returns the TalkBank/SLA authentication modal HTML instead of
+MP4 bytes, causing `ffmpeg` failure. Interpretation: the code path is in place,
+but full openSMILE replication is blocked until approved-access media auth is
+refreshed.
+
+This matters scientifically because future acoustic claims should be phrased
+around feature-family ablations and standard feature sets, not only our custom
+15-feature Praat extraction.
+
+### BA Web / Batchalign infrastructure inventory
+
+Doc: `docs/ba_web_integration_notes.md`
+
+The integration plan is now to build a thin local recorder/export workflow that
+feeds TalkBank/BA Web-compatible infrastructure rather than creating a parallel
+clinical data silo.
+
+Public docs and Brian's call converge on the same direction:
+
+- CLAN/KIDEVAL remain the established analysis layer;
+- Batchalign handles ASR, segmentation, morphosyntax, and forced alignment;
+- BA Web already accepts uploaded media and can return analyses;
+- opening an analysis web service is separate from opening protected clinical
+  data;
+- the recorder must minimize SLP burden and capture metadata/consent correctly.
+
+The concrete next engineering artifact should be a local package:
+
+```text
+media + pseudonym/age/task/device/consent manifest -> local validation ->
+BA-Web-compatible export package
+```
+
+Direct upload should wait until Brian/Franklin clarify auth, API, job status,
+output bundle format, and database-ingestion rules.
+
+### Treatment-response evidence inventory
+
+Output: `outputs/treatment_response_inventory/summary.md`
+
+The inventory separates treatment-response modeling from broader treatment
+evidence.
+
+Highest-value finding: a 2026 Dryad dataset, *Maximizing outcomes for
+preschoolers with developmental language disorders*, is public and contains
+de-identified participant-level baseline and follow-up data from an EMT-SF
+randomized trial. It includes treatment assignment, baseline language-sample
+variables, child-caregiver interaction measures, demographics, and follow-up
+vocabulary/grammar outcomes.
+
+This is the first plausible public dataset for the original treatment-response
+vision:
+
+```text
+baseline language state + treatment group -> 6mo vocabulary / 12mo grammar
+```
+
+CLI download is currently blocked by Dryad/AWS WAF. Manual browser download is
+needed into `data/external/dryad_emt_sf_dld/`.
+
+Other findings:
+
+- RELEASE is the most important aphasia treatment/dosage evidence base, but the
+  individual participant data are not packaged for immediate local modeling.
+- AphasiaBank script-treatment corpora may support pre/post discourse audits
+  after TalkBank media/auth works.
+- FluencyBank Purdue/Ratner/UMD-CMU are probably better immediate recovery
+  prediction targets than treatment-response targets.
+
+### Data-quality gates
+
+Script: `scripts/run_data_quality_gates.py`
+Output: `outputs/data_quality_gates/summary.md`
+
+The first full local gate run found:
+
+- AphasiaBank windowed features: **4,108** rows, **303** rows with duplicated
+  `window_id`s across **128** duplicated IDs. Strict headline experiments must
+  drop all ambiguous duplicated windows.
+- CHILDES windowed features: **23,904** rows and **0** duplicated `window_id`s.
+- GroupKFold by participant produces **0** train/test participant overlap for
+  both AphasiaBank and CHILDES.
+- Naive row-wise KFold would leak heavily: average train/test group overlap of
+  **456** aphasia participants and **237** CHILDES children per fold.
+- Several corpora have poor or absent PAR time marks and should be excluded
+  from audio-linked analyses unless handled separately.
+- TalkBank media auth still fails locally: the media request returns HTML
+  rather than MP4 bytes.
+
+This converts a recurring methodological concern into a reusable gate. Future
+publishable analyses should fail fast unless they pass unique-window checks,
+participant-grouped splits, fold-internal preprocessing, and task/audio
+eligibility checks.
+
+### SLP state report V2
+
+Spec: `docs/slp_state_report_v2_spec.md`
+Script: `scripts/run_slp_state_report_v2.py`
+Output: `outputs/slp_state_report_v2/summary.md`
+
+V2 reframes the report around Brian-aligned state dimensions:
+
+- content carried;
+- unknown-intent risk;
+- recoverable-error burden;
+- structural complexity;
+- lexical access proxy;
+- fluency/timing disruption;
+- acoustic/prosodic atypicality;
+- longitudinal movement;
+- next probe to reduce uncertainty;
+- quality/safety flags.
+
+The prototype generated **956** adult aphasia report rows. Dimension coverage:
+
+- content/risk/recoverability: **956/956**;
+- structural/lexical/fluency proxies after strict duplicate-window dropping:
+  **759/956**;
+- acoustic atypicality: **306/956**.
+
+The report now makes missing evidence visible. For example, a patient can have
+a clear content/risk profile but no acoustic coverage; the report then
+recommends an audio sample with usable time marks rather than pretending the
+acoustic dimension is known.
+
+This is still not a clinical report. It is a structured hypothesis generator
+for SLP review and a template for adult aphasia, child/DLD, and stuttering
+variants.
+
+### BA Web-compatible recorder workflow spec
+
+Doc: `docs/ba_web_recorder_workflow_spec.md`
+
+The recorder plan is now local-first and TalkBank-compatible:
+
+```text
+task script -> recording -> metadata manifest -> local validation ->
+BA-Web-compatible package -> analysis -> SLP-readable state report
+```
+
+The spec defines user types, package layout, manifest schema, local validation
+gates, privacy posture, and the specific API questions for Brian/Franklin. The
+implementation order is deliberately conservative: record/import locally,
+validate package, export manually to BA Web, then add direct upload only after
+the API contract is clear.
+
+### Recording protocols
+
+Doc: `docs/recording_protocols.md`
+
+The project now has draft task scripts for:
+
+- adult aphasia;
+- child language/DLD;
+- stuttering.
+
+Each protocol includes natural speech plus tighter tasks where appropriate, as
+Brian recommended. The child/DLD protocol explicitly includes sentence
+repetition and nonword repetition because local CHILDES headers did not reveal
+those tasks, meaning prospective collection must add them if we want the full
+measurement battery.
+
+### Privacy / IRB plan
+
+Doc: `docs/privacy_irb_plan.md`
+
+The project now has an explicit privacy posture for prospective collection:
+local-first recording, no EHR dependency, no central server until consent and
+review are clear, no raw media or private transcripts in Git, and consent tiers
+that separate local analysis, project research, TalkBank-compatible deposit, and
+aggregate-only publication.
+
+This is important because audio is identifying even when fields are
+pseudonymized. Any recorder prototype must implement spoken-PHI warnings,
+package-level consent flags, and a `requires_review` path before data sharing.
+
+### Local recorder package prototype
+
+Script: `scripts/create_recording_package.py`
+Demo output: `outputs/recorder_package_demo/summary.md`
+
+The first local-only package generator now works. It imports a media file,
+creates the BA-Web-compatible folder structure, writes `manifest.json`, runs
+local validation, and writes `audit/local_validation.json`.
+
+The demo package using `data/audio/cmu01a_test.wav` passed validation. The raw
+package lives under `data/recording_packages/`, which is gitignored; only the
+non-media summary is stored in `outputs/`.
+
+This is not a full mobile recorder yet, but it proves the key architecture:
+
+```text
+local media + manifest + validation -> exportable package
+```
+
+### Partner profile list
+
+Doc: `docs/partner_profile_list.md`
+
+The partnership strategy now prioritizes:
+
+1. DLD treatment labs, especially for the public EMT-SF Dryad treatment-response
+   pilot;
+2. stuttering recovery labs, especially Purdue/FluencyBank recovery data;
+3. aphasia discourse/treatment researchers for adult state-report validation;
+4. SLP clinics and schools for workflow feasibility.
+
+The key shift is that a partner is valuable if they can provide longitudinal
+samples, workflow access, or disorder-specific interpretation. Prestige is less
+important than data access, clinical realism, and speed of feedback.
+
+### Independent IRB feasibility
+
+Doc: `docs/independent_irb_options.md`
+
+Independent IRB review appears feasible without a university affiliation, but it
+should not be the default first move. Audio recordings are identifiable enough
+that prospective speech-language collection should not be treated casually as
+exempt, especially with children or clinical populations.
+
+The practical path is:
+
+```text
+existing data + SLP report feedback + simulated recorder workflow
+-> partner-lab conversations
+-> independent IRB only if the first real prospective protocol is concrete
+```
+
+The memo identifies independent IRB vendors to investigate, expected
+low-thousands-to-several-thousand-dollar cost ranges, likely minimal-risk design
+constraints, and the artifacts needed before submission: protocol, consent,
+recruitment material, task scripts, data handling, deletion policy, and
+TalkBank-compatible sharing language.
+
+The main conclusion is strategic: do not spend time or money on IRB paperwork
+until we know which first prospective question we are actually asking.
+
+### Prospective pilot design
+
+Doc: `docs/prospective_pilot_design.md`
+
+The prospective plan now has a staged order:
+
+1. SLP usability review using de-identified or synthetic report examples.
+2. Local recorder feasibility using non-sensitive samples.
+3. One partner-based longitudinal pilot in the first population where access is
+   real: child/DLD, stuttering, or adult aphasia.
+4. Treatment-response modeling only after intervention type, dose, targets, and
+   outcomes are captured.
+
+The design keeps the original treatment-optimization vision intact but prevents
+premature claims. The first patient-facing pilot should be selected by data
+access:
+
+- **DLD/child language** is closest to the original vision and highest
+  population impact, but needs better outcome and treatment-exposure capture.
+- **Stuttering recovery** may be the cleanest first recovery-prediction science
+  case if FluencyBank or a fluency-clinic partner becomes available.
+- **Adult aphasia** is the fastest measurement-validation sandbox and likely the
+  easiest place to show that broad scores hide different discourse states, but
+  it should not be framed as treatment optimization yet.
+
+The field-changing result would not be "AI diagnoses DLD" or "AI scores
+aphasia." It would be showing that, for the same broad score or diagnosis, a
+state report separates different mechanisms of difficulty, predicts different
+trajectories, and changes what an SLP would assess or monitor next.
+
+### Funding path memo
+
+Doc: `docs/funding_path_memo.md`
+
+The funding plan now separates two paths that should not be conflated:
+
+1. **Scientific discovery:** language-state measurement, recovery prediction,
+   persistent-risk modeling, and longitudinal change.
+2. **Product translation:** recorder, reporting, BA-Web-compatible packaging,
+   and deployment.
+
+The recommended sequence is not to form a company or write an NIH application
+immediately. First finish the strict acoustic replication, run the Dryad DLD
+treatment-response pilot if the files can be downloaded manually, create
+adult/child/stuttering report packets, and collect SLP usability feedback.
+
+The most likely NIH fit is NIDCD for voice/speech/language disorders,
+stuttering, aphasia, and communication-disorder technologies. NICHD becomes
+important for child-language development, DLD/late-talker trajectories, and
+developmental outcomes. SBIR/STTR is a later product route, not the current
+discovery route, unless the project becomes a concrete recorder/report product
+with a clear small-business structure and commercialization story.
+
+### SLP report review packets
+
+Script: `scripts/create_slp_report_packets.py`
+Output: `outputs/slp_report_packets/summary.md`
+
+The project now has review packets for the first informal SLP feedback loop:
+
+- adult aphasia: **10** example cards drawn from the V2 AphasiaBank state-report
+  rows;
+- child/DLD: **8** late-talker trajectory cards and **6** separate DLD
+  target/probe profile cards;
+- stuttering: a wireframe and data-source packet, because local longitudinal
+  recovery data are not available yet.
+
+The child packet deliberately separates late-talker trajectory examples from
+DLD target-policy examples because those outputs are not case-linked. That is a
+useful limitation: it shows exactly what the current retrospective child work
+can and cannot support before prospective collection.
+
+The next step is human review, not another model: ask SLPs whether these reports
+are understandable, clinically useful, misleading, or missing the information
+they would need to choose the next assessment probe.
+
+Review protocol: `docs/slp_report_review_protocol.md`
+Review template: `outputs/slp_report_packets/review_form_template.csv`
+
+The human-response part is blocked until SLPs actually review the packets, but
+the review procedure and data-capture template are now ready.
+
+### TalkBank media auth replay support
+
+Scripts:
+
+- `src/ingestion/talkbank_media.py`
+- `scripts/check_talkbank_media_access.py`
+- `scripts/extract_aphasia_opensmile.py`
+- `scripts/extract_aphasia_acoustic.py`
+
+The media checker confirms that the current `.env` value is being read from
+`TALKBANK_COOKIE_HEADER`, but Python and curl still receive the SLA auth HTML
+for the media URL that the browser can fetch as `206 Partial Content` with
+`Content-Type: video/mp4`.
+
+To close that gap, the scripts now support replaying a private DevTools
+"Copy as cURL" request from `docs/private/talkbank_media_request.curl`. That
+file is under the gitignored private-docs path, so it can contain headers/cookies
+without entering Git. If the cURL replay passes, the same header parser will be
+used by the openSMILE and custom acoustic streaming extractors.
+
+Update: after refreshing `TALKBANK_COOKIE_HEADER`, the media checker returned
+`206 Partial Content`, `Content-Type: video/mp4`, and `media_stream_ok`.
+
+### Same-score different-state demonstration
+
+Script: `scripts/run_same_score_different_state_demo.py`
+Output: `outputs/same_score_different_state_demo/summary.md`
+
+The same-score demo found **11,398** same-subtype pairs with WAB-AQ difference
+<= 2.0. These pairs often have materially different state profiles and next
+probe hypotheses despite similar broad aphasia severity.
+
+Selected examples include:
+
+- Broca pairs with nearly identical WAB-AQ but very different
+  recoverable-error burden;
+- Anomic pairs where one case has high unknown-intent risk and the other has
+  higher content with lower risk;
+- Conduction pairs with identical WAB-AQ but different content, risk,
+  recoverability, structure, and next-probe recommendations.
+
+This is a measurement claim, not a treatment claim. It provides clinician-review
+case studies for the argument that a single broad score is not enough to guide
+next assessment.
+
+### Balanced48 openSMILE/eGeMAPS aphasia pilot
+
+Scripts:
+
+- `scripts/extract_aphasia_opensmile.py`
+- `scripts/run_opensmile_balanced48_model.py`
+
+Outputs:
+
+- `outputs/aphasia_standard_acoustic_replication/noncontrol_media_size_manifest.csv`
+- `outputs/aphasia_standard_acoustic_replication/balanced_patient_root_transcript_list.csv`
+- `data/features/aphasia_opensmile_egemaps_balanced48.parquet`
+- `outputs/aphasia_standard_acoustic_replication/balanced48_model_summary.md`
+
+The refreshed TalkBank auth made streaming extraction work. A first NEURAL-2
+chunk was technically successful but scientifically weak because the extracted
+sessions were all controls. The better pilot used a media-size manifest to pick
+**48** non-control sessions under 250 MB, with one session per derived patient
+root and **12** roots each for Anomic, Broca, Conduction, and Wernicke.
+
+Extraction result:
+
+- **48** sessions;
+- **54** window rows;
+- **92** eGeMAPS feature columns;
+- **0** missing eGeMAPS values;
+- no auth failures, ffmpeg failures, oversized skips, or persisted temp audio.
+
+Fold-clean repeated stratified CV on patient-root rows found:
+
+| model | balanced accuracy | macro F1 |
+|---|---:|---:|
+| WAB-only | 0.554 | 0.533 |
+| eGeMAPS + WAB | 0.430 | 0.410 |
+| eGeMAPS only | 0.384 | 0.363 |
+| random features | 0.317 | 0.299 |
+| shuffled labels | 0.299 | 0.284 |
+| majority | 0.250 | 0.100 |
+
+Pairwise eGeMAPS contrasts were more interesting:
+
+- Wernicke vs Conduction: balanced accuracy **0.792**, macro F1 **0.791**;
+- Broca vs Anomic: balanced accuracy **0.667**, macro F1 **0.667**;
+- Wernicke vs Anomic: balanced accuracy **0.625**, macro F1 **0.624**;
+- Conduction vs Anomic: chance-level.
+
+Interpretation: the standard eGeMAPS pilot does not yet replicate a broad,
+dominant acoustic subtype result. WAB severity is stronger than eGeMAPS for
+4-way subtype classification in this tiny balanced sample. But eGeMAPS beats
+random/shuffled controls and may be especially informative for fluent subtype
+contrasts such as Wernicke vs Conduction. The correct next step is to expand
+patient-root-balanced extraction and add corpus-held-out evaluation, not to
+claim a final acoustic discovery from this pilot.
+
+### Balanced84 openSMILE/eGeMAPS replication and custom-vs-standard audit
+
+Scripts:
+
+- `scripts/extract_aphasia_opensmile.py`
+- `scripts/extract_aphasia_acoustic.py`
+- `scripts/run_opensmile_balanced48_model.py`
+- `scripts/run_acoustic_feature_set_comparison.py`
+
+Outputs:
+
+- `data/features/aphasia_opensmile_egemaps_balanced84.parquet`
+- `data/features/acoustic_g_balanced84_missing.parquet`
+- `outputs/aphasia_standard_acoustic_replication/balanced84_model_summary.md`
+- `outputs/aphasia_standard_acoustic_replication/feature_set_comparison_summary.md`
+- `outputs/aphasia_standard_acoustic_replication/summary.md`
+
+After the TalkBank cookie refresh, the media checker returned `206 Partial
+Content` with `Content-Type: video/mp4`, so streaming media auth is no longer
+the blocker.
+
+The expanded eGeMAPS sample used **84** patient roots with **21** roots each
+for Anomic, Broca, Conduction, and Wernicke. Labels, WAB, corpus, and derived
+patient root now come from the transcript manifest rather than from window-level
+metadata, which avoids ambiguous duplicate-window joins.
+
+Fold-clean 4-way subtype modeling on the balanced84 roots found:
+
+| model | balanced accuracy | macro F1 |
+|---|---:|---:|
+| WAB-only | 0.549 | 0.526 |
+| eGeMAPS + WAB | 0.457 | 0.440 |
+| eGeMAPS only | 0.407 | 0.391 |
+| random features | 0.268 | 0.255 |
+| shuffled labels | 0.218 | 0.207 |
+| majority | 0.250 | 0.096 |
+
+The larger sample therefore does **not** support a broad standard-acoustic
+subtype-classification claim. eGeMAPS is above random and shuffled controls,
+but WAB severity is still stronger.
+
+The eGeMAPS family ablation points toward timing/coverage as the strongest
+standard-feature family:
+
+| eGeMAPS family | balanced accuracy | macro F1 |
+|---|---:|---:|
+| timing_coverage | 0.463 | 0.449 |
+| loudness_intensity | 0.390 | 0.364 |
+| voice_quality | 0.373 | 0.355 |
+| formants | 0.344 | 0.327 |
+| spectral_mfcc | 0.305 | 0.286 |
+| pitch_f0 | 0.322 | 0.281 |
+
+Pairwise eGeMAPS contrasts remain most interesting for Wernicke-vs-Conduction
+but do not beat WAB-only in the tested contrasts:
+
+- Wernicke vs Conduction: eGeMAPS macro F1 **0.689**, WAB-only **0.738**.
+- Wernicke vs Anomic: eGeMAPS macro F1 **0.643**, WAB-only **0.976**.
+- Broca vs Anomic: eGeMAPS macro F1 **0.618**, WAB-only **0.928**.
+- Conduction vs Anomic: eGeMAPS macro F1 **0.568**, WAB-only **0.880**.
+
+The custom-vs-standard audit then compared eGeMAPS against the project's
+Praat-style custom acoustic features on roots present in both feature sets.
+Backfilling 8 of 9 missing sessions increased custom coverage to **83** of the
+84 balanced roots; `Protocol/SCALE/scale06d` remains the one failed custom
+ffmpeg extraction. The balanced common subset has **80** roots, 20 per subtype.
+
+On the balanced common 80-root subset:
+
+| model | balanced accuracy | macro F1 |
+|---|---:|---:|
+| custom + WAB | 0.563 | 0.546 |
+| WAB-only | 0.542 | 0.520 |
+| custom voice/pitch/intensity | 0.496 | 0.484 |
+| custom only | 0.484 | 0.466 |
+| custom no token/count features | 0.472 | 0.459 |
+| eGeMAPS + WAB | 0.436 | 0.418 |
+| eGeMAPS only | 0.393 | 0.378 |
+
+This is a useful negative/clarifying result. The earlier stronger custom
+feature result on a smaller common subset was sample-sensitive. After filling
+most missing Wernicke roots, custom features add a modest increment over WAB,
+while standard eGeMAPS remains weaker. The defensible claim is not "audio
+classifies aphasia subtype." It is that timing/voice-state measurements may add
+state information not captured by broad subtype labels, and should be evaluated
+against same-score different-state examples and longitudinal change rather than
+as a standalone subtype diagnostic.
+
+### Stable-WAB mover replication with acoustic-state overlay
+
+Script:
+
+- `scripts/run_stable_wab_mover_analysis.py`
+
+Outputs:
+
+- `outputs/stable_wab_movers/summary.md`
+- `outputs/stable_wab_movers/classified_pairs.csv`
+- `outputs/stable_wab_movers/acoustic_thresholds.csv`
+- `outputs/stable_wab_movers/stable_wab_acoustic_only_examples.csv`
+
+The stable-WAB analysis was rerun with the custom acoustic feature files joined
+by `corpus + participant_id` rather than by transcript path, because some
+longitudinal state transcript IDs include `/PWA/` while the acoustic extractor
+stores a shorter path. This fixed the acoustic coverage issue.
+
+Overall results:
+
+| metric | value |
+|---|---:|
+| consecutive pairs | 405 |
+| stable-WAB pairs (`abs(delta WAB-AQ) <= 3`) | 370 |
+| stable-WAB discourse movers | 66 |
+| stable-WAB discourse mover rate | 0.178 |
+| pairs with custom acoustic coverage | 112 |
+| stable-WAB pairs with acoustic coverage | 110 |
+| stable-WAB acoustic movers | 17 |
+| stable-WAB acoustic mover rate | 0.155 |
+| stable-WAB acoustic-only movers | 11 |
+| stable-WAB discourse+acoustic movers | 6 |
+
+The stable-WAB discourse mover result remains: a nontrivial minority of
+session-to-session pairs show reliable discourse movement despite little or no
+movement in WAB-AQ.
+
+The acoustic overlay adds a stronger falsification set. There are **11**
+stable-WAB acoustic-only movers where the broad score is stable and discourse
+metrics are below reliable-change thresholds, but acoustic state crosses a
+family-specific empirical 95th-percentile threshold. These cases should be
+manually reviewed before any acoustic-state claim is made. If SLP review finds
+real voice/timing/fluency changes, WAB is missing an additional state dimension.
+If not, the acoustic-state threshold is too sensitive to recording/session
+artifacts and should be downgraded.
+
+Acoustic distances are not simply WAB in disguise in this subset:
+
+- `abs_acoustic_no_token_vs_abs_wab_r = -0.056`
+- `abs_acoustic_no_token_vs_abs_content_r = -0.097`
+
+This does **not** prove clinical relevance, but it supports the next experiment:
+manual or rule-based artifact review of acoustic-only stable-WAB movers, then a
+state-report version that separates discourse movement from acoustic movement.
+
+### Acoustic-only stable-WAB artifact audit
+
+Script:
+
+- `scripts/run_acoustic_mover_artifact_audit.py`
+
+Outputs:
+
+- `outputs/acoustic_mover_artifact_audit/summary.md`
+- `outputs/acoustic_mover_artifact_audit/acoustic_only_artifact_audit.csv`
+
+The acoustic-only stable-WAB movers were audited heuristically by looking at
+the z-scored custom acoustic features driving each change, plus raw deltas for
+duration, F0, voiced fraction, HNR, intensity, and voiced-utterance counts.
+
+Result:
+
+| audit label | n |
+|---|---:|
+| likely voice/pitch state change | 6 |
+| possible recording or sample artifact | 3 |
+| quantity or transcription shift | 2 |
+
+The most interesting candidates are repeated Fridriksson-2 cases such as
+`1012-4 -> 1012-5`, `1014-2 -> 1014-3`, and `1012-2 -> 1012-3`, where WAB-AQ
+is unchanged and discourse change is below the reliable threshold, but F0,
+jitter, shimmer, and related pitch/voice variability features move strongly.
+
+This audit improves the claim's quality because it creates a falsification
+queue. The likely voice/pitch cases are candidates for manual audio review; the
+intensity-dominated cases should be treated as possible recording/session
+artifacts until reviewed; the token/count cases should not be used as acoustic
+evidence.
+
+### DLD label-noise sensitivity audit
+
+Script:
+
+- `scripts/run_dld_label_noise_sensitivity.py`
+
+Outputs:
+
+- `outputs/dld_label_noise_sensitivity/summary.md`
+- `outputs/dld_label_noise_sensitivity/symmetric_noise_sensitivity.csv`
+- `outputs/dld_label_noise_sensitivity/label_noise_candidates.csv`
+
+This audit treats DLD/SLI labels as noisy clinical anchors rather than clean
+ground truth. It uses existing held-out participant predictions and asks two
+questions:
+
+1. how model metrics would degrade under assumed symmetric label noise; and
+2. which participants show high-confidence conflict between clinical label,
+   corpus/age prediction, and language-state prediction.
+
+Symmetric label-noise sensitivity:
+
+- With no injected noise, full-language models remain strong:
+  `full_language_age` macro F1 **0.802**, AUC **0.903**;
+  `full_language_no_age` macro F1 **0.798**, AUC **0.883**.
+- With **10%** symmetric label noise, full-language macro F1 remains around
+  **0.734-0.736** and AUC around **0.798-0.814**.
+- With **20%** symmetric label noise, full-language macro F1 remains around
+  **0.670-0.672**, close to the no-noise `mlu_age` macro F1 of **0.680** and
+  still above age-only.
+
+High-confidence label-conflict counts:
+
+| conflict flag | n |
+|---|---:|
+| no high conflict | 674 |
+| DLD label but state TD-like | 31 |
+| corpus/age-driven risk | 27 |
+| TD label but state risk | 12 |
+| language-state risk without corpus | 12 |
+
+Interpretation: this reinforces Brian's warning. The DLD signal should not be
+framed as "we can diagnose DLD from transcripts." A more credible framing is:
+language-state models identify participants where the clinical/corpus label,
+age/corpus context, and measured language behavior agree or conflict. The
+high-conflict cases are exactly where corpus documentation, task type, bilingual
+status, dialect, and clinical history need review before any label is treated
+as ground truth.
+
+### DLD task-context comparison
+
+Script:
+
+- `scripts/run_dld_task_context_comparison.py`
+
+Outputs:
+
+- `outputs/dld_task_context_comparison/summary.md`
+- `outputs/dld_task_context_comparison/task_context_metrics.csv`
+- `outputs/dld_task_context_comparison/task_context_inventory.csv`
+
+This experiment asks whether DLD/SLI signal looks task-general in the current
+local Clinical-Eng data, or whether narrative/story and natural conversation
+are different enough that they should not be treated as interchangeable.
+
+Within-task-bucket participant-held-out results:
+
+| task bucket | best local model | balanced accuracy | macro F1 | AUC |
+|---|---|---:|---:|---:|
+| narrative/story | full language + age | 0.719 | 0.747 | 0.885 |
+| natural conversation | full language + age | 0.767 | 0.778 | 0.814 |
+| unknown/mixed | full language + age | 0.742 | 0.789 | 0.930 |
+
+Cross-task transfer is much weaker:
+
+- train natural conversation -> test narrative/story:
+  `full_language_age` macro F1 **0.587**, AUC **0.701**.
+- train narrative/story -> test natural conversation:
+  `full_language_age` macro F1 **0.548**, AUC **0.667**.
+- train natural conversation -> test unknown/mixed:
+  `full_language_age` macro F1 **0.651**, AUC **0.828**.
+- train narrative/story -> test unknown/mixed:
+  `full_language_age` macro F1 **0.174**, AUC **0.510**.
+
+Interpretation: local task-context results support Brian's advice. Narrative
+and natural speech both contain signal, but cross-task transfer is not strong
+enough to claim a task-general DLD measurement battery. The prospective battery
+should pair natural speech with structured tasks; current local data cannot test
+sentence repetition or nonword repetition because the structured-task inventory
+found no usable local candidates.
+
+### Late-talker persistence sensitivity
+
+Script:
+
+- `scripts/run_dld_late_talker_persistence_sensitivity.py`
+
+Outputs:
+
+- `outputs/dld_late_talker_persistence_sensitivity/summary.md`
+- `outputs/dld_late_talker_persistence_sensitivity/persistence_prediction_metrics.csv`
+- `outputs/dld_late_talker_persistence_sensitivity/late_talker_model_table.csv`
+
+This rerun revisits the Rescorla late-talker question with a stricter split
+between earliest state and early trajectory change.
+
+Key sample counts:
+
+- Late talkers with longitudinal trajectories: **38**
+- Late talkers with final age >= 108 months: **32**
+- Final TD-band rate: **0.553**
+- Persistent-gap rate: **0.211**
+
+Earliest transcript state alone remains weak:
+
+- final TD-band AUC: `first_mlu_only` **0.471**, `first_composite_only`
+  **0.398**, `first_axes` **0.294**.
+- persistent-gap AUC: `first_mlu_only` **0.492**, `first_composite_only`
+  **0.262**, `first_axes` **0.425**.
+
+The more interesting signal is early change. Adding 36-to-48-month change
+improves prediction:
+
+| cohort | target | AUC | balanced accuracy | macro F1 |
+|---|---|---:|---:|---:|
+| all longitudinal | final TD band | 0.742 | 0.710 | 0.709 |
+| all longitudinal | persistent gap | 0.708 | 0.708 | 0.635 |
+| final age >= 108 months | final TD band | 0.750 | 0.710 | 0.712 |
+| final age >= 108 months | persistent gap | 0.782 | 0.756 | 0.726 |
+
+Interpretation: the field-relevant signal is probably not a one-time early
+sample. It is early movement. That aligns with the larger project thesis:
+state change may be more clinically meaningful than static state. However, this
+still cannot support treatment-response claims because Rescorla lacks treatment
+exposure and later functional/literacy outcomes.
+
+## 2026-05-01 Project checkpoint after post-Brian local batch
+
+The post-Brian local experiment batch is now complete where it can be completed
+with the data currently available locally.
+
+What is now done:
+
+- TalkBank media streaming is working through the `.env` cookie path and shared
+  `src/ingestion/talkbank_media.py` helper.
+- Standard openSMILE/eGeMAPS extraction and balanced AphasiaBank subtype
+  replication are implemented.
+- eGeMAPS carries real but modest subtype signal and does not outperform WAB
+  severity for broad 4-way subtype classification.
+- Custom Praat-style acoustic features add only a modest increment after
+  backfilling missing balanced roots, so the earlier stronger acoustic result
+  should be treated as sample-sensitive.
+- Stable-WAB discourse and acoustic mover analyses now produce a falsification
+  set rather than an overclaimed clinical result.
+- Acoustic-only stable-WAB movers have been separated into likely voice/pitch
+  candidates, possible recording/sample artifacts, and quantity/transcription
+  shifts.
+- DLD/SLI modeling has been reframed as noisy-label and task-context-sensitive
+  measurement, not diagnosis.
+- Rescorla late-talker persistence is more promising as an early-movement
+  question than as a static earliest-sample prediction question.
+- The README, ordered task list, task board, and Brian update draft now reflect
+  this current state.
+
+Current scientific position:
+
+> The most defensible near-term claim is that language samples contain multiple
+> clinically relevant state dimensions that broad scores and labels collapse.
+> The project is not yet a diagnostic tool, treatment recommender, or
+> treatment-response predictor.
+
+Blocked next steps:
+
+- DLD EMT-SF treatment-response pilot requires manually downloading the Dryad
+  dataset into `data/external/dryad_emt_sf_dld/`.
+- Stuttering recovery modeling requires FluencyBank recovery/persistence data
+  access.
+- BA Web integration requires API/upload/auth details from Brian or Franklin.
+- SLP-facing report validation requires actual SLP review.
+- Prospective treatment-response science requires consent/IRB and repeated
+  samples with treatment type, dose, goals, and outcomes.
