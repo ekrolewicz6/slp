@@ -11,11 +11,7 @@ None.
 
 ## Next
 
-- [ ] **4.2 Full FluencyBank transcript recovery model.** Extend the Purdue pilot to longitudinal-change features, weighted stuttering-like disfluency, disfluency classes, transcript-language features, task/corpus structure, and corpus-held-out replication across the newly local password corpora where labels permit.
-- [ ] **4.3 Stuttering robustness audit.** Add bootstrap CIs, leave-corpus/grant-out checks, shuffled-label controls beyond AUC, and replication across IISRP, IISRP-new, Wagovich, Ratner, Tellis, Maxfield, Sawyer, Purdue, and UMD-CMU where labels permit.
-- [ ] **14.1 Fiveash sentence-repetition structured-task pilot.** Use the downloaded OSF data from Fiveash et al. (2023) to model sentence-repetition performance, DLD-vs-TD separation, age/reading covariates, and the regular-vs-irregular rhythm manipulation.
-- [ ] **14.2 Calder repeated-probe treatment-response pilot.** Use the downloaded ASHA Figshare supplements from Calder et al. (2020) to build a single-case response-curve analysis for trained, untrained, extension, and control grammar probes.
-- [ ] **14.3 SCALES access packet and analysis plan.** Use the downloaded UKDS user guide to define the variable map, minimum models, and access request rationale for SCALES Study 8968.
+None.
 
 ## Backlog
 
@@ -91,6 +87,15 @@ None.
 - [x] **13.2 Data access and literature scan.** Downloaded open papers/docs/supplements into gitignored `data/external/literature/` and committed `outputs/data_access_scan/summary.md`; SCALES and Manchester participant-level data are UKDS gated, FluencyBank recovery corpora remain consortium/password gated, and Fiveash/Calder are now immediate local analysis targets.
 - [x] **13.3 Full FluencyBank transcript access.** Confirmed Brian's access change worked and reran `scripts/download_fluencybank_transcripts.py --only-password`; all 1,999 FluencyBank `.cha` transcripts in the TalkBankDB export are now local, including 1,154 formerly password-gated transcript files.
 - [x] **13.4 Clinical literature review matrix.** Created `outputs/clinical_literature_review/summary.md` and `outputs/clinical_literature_review/paper_matrix.md`; the papers push the next work toward longitudinal state movement, natural-plus-structured tasks, and treatment-response datasets rather than broad diagnostic classifiers.
+- [x] **4.2a Full FluencyBank inventory/label audit.** Created `outputs/fluencybank_full_recovery_model/summary.md`; parsed 1,922 of 1,999 local `.cha` files and found 253 recovery-labelled CWS participants with usable transcript features.
+- [x] **4.2b Full FluencyBank transcript feature extraction.** Created row-level gitignored session/participant feature tables under `data/parsed/fluencybank/` and aggregate corpus/endpoint inventories under `outputs/fluencybank_full_recovery_model/`.
+- [x] **4.2c Early-movement recovery test.** Compared earliest-session state with early movement among 152 multi-session labelled participants; early movement did not improve AUC in the first transcript-only test.
+- [x] **4.3 Stuttering robustness audit.** Added bootstrap CIs, shuffled-label controls, and leave-corpus-out checks in `outputs/fluencybank_full_recovery_model/`; first-language features were strongest, while movement-only was below chance.
+- [x] **4.3b FluencyBank media access probe.** Created `scripts/probe_fluencybank_media_access.py` and `outputs/fluencybank_media_access_probe/summary.md`; 12 of 17 sampled corpora have accessible media, but IISRP/IISRP-new/Wagovich and Purdue are not streamable in the current environment.
+- [x] **14.1 Fiveash sentence-repetition structured-task pilot.** Created `scripts/run_fiveash_sentence_repetition_pilot.py` and `outputs/fiveash_sentence_repetition_pilot/summary.md`; sentence-repetition level strongly separates DLD from TD in leave-one-child-out testing, while rhythm response alone is much weaker and not clearly DLD-specific.
+- [x] **14.2 Calder repeated-probe treatment-response pilot.** Created `scripts/run_calder_repeated_probe_pilot.py` and `outputs/calder_repeated_probe_pilot/summary.md`; PDF supplemental probe tables were parsed into gitignored row-level data and aggregate response metrics showing strong target-specific expressive maintenance gains for untrained past tense.
+- [x] **14.3 SCALES access packet and analysis plan.** Created `scripts/build_scales_access_packet.py`, `docs/scales_access_packet.md`, and `outputs/scales_access_packet/summary.md`; defined the minimum variable request and first six analyses for SCALES Study 8968 after UKDS safeguarded/restricted access.
+- [x] Documentation and push prep for tasks 4.2a-4.3b and 14.1-14.3.
 
 ## Deprioritized
 

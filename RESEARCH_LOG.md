@@ -9377,3 +9377,251 @@ The most interesting cross-disorder hypothesis is:
 This is now immediately testable in stuttering with FluencyBank transcripts,
 partially testable in DLD with Dryad/Fiveash/Calder, and theoretically aligned
 with the aphasia digital-twin and discourse-assessment literature.
+
+## 2026-05-01 Local Batch 9: Full FluencyBank model, structured-task DLD pilots, and SCALES packet
+
+User request: add the post-Brian tasks to the task list and work through them
+one by one, using the newly available TalkBank/FluencyBank access and the
+downloaded literature datasets.
+
+Outputs:
+
+- `scripts/run_fluencybank_full_recovery_model.py`
+- `outputs/fluencybank_full_recovery_model/summary.md`
+- `scripts/probe_fluencybank_media_access.py`
+- `outputs/fluencybank_media_access_probe/summary.md`
+- `scripts/run_fiveash_sentence_repetition_pilot.py`
+- `outputs/fiveash_sentence_repetition_pilot/summary.md`
+- `scripts/run_calder_repeated_probe_pilot.py`
+- `outputs/calder_repeated_probe_pilot/summary.md`
+- `scripts/build_scales_access_packet.py`
+- `docs/scales_access_packet.md`
+- `outputs/scales_access_packet/summary.md`
+
+### 1. Full FluencyBank transcript recovery model
+
+The full FluencyBank transcript dataset is now local and parseable:
+
+- local `.cha` files scanned: **1,999**
+- parsed feature rows with target-speaker threshold: **1,922**
+- recovery-labelled CWS participants with usable features: **253**
+- labelled participants with at least two usable sessions: **152**
+
+Recovery-labelled endpoint inventory:
+
+- IISRP: 68 recovered, 19 persistent
+- IISRP-new: 67 recovered, 15 persistent
+- Purdue: 42 recovered, 42 persistent
+
+The model result is scientifically useful but negative for the hoped-for
+early-movement stuttering claim.
+
+Earliest-session prediction over 253 labelled participants:
+
+- first-disfluency features: AUC 0.629, balanced accuracy 0.637
+- first-language features: AUC 0.717, balanced accuracy 0.688
+- first-all transcript features: AUC 0.666, balanced accuracy 0.612
+
+Movement subset over 152 multi-session labelled participants:
+
+- first-disfluency features: AUC 0.631, balanced accuracy 0.606
+- first-language features: AUC 0.673, balanced accuracy 0.641
+- first-all transcript features: AUC 0.604, balanced accuracy 0.562
+- movement-only features: AUC 0.421, balanced accuracy 0.460
+- first-plus-movement features: AUC 0.594, balanced accuracy 0.589
+
+Adding early transcript movement changed AUC by **-0.010** with bootstrap 95%
+CI **[-0.118, 0.083]** and changed balanced accuracy by **+0.027** with CI
+**[-0.067, 0.120]**. Permutation checks were weak: movement-only p=0.900,
+first-plus-movement p=0.085. Leave-corpus-out tests also showed poor
+generalization, including zero persistent F1 in one held-out IISRP split.
+
+Interpretation: the transcript-only recovery model is not Nature-grade and
+does not yet support the cross-disorder "early movement beats earliest state"
+hypothesis for stuttering. The result is still valuable because it narrows the
+next scientific need: stuttering recovery likely requires richer predictors
+than our current transcript summaries, such as official severity trajectories,
+more task metadata, acoustic/prosodic features, treatment/context variables, or
+better recovery endpoint harmonization.
+
+### 2. FluencyBank media access probe
+
+Media probing used range requests only and did not download session media.
+
+Results:
+
+- corpora probed: **17**
+- sample files probed: **49**
+- corpora with at least one accessible media sample: **12**
+
+Accessible sampled corpora:
+
+- Brejon
+- Examples
+- Hakim
+- Maxfield
+- Ratner
+- Sawyer
+- Tellis
+- UMD-CMU
+- VanZaalen
+- Voices-AWC
+- Voices-AWS
+- Voices-CWS
+
+Blocked or unavailable sampled corpora:
+
+- IISRP
+- IISRP-new
+- Purdue
+- Ulm
+- Wagovich
+
+Purdue's TalkBank page says audio is not available. IISRP and IISRP-new
+transcripts now work, but sampled media URLs still returned 401 in this
+environment. This blocks acoustic recovery modeling on the strongest
+recovery-labelled corpora for now.
+
+### 3. Fiveash sentence-repetition structured-task pilot
+
+Citation: Anna Fiveash, Eniko Ladanyi, Julie Camici, Karen Chidiac, Catherine T.
+Bush, Laure-Helene Canette, Nathalie Bedoin, Reyna L. Gordon, and Barbara
+Tillmann (2023), *Regular rhythmic primes improve sentence repetition in
+children with developmental language disorder*, npj Science of Learning, DOI
+`10.1038/s41539-023-00170-1`.
+
+Local data source: downloaded OSF files under gitignored
+`data/external/literature/structured_tasks/fiveash_2023_osf/`.
+
+Dataset:
+
+- 33 children: 18 TD, 15 DLD
+- 1,188 trial rows
+- 36 sentence-repetition trials per child
+- ordinal grammar score coded 0, 0.5, or 1
+- regular versus irregular rhythmic primes
+
+Main results:
+
+- Regular rhythm improved sentence repetition by **0.043** grammar-score points
+  on the 0-1 scale, 95% bootstrap CI **[0.008, 0.077]**, sign-flip p=0.0246.
+- DLD children scored lower overall by **-0.334** points relative to TD, 95%
+  bootstrap CI **[-0.435, -0.236]**, permutation p=0.0002.
+- The DLD-vs-TD difference in rhythm benefit was **0.047** points, 95% CI
+  **[-0.023, 0.115]**, permutation p=0.2066.
+- Best task-only leave-one-child-out DLD-vs-TD classifier:
+  `sentence_repetition_level`, AUC **0.944**, balanced accuracy **0.939**, DLD
+  F1 **0.933**.
+- Rhythm-response-only classification was weaker: AUC **0.652**, balanced
+  accuracy **0.628**.
+
+Interpretation: sentence repetition is a strong candidate for the tight-task
+half of the natural-plus-structured battery. The rhythm manipulation is
+scientifically interesting as a causal perturbation of grammar processing, but
+this public sample does not show that rhythm response alone can assign
+treatment, define a clinical subtype, or predict who benefits most.
+
+### 4. Calder repeated-probe treatment-response pilot
+
+Citation: Samuel D. Calder, Mary Claessen, Susan Ebbels, and Suze Leitão
+(2020), *Explicit grammar intervention in young school-aged children with
+Developmental Language Disorder: An efficacy study using single-case
+experimental design*, Language, Speech, and Hearing Services in Schools, DOI
+`10.1044/2019_LSHSS-19-00060`. The ASHA Figshare supplemental dataset DOI is
+`10.23641/asha.11958771`.
+
+This is the closest local public example of the treatment-response data shape
+Brian described: repeated probes, a specific target, dose/session order,
+extension targets, control targets, and maintenance.
+
+Extraction:
+
+- parsed 10 supplemental raw-score PDF tables
+- extracted **1,638** probe rows
+- **1,494** rows had usable numerator/denominator scores
+- 9 children with DLD
+- row-level extracted scores are kept under gitignored
+  `data/parsed/calder_repeated_probes/`
+
+Main results:
+
+- Trained expressive past-tense probes improved across treatment sessions:
+  between-session late-minus-early mean **0.284**, 95% bootstrap CI
+  **[0.176, 0.398]**; **9/9** children improved.
+- Expressive untrained past-tense maintenance gain averaged **0.533** from
+  baseline, 95% CI **[0.386, 0.680]**.
+- Expressive possessive-s control maintenance gain averaged **0.256**, 95% CI
+  **[0.087, 0.445]**.
+- Expressive target-specificity at maintenance, untrained past tense minus
+  control, averaged **0.277**, 95% CI **[0.195, 0.357]**, Wilcoxon p=0.0039.
+- Grammaticality-judgment maintenance gains were smaller: untrained past tense
+  **0.088** versus control **0.073**.
+
+Interpretation: this supports the project direction that treatment learning
+must model curves and target specificity, not only diagnosis or one pre/post
+score. It is too small for general treatment allocation, but it is an excellent
+schema template for prospective data collection.
+
+### 5. SCALES access packet
+
+Citation: Courtenay Norbury (2022), *Surrey Communication and Language in
+Education Study: Intensive Data T2-T5, 2012-2020* [data collection], UK Data
+Service, SN 8968, DOI `10.5255/UKDA-SN-8968-1`.
+
+Current access status from the University of Surrey / UK Data Service record:
+SCALES 8968 is **Safeguarded Restricted** and access may be granted on request.
+
+Relevant scientific context:
+
+- Norbury et al. (2016), DOI `10.1111/jcpp.12573`, showed that DLD prevalence
+  and service implications depend strongly on diagnostic criteria and that NVIQ
+  exclusion can deny care to children with real language needs.
+- The 2025 SCALES cohort profile reports the intensive sample through Year 8
+  and confirms UKDS availability for screening and intensive releases.
+- Ward, Bannard, Norbury, and Polišenská (2026), *The Utility and Robustness of
+  Sentence Repetition as a Marker of Developmental Language Disorder*, JSLHR,
+  DOI `10.1044/2025_JSLHR-25-00058`, used SCALES to show sentence repetition is
+  a robust DLD marker while still requiring additional assessment for clinical
+  decisions. The accepted manuscript is cached locally under gitignored
+  `data/external/literature/dld_longitudinal/ward_2026_sentence_repetition_scales.pdf`.
+
+The packet defines the variable request and first six models:
+
+1. Reconstruct the cohort, missingness, and published LD/DLD labels.
+2. Replicate and extend the sentence-repetition marker result.
+3. Test whether T2-to-T3 movement predicts T4/T5 outcomes better than T2
+   severity.
+4. Discover reproducible mechanistic subtypes across vocabulary, grammar,
+   narrative, phonology, speech, and pragmatic/social variables.
+5. Audit NVIQ gatekeeping and fairness.
+6. Learn a minimal assessment battery that preserves prediction of long-term
+   language, literacy, school-support, and mental-health outcomes.
+
+Interpretation: SCALES is not a treatment-response dataset, but it is probably
+the highest-value gated dataset for the original child-language vision because
+it can test whether early multidimensional language state and movement predict
+later outcomes that SLPs and families actually care about.
+
+### Batch 9 synthesis
+
+This batch makes the project more focused:
+
+1. The stuttering recovery hypothesis is not validated by transcript-only early
+   movement yet.
+2. Sentence repetition is now strongly supported as a tight structured state
+   probe in DLD.
+3. Repeated probe curves, as in Calder, are the right treatment-response data
+   shape.
+4. SCALES is the next best access target for child-language longitudinal
+   science, especially for testing state movement against real functional
+   outcomes.
+
+The current highest-learning path is therefore:
+
+```text
+natural speech + tight structured tasks + repeated probes + longitudinal outcomes
+```
+
+The original treatment-optimization vision remains intact, but the next
+scientific bottleneck is not model architecture. It is access to datasets that
+contain the right repeated measurements, outcomes, targets, and care context.

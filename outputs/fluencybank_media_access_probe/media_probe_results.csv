@@ -1,0 +1,50 @@
+corpus,sample,media_stem,media_type,best_status,http_status,content_type,remote_size_mb,url,error
+Brejon,Ali.cha,Ali,audio,accessible,206,audio/wav,9.894435,https://media.talkbank.org/fluency/Brejon/Ali.mp3,
+Brejon,Did.cha,Did,audio,accessible,206,audio/wav,25.006179,https://media.talkbank.org/fluency/Brejon/Did.mp3,
+Brejon,Fra.cha,Fra,audio,accessible,206,audio/wav,21.503628,https://media.talkbank.org/fluency/Brejon/Fra.mp3,
+Examples,Tom.cha,Tom,video,accessible,206,video/mp4,16.695328,https://media.talkbank.org/fluency/Examples/Tom.mp4,
+Hakim,03.cha,03,audio,accessible,206,audio/wav,9.540419,https://media.talkbank.org/fluency/Hakim/CWS/LS/03.mp3,
+Hakim,04.cha,04,audio,accessible,206,audio/wav,9.092785,https://media.talkbank.org/fluency/Hakim/CWS/LS/04.mp3,
+Hakim,05.cha,05,audio,accessible,206,audio/wav,7.491583,https://media.talkbank.org/fluency/Hakim/CWS/LS/05.mp3,
+IISRP,203-1.cha,203-1,audio,blocked_or_missing,401,text/html; charset=utf-8,0.000231,,HTTPError: 401
+IISRP,203-2.cha,203-2,audio,blocked_or_missing,401,text/html; charset=utf-8,0.000231,,HTTPError: 401
+IISRP,203-3.cha,203-3,audio,blocked_or_missing,401,text/html; charset=utf-8,0.000231,,HTTPError: 401
+IISRP-new,213-1.cha,213-1,audio,blocked_or_missing,401,text/html; charset=utf-8,0.000231,,HTTPError: 401
+IISRP-new,218-1.cha,218-1,audio,blocked_or_missing,401,text/html; charset=utf-8,0.000231,,HTTPError: 401
+IISRP-new,223-1.cha,223-1,audio,blocked_or_missing,401,text/html; charset=utf-8,0.000231,,HTTPError: 401
+Maxfield,1980-82a.cha,1980-82a,video,accessible,206,video/mp4,1596.550614,https://media.talkbank.org/fluency/Password/Maxfield/1980-82a.mp4,
+Maxfield,1980-82b.cha,1980-82b,video,accessible,206,video/mp4,1596.433849,https://media.talkbank.org/fluency/Password/Maxfield/1980-82b.mp4,
+Maxfield,1980-82c.cha,1980-82c,video,accessible,206,video/mp4,1469.083933,https://media.talkbank.org/fluency/Password/Maxfield/1980-82c.mp4,
+Purdue,103mzcy06.cha,103mzcy06,,blocked_or_missing,404,text/plain; charset=utf-8,9e-06,,HTTPError: 404
+Purdue,103mzcy07.cha,103mzcy07,,blocked_or_missing,404,text/plain; charset=utf-8,9e-06,,HTTPError: 404
+Purdue,103mzcy08.cha,103mzcy08,,blocked_or_missing,404,text/plain; charset=utf-8,9e-06,,HTTPError: 404
+Ratner,S001_intake.cha,S001_intake,video,accessible,206,video/mp4,589.023238,https://media.talkbank.org/fluency/Password/Ratner/intake/S001_intake.mp4,
+Ratner,S100_control.cha,S100_control,video,accessible,206,video/mp4,347.11785,https://media.talkbank.org/fluency/Password/Ratner/control/S100_control.mp4,
+Ratner,S101_control.cha,S101_control,video,accessible,206,video/mp4,349.765985,https://media.talkbank.org/fluency/Password/Ratner/control/S101_control.mp4,
+Sawyer,01-1.cha,01-1,audio,accessible,206,audio/wav,17.551572,https://media.talkbank.org/fluency/Password/Sawyer/01-1.mp3,
+Sawyer,01-2.cha,01-2,audio,accessible,206,audio/wav,27.896362,https://media.talkbank.org/fluency/Password/Sawyer/01-2.mp3,
+Sawyer,01-3.cha,01-3,audio,accessible,206,audio/wav,11.504182,https://media.talkbank.org/fluency/Password/Sawyer/01-3.mp3,
+Tellis,Cancel.cha,Cancel,video,accessible,206,video/mp4,3.848635,https://media.talkbank.org/fluency/Password/Tellis/01/Cancel.mp4,
+Tellis,CareerPlans.cha,CareerPlans,video,accessible,206,video/mp4,5.811962,https://media.talkbank.org/fluency/Password/Tellis/01/CareerPlans.mp4,
+Tellis,FearOfTelephone.cha,FearOfTelephone,video,accessible,206,video/mp4,5.603888,https://media.talkbank.org/fluency/Password/Tellis/01/FearOfTelephone.mp4,
+UMD-CMU,200LJ_clinician_y1.cha,200LJ_clinician_y1,video,accessible,206,video/mp4,201.454899,https://media.talkbank.org/fluency/UMD-CMU/CWS/200LJ_clinician_y1.mp4,
+UMD-CMU,200LJ_clinician_y2.cha,200LJ_clinician_y2,video,accessible,206,video/mp4,190.679822,https://media.talkbank.org/fluency/UMD-CMU/CWS/200LJ_clinician_y2.mp4,
+UMD-CMU,200LJ_clinician_y3.cha,200LJ_clinician_y3,video,accessible,206,video/mp4,471.871302,https://media.talkbank.org/fluency/UMD-CMU/CWS/200LJ_clinician_y3.mp4,
+Ulm,01david1.cha,01david1,,blocked_or_missing,404,text/plain; charset=utf-8,9e-06,,HTTPError: 404
+Ulm,01david4.cha,01david4,,blocked_or_missing,404,text/plain; charset=utf-8,9e-06,,HTTPError: 404
+Ulm,02erwin1.cha,02erwin1,,blocked_or_missing,404,text/plain; charset=utf-8,9e-06,,HTTPError: 404
+VanZaalen,SPA.cha,SPA,video,accessible,206,video/mp4,8.025179,https://media.talkbank.org/fluency/VanZaalen/SPA.mp4,
+VanZaalen,convincing.cha,convincing,video,accessible,206,video/mp4,3.702824,https://media.talkbank.org/fluency/VanZaalen/convincing.mp4,
+VanZaalen,reading.cha,reading,video,accessible,206,video/mp4,28.730905,https://media.talkbank.org/fluency/VanZaalen/reading.mp4,
+Voices-AWC,200.cha,200,video,accessible,206,video/mp4,801.094557,https://media.talkbank.org/fluency/Voices-AWC/interview/200.mp4,
+Voices-AWC,501.cha,501,video,accessible,206,video/mp4,2588.721626,https://media.talkbank.org/fluency/Voices-AWC/interview/501.mp4,
+Voices-AWC,502.cha,502,video,accessible,206,video/mp4,890.535685,https://media.talkbank.org/fluency/Voices-AWC/interview/502.mp4,
+Voices-AWS,01.cha,01,video,accessible,206,video/mp4,167.653211,https://media.talkbank.org/fluency/Voices-AWS/interview/01.mp4,
+Voices-AWS,02.cha,02,video,accessible,206,video/mp4,110.999818,https://media.talkbank.org/fluency/Voices-AWS/interview/02.mp4,
+Voices-AWS,05.cha,05,video,accessible,206,video/mp4,140.9772,https://media.talkbank.org/fluency/Voices-AWS/interview/05.mp4,
+Voices-CWS,08f.cha,08f,video,accessible,206,video/mp4,50.780625,https://media.talkbank.org/fluency/Voices-CWS/interview/08f.mp4,
+Voices-CWS,08fb.cha,08fb,video,accessible,206,video/mp4,662.622151,https://media.talkbank.org/fluency/Voices-CWS/interview/08fb.mp4,
+Voices-CWS,09f.cha,09f,video,accessible,206,video/mp4,42.800188,https://media.talkbank.org/fluency/Voices-CWS/interview/09f.mp4,
+Wagovich,1-1.cha,1-1,audio,blocked_or_missing,401,text/html; charset=utf-8,0.000231,,HTTPError: 401
+Wagovich,1-10.cha,1-10,audio,blocked_or_missing,401,text/html; charset=utf-8,0.000231,,HTTPError: 401
+Wagovich,1-2.cha,1-2,audio,blocked_or_missing,401,text/html; charset=utf-8,0.000231,,HTTPError: 401

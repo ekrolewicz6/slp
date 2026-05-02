@@ -1,0 +1,11 @@
+supplement,modality,target,target_class,context,participants,rows,nonmissing_scores,missing_scores,mean_score_prop
+S1,expressive,trained_past_tense,trained,within_session,9,99,90,9,0.6074074074074074
+S10,grammaticality_judgment,trained_past_tense,trained,within_session,9,99,90,9,0.5694444444444444
+S11,grammaticality_judgment,trained_past_tense,trained,between_session,9,99,90,9,0.5861111111111111
+S12,grammaticality_judgment,untrained_past_tense,untrained_target,probe,9,207,189,18,0.5561487894821228
+S17,grammaticality_judgment,third_person_singular,extension,probe,9,207,189,18,0.5664902998236332
+S2,expressive,trained_past_tense,trained,between_session,9,99,90,9,0.6027777777777777
+S20,grammaticality_judgment,possessive_s,control,probe,9,207,189,18,0.5597883597883597
+S3,expressive,untrained_past_tense,untrained_target,probe,9,207,189,18,0.44326866549088767
+S4,expressive,third_person_singular,extension,probe,9,207,189,18,0.3285126396237507
+S7,expressive,possessive_s,control,probe,9,207,189,18,0.4376249265138154
