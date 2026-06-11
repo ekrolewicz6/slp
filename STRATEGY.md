@@ -84,11 +84,15 @@ whether it can be done on data/infra we already have.
   carries."
 - **Impact:** High (unlocks every downstream box). **Effort:** Weeks.
   **Buildable now:** ✅ — audio re-streams from TalkBank; labels exist.
-- **Status in this repo:** ✅ shipped as scaffolding —
+- **Status in this repo:** ✅ shipped AND tested on real audio —
   [`src/features/foundation_rep.py`](src/features/foundation_rep.py),
   [`scripts/extract_foundation_embeddings.py`](scripts/extract_foundation_embeddings.py),
-  [`scripts/benchmark_representations.py`](scripts/benchmark_representations.py).
-  Run the benchmark to falsify-or-confirm the representation-ceiling claim.
+  [`scripts/benchmark_representations.py`](scripts/benchmark_representations.py),
+  [`scripts/encoder_bakeoff.py`](scripts/encoder_bakeoff.py).
+  **Verdict (#52, n=85, preliminary): task-dependent. HuBERT layer-9 beats
+  hand-crafted on subtype (macro-F1 0.47 vs 0.35); hand-crafted text wins on
+  severity (r 0.55 vs 0.41).** The ceiling breaks where acoustics matter.
+  Next lever: a fine-tuned head / attentive pooling, and a full-corpus re-run.
 
 ### Leap 2 — Outcome: predict functional communication, not WAB-AQ
 - **What:** Re-aim the whole system at real-world communicative success —

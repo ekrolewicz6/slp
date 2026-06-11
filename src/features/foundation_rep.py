@@ -118,6 +118,42 @@ class FoundationEmbedder:
             return np.zeros(2 * hidden, dtype=np.float32)
         return np.mean(np.stack(pooled_chunks, axis=0), axis=0).astype(np.float32)
 
+    def embed_segment_layers(self, wav: np.ndarray, sr: int,
+                             layers: list[int]) -> dict[int, np.ndarray]:
+        """Mean+std-pooled embeddings for SEVERAL hidden layers in one pass.
+
+        Lets an encoder bake-off compare layers without re-streaming audio.
+        Returns {layer: vector(2*hidden)}.
+        """
+        self._ensure_loaded()
+        import torch
+
+        wav = np.asarray(wav, dtype=np.float32)
+        if wav.ndim > 1:
+            wav = wav.mean(axis=1)
+        if sr != TARGET_SR:
+            wav = _resample(wav, sr, TARGET_SR)
+        chunk = int(self.config.chunk_seconds * TARGET_SR) or len(wav) or 1
+        acc = {ly: [] for ly in layers}
+        with torch.no_grad():
+            for start in range(0, max(1, len(wav)), chunk):
+                seg = wav[start:start + chunk]
+                if len(seg) < TARGET_SR // 5:
+                    continue
+                inputs = self._processor(seg, sampling_rate=TARGET_SR,
+                                         return_tensors="pt")
+                out = self._model(inputs.input_values.to(self._device))
+                for ly in layers:
+                    h = out.hidden_states[ly][0]
+                    pooled = torch.cat([h.mean(0), h.std(0)], dim=-1)
+                    acc[ly].append(pooled.float().cpu().numpy())
+        hidden = self._model.config.hidden_size
+        result = {}
+        for ly in layers:
+            result[ly] = (np.mean(np.stack(acc[ly]), axis=0).astype(np.float32)
+                          if acc[ly] else np.zeros(2 * hidden, dtype=np.float32))
+        return result
+
     @property
     def dim(self) -> int:
         self._ensure_loaded()

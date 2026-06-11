@@ -67,6 +67,7 @@ precisely what evolved in our thinking and why.
 | 46 | 2026-04-26 | Phase 2 with acoustics — full extraction (n=412, 74% complete) | HIGH | **Wernicke F1 0.27 → 0.44** (text-only → text+embeddings+acoustic) at full sample; macro-F1 **0.62 → 0.68**. Smaller absolute Wernicke gain than #44 (0.74 at n=258 — sample-dependent), but the direction is robust. Broca within-subtype phenotyping replicates at p<0.001 with n=94. |
 | 47 | 2026-04-26 | Phase 2 with acoustics — near-full (n=505, 96% extraction) | HIGH | **Wernicke F1 0.22 → 0.40** (text-only → text+acoustic), **Conduction F1 0.64 → 0.75**, **Anomic F1 0.53 → 0.66**, **Macro-F1 0.52 → 0.59**. Broca phenotyping p<0.001 at n=99. The fluent-subtype gains (Wernicke +84%, Conduction +17%, Anomic +25%) are exactly where text features were known to fail. |
 | **48** | **2026-04-26** | **Phase 2 with acoustics — FINAL (n=538, full extraction)** | **HIGH** | **Wernicke F1 0.26 → 0.48 (+85%), Conduction F1 0.59 → 0.74 (+25%), Anomic F1 0.50 → 0.66 (+32%), Macro-F1 0.49 → 0.65 (+33%).** Broca phenotyping p<0.001 (n=103, 4th replication). **Acoustic-only achieves Macro-F1 0.58** — competitive with text-only (0.49). The full multi-modal stack is the project's best result. |
+| **52** | **2026-04-26** | **Leap-1 verdict: learned speech reps vs hand-crafted features** | **MEDIUM (n=85)** | Ran Leap 1 on real streamed audio. **Task-dependent: HuBERT layer-9 beats hand-crafted on subtype (macro-F1 0.473 vs 0.349, acc 0.571 vs 0.381); hand-crafted text wins on severity (WAB-AQ r 0.55 vs 0.41).** Representation ceiling breaks where acoustics matter (corroborates #43–48 with a learned rep). HuBERT > wav2vec2; mid-layers > late. Partial confirmation, honest scope (4 corpora, ~1 window/patient). |
 | **51** | **2026-04-26** | **Pilot specified: outcome instrument + measurement engine + per-patient power** | **HIGH (in-silico)** | Leap-2 functional-communication instrument (`src/outcomes/`), Leap-3 daily-measurement engine (`src/app/daily_checkin.py`, embed-and-discard privacy, demoed on real audio), per-patient partial-pooling causal analysis (`pilot_analysis.py`), and a feasibility/power sim: 8 patients×8 weeks recovers the right activity at 67% point acc (vs 25% chance), **38% confident-correct yield with partial pooling vs 24% naive**. IRB-ready draft protocol ([docs/pilot/PROTOCOL.md](docs/pilot/PROTOCOL.md)). |
 | **50** | **2026-04-26** | **Strategic pivot → closed-loop system; built the buildable slice** | **HIGH (in-silico)** | Pivot from observation to a closed-loop interventional system ([STRATEGY.md](STRATEGY.md)). Built + ran the in-silico closed loop (`src/closed_loop/`): adaptive dosing **+27.4** vs fixed **+24.4** vs random **+23.4** pts; IPW recovers **4/4** phenotypes' true best activity; bounded micro-randomization keeps **16/16** dose-response cells estimable vs **5/16** greedy. Built + validated Leap-1 foundation-model speech reps (`foundation_rep.py`, 1536-d wav2vec2 on real audio); corpus-scale extraction blocked on an expired TalkBank cookie (diagnosed, not a bug). |
 | **49** | **2026-04-26** | **Universality program: does aphasia recovery retrace child development?** | **HIGH** | Five-test program. T1 (axes): same 8-d subspace, different within-subspace rotation. T2 (direction): weak — 70% of improvers move developmentally, mean signed cos = +0.034. T3 (manifold): PWAs sit on the joint adult+CHILDES manifold but Broca specifically is far from CHILDES nearest neighbors (median NN dist 7.15 vs ~3.5 for other subtypes). T4 (one-number sufficiency): NULL — dev-age underperforms subtype on every WAB outcome. **T5 (qualitative similarity at matched MLU): Broca PWA vs MLU-matched children classifier F1 = 0.988, while AB Controls in same MLU range vs children F1 = 0.345. ΔF1 = +0.643 for Broca; +0.108 to +0.296 for other subtypes.** **Headline: Broca aphasia is qualitatively distinct from typically-developing child speech in a way no other subtype is. The "Broca patients talk like 3-year-olds" framing is empirically wrong.** |
@@ -3528,6 +3529,94 @@ pilot can examine.
 **Outputs:**
 - [outputs/pilot_power/pilot_power.csv](outputs/pilot_power/pilot_power.csv) — full feasibility grid (naive vs pooled)
 - [outputs/pilot_power/run.log](outputs/pilot_power/run.log) — run transcript
+
+---
+
+### 52. Leap-1 empirical verdict — learned speech reps vs hand-crafted features
+**Date:** 2026-04-26 · **Confidence:** MEDIUM (n=85, preliminary) ·
+**Scripts:** [scripts/extract_foundation_embeddings.py](scripts/extract_foundation_embeddings.py),
+[scripts/benchmark_representations.py](scripts/benchmark_representations.py),
+[scripts/encoder_bakeoff.py](scripts/encoder_bakeoff.py)
+
+**Goal.** With a fresh TalkBank cookie, actually run Leap 1 (#50): do
+self-supervised speech embeddings beat the 55 hand-crafted features? The
+hypothesis (#34) was that the n≈400 accuracy plateau is a *representation*
+ceiling. Tested on real streamed AphasiaBank audio under the same
+patient-grouped, corpus-OOD GroupKFold protocol.
+
+**Extraction.** Streamed audio → wav2vec2/HuBERT window embeddings (the
+acoustic pipeline's streaming + windowing, audio discarded after
+embedding). Two passes: (1) wav2vec2 layer-8 over 129 sessions
+(115 labeled patients, 5 corpora); (2) an encoder bake-off streaming 85
+sessions once and extracting wav2vec2 layers {6,9,12} + HuBERT layer-9 per
+window (68 labeled patients, 4 corpora).
+
+**Result — the representation ceiling breaks, but only for subtype.**
+
+Layer-8 benchmark (n=115):
+
+| setup | WAB-AQ MAE | r | subtype macro-F1 |
+|---|--:|--:|--:|
+| handcrafted | 17.18 | +0.294 | 0.261 |
+| foundation (w2v L8) | 21.11 | −0.129 | 0.273 |
+| **fusion** | **17.16** | **+0.288** | **0.320** |
+
+Encoder bake-off (n=85; severity n=68):
+
+| representation | WAB-AQ MAE | r | subtype acc | subtype macro-F1 |
+|---|--:|--:|--:|--:|
+| **handcrafted** | **13.45** | **+0.55** | 0.381 | 0.349 |
+| w2v2 layer-6 | 20.05 | +0.08 | 0.460 | 0.384 |
+| w2v2 layer-9 | 15.82 | +0.44 | 0.413 | 0.338 |
+| w2v2 layer-12 | 19.48 | +0.03 | 0.381 | 0.295 |
+| **HuBERT layer-9** | 15.58 | +0.41 | **0.571** | **0.473** |
+| fusion (hc+HuBERT) | 13.98 | +0.51 | 0.476 | 0.398 |
+
+**Findings.**
+1. **Severity (WAB-AQ): hand-crafted text features win decisively** (r=0.55
+   vs best-encoder 0.44). Learned acoustic reps carry no extra severity
+   signal, and fusion slightly degrades it. Severity is largely linguistic
+   productivity, which the text features already capture.
+2. **Subtype: HuBERT layer-9 beats hand-crafted by a wide margin**
+   (macro-F1 0.473 vs 0.349; acc 0.571 vs 0.381). This is the
+   representation-ceiling break — and it lands exactly where acoustics
+   matter (fluent vs non-fluent, prosody), corroborating the acoustic-
+   features story (#43–48) with a learned rep instead of parselmouth.
+3. **Architecture/layer matter as theory predicts:** HuBERT > wav2vec2;
+   mid layers (w2v L9) > late layers (w2v L12) — consistent with the
+   SSL-layer literature that mid layers carry the most phonetic/linguistic
+   content. The naive first attempt (w2v L8 alone) underperformed precisely
+   because it was the wrong knob.
+4. **Fusion is not automatically best:** on subtype, HuBERT *alone* (0.473)
+   beat fusion (0.398) — concatenating 55 text dims dilutes the strong
+   HuBERT signal for the GBM at this n. The clean recipe is task-specific:
+   text features for severity, HuBERT for subtype.
+
+**Honest verdict on the hypothesis.** *Partially confirmed, task-dependent.*
+The representation ceiling is real and breakable for subtype with the right
+encoder (HuBERT), but text features remain the better representation for
+severity. The dramatic "learned reps break everything" framing is wrong;
+the precise finding — *a speech foundation model beats hand-crafted
+features on the acoustic-dependent task* — is the defensible one.
+
+**Scope/limits.** n=85 patients (68 with WAB-AQ), 4 corpora, ~1 window per
+patient, corpus-OOD GroupKFold — preliminary. The subtype margin is sizable
+and reproduces across two encoders (HuBERT and w2v L6 both beat handcrafted
+on subtype acc), which is reassuring, but a full-corpus re-run is the
+confirmatory step. Embeddings are wav2vec2/HuBERT mean+std pooled; a
+fine-tuned head or attentive pooling would likely widen the subtype gap and
+is the obvious next lever. The calibrated language-state head
+(`src/app/daily_checkin.py`) should be trained from the HuBERT rep for
+subtype-adjacent state and from text features for severity.
+
+**Operational note.** transformers 4.57 + torch 2.2 needs
+`use_safetensors=True` (CVE guard); HuBERT/wav2vec2 both load fine that way.
+TalkBank media auth is a single `talkbank=` session cookie in `.env`
+(gitignored); it expires every few days.
+
+**Outputs:**
+- [outputs/representation_benchmark/representation_benchmark.csv](outputs/representation_benchmark/representation_benchmark.csv) — layer-8 handcrafted/foundation/fusion
+- [outputs/representation_benchmark/encoder_bakeoff.csv](outputs/representation_benchmark/encoder_bakeoff.csv) — multi-encoder comparison
 
 ---
 
