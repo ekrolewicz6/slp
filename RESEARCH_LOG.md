@@ -67,6 +67,7 @@ precisely what evolved in our thinking and why.
 | 46 | 2026-04-26 | Phase 2 with acoustics — full extraction (n=412, 74% complete) | HIGH | **Wernicke F1 0.27 → 0.44** (text-only → text+embeddings+acoustic) at full sample; macro-F1 **0.62 → 0.68**. Smaller absolute Wernicke gain than #44 (0.74 at n=258 — sample-dependent), but the direction is robust. Broca within-subtype phenotyping replicates at p<0.001 with n=94. |
 | 47 | 2026-04-26 | Phase 2 with acoustics — near-full (n=505, 96% extraction) | HIGH | **Wernicke F1 0.22 → 0.40** (text-only → text+acoustic), **Conduction F1 0.64 → 0.75**, **Anomic F1 0.53 → 0.66**, **Macro-F1 0.52 → 0.59**. Broca phenotyping p<0.001 at n=99. The fluent-subtype gains (Wernicke +84%, Conduction +17%, Anomic +25%) are exactly where text features were known to fail. |
 | **48** | **2026-04-26** | **Phase 2 with acoustics — FINAL (n=538, full extraction)** | **HIGH** | **Wernicke F1 0.26 → 0.48 (+85%), Conduction F1 0.59 → 0.74 (+25%), Anomic F1 0.50 → 0.66 (+32%), Macro-F1 0.49 → 0.65 (+33%).** Broca phenotyping p<0.001 (n=103, 4th replication). **Acoustic-only achieves Macro-F1 0.58** — competitive with text-only (0.49). The full multi-modal stack is the project's best result. |
+| **51** | **2026-04-26** | **Pilot specified: outcome instrument + measurement engine + per-patient power** | **HIGH (in-silico)** | Leap-2 functional-communication instrument (`src/outcomes/`), Leap-3 daily-measurement engine (`src/app/daily_checkin.py`, embed-and-discard privacy, demoed on real audio), per-patient partial-pooling causal analysis (`pilot_analysis.py`), and a feasibility/power sim: 8 patients×8 weeks recovers the right activity at 67% point acc (vs 25% chance), **38% confident-correct yield with partial pooling vs 24% naive**. IRB-ready draft protocol ([docs/pilot/PROTOCOL.md](docs/pilot/PROTOCOL.md)). |
 | **50** | **2026-04-26** | **Strategic pivot → closed-loop system; built the buildable slice** | **HIGH (in-silico)** | Pivot from observation to a closed-loop interventional system ([STRATEGY.md](STRATEGY.md)). Built + ran the in-silico closed loop (`src/closed_loop/`): adaptive dosing **+27.4** vs fixed **+24.4** vs random **+23.4** pts; IPW recovers **4/4** phenotypes' true best activity; bounded micro-randomization keeps **16/16** dose-response cells estimable vs **5/16** greedy. Built + validated Leap-1 foundation-model speech reps (`foundation_rep.py`, 1536-d wav2vec2 on real audio); corpus-scale extraction blocked on an expired TalkBank cookie (diagnosed, not a bug). |
 | **49** | **2026-04-26** | **Universality program: does aphasia recovery retrace child development?** | **HIGH** | Five-test program. T1 (axes): same 8-d subspace, different within-subspace rotation. T2 (direction): weak — 70% of improvers move developmentally, mean signed cos = +0.034. T3 (manifold): PWAs sit on the joint adult+CHILDES manifold but Broca specifically is far from CHILDES nearest neighbors (median NN dist 7.15 vs ~3.5 for other subtypes). T4 (one-number sufficiency): NULL — dev-age underperforms subtype on every WAB outcome. **T5 (qualitative similarity at matched MLU): Broca PWA vs MLU-matched children classifier F1 = 0.988, while AB Controls in same MLU range vs children F1 = 0.345. ΔF1 = +0.643 for Broca; +0.108 to +0.296 for other subtypes.** **Headline: Broca aphasia is qualitatively distinct from typically-developing child speech in a way no other subtype is. The "Broca patients talk like 3-year-olds" framing is empirically wrong.** |
 | 36 | 2026-04-26 | Salem paraphasia annotations vs WAB-AQ | NULL | Per-session paraphasia count (n_targets) does NOT correlate with WAB-AQ (r=+0.04, p=0.54, n=305). Paraphasia rate is about subtype (Conduction/Wernicke higher), not severity. |
@@ -3439,6 +3440,94 @@ benchmark beating hand-crafted, the in-silico recovery (done), and IRB.
 - [outputs/closed_loop/dose_response_estimates.csv](outputs/closed_loop/dose_response_estimates.csv) — per-(phenotype,arm) causal estimates
 - [outputs/closed_loop/recovery_eval.csv](outputs/closed_loop/recovery_eval.csv) — recovered vs true best activity
 - [outputs/representation_benchmark/representation_benchmark.csv](outputs/representation_benchmark/representation_benchmark.csv) — hand-crafted baseline (foundation/fusion pending cookie)
+
+---
+
+### 51. Pilot specified: outcome instrument, daily-measurement engine, per-patient power
+**Date:** 2026-04-26 · **Confidence:** HIGH (in-silico / scaffolding) ·
+**Docs:** [docs/pilot/PROTOCOL.md](docs/pilot/PROTOCOL.md),
+[docs/pilot/outcome_instrument.md](docs/pilot/outcome_instrument.md) ·
+**Scripts:** [scripts/pilot_power.py](scripts/pilot_power.py),
+[scripts/demo_daily_checkin.py](scripts/demo_daily_checkin.py)
+
+**Goal.** Turn the closed-loop strategy (#50) into a runnable Phase-C
+slice: the outcome that matters (Leap 2), the patient-facing measurement
+engine (Leap 3), the per-patient causal analysis, and an IRB-ready pilot
+protocol whose sample size is justified by simulation rather than
+hand-waving.
+
+**(a) Leap 2 — functional-communication outcome instrument.**
+`src/outcomes/functional_communication.py`: a 3-item daily EMA + a 6-item
+weekly communicative-participation composite (CPIB/ACOM-style), scored
+0–100 (higher = better), with a blended Functional-Communication Outcome
+(FCO). Spec + validation plan in
+[docs/pilot/outcome_instrument.md](docs/pilot/outcome_instrument.md). This
+replaces WAB-AQ (a slow, coarse proxy, #23) as the primary signal — the
+thing patients actually care about. Validated arithmetic (perfect →
+100.0; worked example daily 75.0 / weekly 61.1 / composite 66.7).
+
+**(b) Leap 3 — daily-measurement engine.** `src/app/daily_checkin.py`:
+speech sample → on-device foundation embedding → (trained head →) language
+state, plus the FCO from self-report, emitted as a `DailyRecord` that
+projects into the closed-loop log schema. **Privacy posture is baked in:
+the waveform is embedded and discarded; only the non-invertible pooled
+embedding + scores are retained** (`audio_retained=False`). Demoed
+end-to-end on real audio
+([scripts/demo_daily_checkin.py](scripts/demo_daily_checkin.py)): 1536-d
+embedding, FCO composite 66.7, log row produced. The language-state scalar
+is left `None`/pending until the calibrated head is trained from the
+representation benchmark — we do not fabricate an estimate we haven't
+validated.
+
+**(c) Per-patient causal analysis.** `src/closed_loop/pilot_analysis.py`:
+within-patient dose-response with bootstrap 90% CIs, a "confident
+separation" test (top arm's CI lower bound > runner-up), and an
+empirical-Bayes **partial-pooling** option (shrink each patient's per-arm
+effect toward the phenotype mean). Per-patient ground truth now varies
+within phenotype (added per-patient effect jitter to the simulator), so
+the analysis must recover each *individual's* best activity, not the
+subtype default — directly operationalizing #26 (labels collapse
+within-group variation).
+
+**(d) Pilot feasibility / power simulation.** `scripts/pilot_power.py`
+(150 replicate pilots/cell, within-patient uniform micro-randomized trial,
+realistic noise + per-patient effect heterogeneity):
+
+| N | Weeks | Estimator | Point acc | % confident | Conf. precision | Yield |
+|--:|--:|---|--:|--:|--:|--:|
+| 8 | 8 | naive | 62% | 29% | 81% | 24% |
+| 8 | 8 | **pooled** | **67%** | **46%** | **84%** | **38%** |
+| 12 | 8 | pooled | 72% | 49% | 88% | 43% |
+
+(Chance point accuracy = 25%.) **Honest headline: a naive within-patient
+MRT at pilot scale is underpowered for *confident* individual
+recommendations (24% yield); partial pooling toward the phenotype prior
+roughly doubles it (38%).** That is the analysis-plan justification in the
+protocol — and a real design finding: the pilot's value is feasibility +
+sizing, not acting on individual estimates (the protocol forbids the
+latter).
+
+**(e) IRB-ready protocol.** [docs/pilot/PROTOCOL.md](docs/pilot/PROTOCOL.md):
+single-group 8-week within-patient micro-randomized trial; aphasia-adapted
+informed consent and capacity assessment; on-device embed-and-discard
+privacy; descriptive per-patient dose-response analysis (partial pooling);
+minimal-risk framing with the key mitigation that **no clinical decisions
+are made from pilot outputs**; SaMD/regulatory notes. Drafted as a
+template with `{{institution-specific}}` placeholders — explicitly not
+medical/legal advice, requires PI + IRB + privacy-officer completion.
+
+**Honest scope limits.** The power numbers come from a deliberately simple
+simulator (scalar state, multiplicative headroom, Gaussian noise, 4
+activities); real effect sizes, noise, adherence gaps, and carryover
+between activities will differ and are exactly what the pilot measures.
+The partial-pooling lift depends on the phenotype prior being informative;
+if individuals deviate strongly from their subtype, pooling helps less (and
+the within-patient signal matters more) — which is itself a hypothesis the
+pilot can examine.
+
+**Outputs:**
+- [outputs/pilot_power/pilot_power.csv](outputs/pilot_power/pilot_power.csv) — full feasibility grid (naive vs pooled)
+- [outputs/pilot_power/run.log](outputs/pilot_power/run.log) — run transcript
 
 ---
 

@@ -57,6 +57,20 @@ def true_best_arm(phenotype: str) -> str:
     return max(eff, key=eff.get)
 
 
+def true_best_arm_for(patient: "Patient") -> str:
+    """The arm with the largest effect for THIS patient.
+
+    With per-patient effect jitter (see `Simulator.make_cohort`), an
+    individual's best activity can differ from their phenotype's — which is
+    exactly why the pilot must micro-randomize *within* each patient rather
+    than trust the subtype label (cf. experiment #26: categorical labels
+    collapse meaningful within-group variation).
+    """
+    if patient.arm_effect:
+        return max(patient.arm_effect, key=patient.arm_effect.get)
+    return true_best_arm(patient.phenotype)
+
+
 @dataclass
 class Patient:
     patient_id: str
@@ -65,6 +79,7 @@ class Patient:
     responsiveness: float = 1.0        # personal multiplier on therapy effect
     spontaneous: float = 0.15          # baseline daily drift at floor
     history: list[float] = field(default_factory=list)
+    arm_effect: dict = field(default_factory=dict)  # per-patient effect/arm
 
     def context(self) -> dict:
         """What the policy is allowed to see when choosing an activity."""
@@ -86,14 +101,24 @@ class Simulator:
         self.reward_noise = reward_noise
 
     def make_cohort(self, n_per_phenotype: int = 5,
-                    start_low: float = 25.0, start_high: float = 55.0) -> list[Patient]:
+                    start_low: float = 25.0, start_high: float = 55.0,
+                    ind_effect_sd: float = 0.0) -> list[Patient]:
+        """Build a cohort. `ind_effect_sd` > 0 jitters each patient's
+        per-arm effect around their phenotype mean, so individuals can have
+        a personal best activity that differs from the subtype default."""
         patients: list[Patient] = []
         for ph in PHENOTYPES:
             for i in range(n_per_phenotype):
                 s0 = float(self.rng.uniform(start_low, start_high))
                 resp = float(np.clip(self.rng.normal(1.0, 0.25), 0.4, 1.8))
+                if ind_effect_sd > 0:
+                    arm_eff = {a: float(max(0.05, EFFECT[ph][a]
+                                            + self.rng.normal(0.0, ind_effect_sd)))
+                               for a in ARMS}
+                else:
+                    arm_eff = {a: EFFECT[ph][a] for a in ARMS}
                 p = Patient(patient_id=f"{ph[:4]}{i:02d}", phenotype=ph,
-                            state=s0, responsiveness=resp)
+                            state=s0, responsiveness=resp, arm_effect=arm_eff)
                 p.history.append(s0)
                 patients.append(p)
         return patients
@@ -106,7 +131,9 @@ class Simulator:
         s = patient.state
         hr = self.headroom(s)
         base = patient.spontaneous * hr
-        treat = EFFECT[patient.phenotype][arm] * patient.responsiveness * hr
+        eff = patient.arm_effect.get(arm, EFFECT[patient.phenotype][arm]) \
+            if patient.arm_effect else EFFECT[patient.phenotype][arm]
+        treat = eff * patient.responsiveness * hr
         noise = float(self.rng.normal(0.0, self.reward_noise))
         delta = base + treat + noise
         new_s = float(np.clip(s + delta, 0.0, CEILING))

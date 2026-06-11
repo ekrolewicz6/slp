@@ -93,14 +93,17 @@ whether it can be done on data/infra we already have.
 ### Leap 2 — Outcome: predict functional communication, not WAB-AQ
 - **What:** Re-aim the whole system at real-world communicative success —
   "can she order coffee, answer the phone, argue with her son" — measured
-  from naturalistic samples + patient/caregiver report (e.g., a
-  lightweight daily EMA + a communicative-participation scale).
+  from naturalistic samples + patient/caregiver report (a lightweight
+  daily EMA + a communicative-participation scale).
 - **Why:** WAB-AQ is a proxy that barely moves (#23). Functional outcome
   is what matters to a human and what a payer/clinician acts on.
 - **Impact:** High (makes it matter, not just measurable). **Effort:**
   Medium, but needs new data (no archived label exists). **Buildable
-  now:** ⚠️ partial — define the construct + instrument now; collect in
-  the pilot.
+  now:** ⚠️ partial — instrument defined now, validated/collected in pilot.
+- **Status in this repo:** ✅ instrument shipped —
+  [`src/outcomes/functional_communication.py`](src/outcomes/functional_communication.py)
+  + spec [`docs/pilot/outcome_instrument.md`](docs/pilot/outcome_instrument.md).
+  Psychometric validation is a pilot deliverable.
 
 ### Leap 3 — Continuity: ambient, daily measurement
 - **What:** A consented phone app that samples speech (with strict
@@ -110,7 +113,13 @@ whether it can be done on data/infra we already have.
   makes this technically free.
 - **Impact:** High (prerequisite for steering). **Effort:** Medium (app +
   on-device/edge inference + privacy). **Buildable now:** ⚠️ — the
-  inference core exists; the app + consent + privacy do not.
+  inference core exists; the app UI + consent flow do not.
+- **Status in this repo:** ✅ measurement engine shipped —
+  [`src/app/daily_checkin.py`](src/app/daily_checkin.py): speech → on-device
+  embedding (waveform discarded) → functional score → closed-loop log row.
+  Demoed end-to-end on real audio
+  ([`scripts/demo_daily_checkin.py`](scripts/demo_daily_checkin.py)). Mobile
+  UI + consent flow remain.
 
 ### Leap 4 — Intervention + causality: the lever
 - **What:** The app *delivers* individualized practice and
@@ -187,6 +196,19 @@ kind that **does not currently exist anywhere**:
 Gating before patients: (a) Leap-1 benchmark beats hand-crafted features;
 (b) in-silico loop recovers ground-truth dose-response within tolerance;
 (c) IRB + consent + privacy review complete.
+
+**Pilot is now specified.** Full draft protocol:
+[`docs/pilot/PROTOCOL.md`](docs/pilot/PROTOCOL.md) (design, eligibility,
+aphasia-friendly consent, privacy, analysis plan, regulatory). Sample size
+grounded by a feasibility simulation
+([`scripts/pilot_power.py`](scripts/pilot_power.py),
+[`src/closed_loop/pilot_analysis.py`](src/closed_loop/pilot_analysis.py)):
+at 8 patients × 8 weeks a within-patient micro-randomized trial recovers
+the correct best activity at 67% point accuracy (vs 25% chance) and returns
+a *confident* correct recommendation for ~38% of patients — **with partial
+pooling toward the phenotype prior, which ~doubles the naive yield**. That
+is adequate for a feasibility pilot (not for acting clinically — the
+protocol forbids it) and sizes the successor trial.
 
 ---
 

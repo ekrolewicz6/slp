@@ -13,19 +13,23 @@ are swapped for real patients.
 """
 
 from .simulator import (ARMS, CEILING, EFFECT, PHENOTYPES, Patient, Simulator,
-                        true_best_arm)
+                        true_best_arm, true_best_arm_for)
 from .state import SimStateEstimator, StateEstimator
 from .policy import (FixedPolicy, GreedyPolicy, Policy, RandomPolicy,
                      ThompsonBandit)
 from .trial import LOG_COLUMNS, run_trial, total_recovery
 from .causal import (estimate_dose_response, evaluate_recovery,
                      recovered_best_arms)
+from .pilot_analysis import (evaluate_against_truth, patient_best_arms,
+                             per_patient_dose_response)
 
 __all__ = [
     "ARMS", "CEILING", "EFFECT", "PHENOTYPES", "Patient", "Simulator",
-    "true_best_arm", "SimStateEstimator", "StateEstimator", "FixedPolicy",
+    "true_best_arm", "true_best_arm_for", "SimStateEstimator",
+    "StateEstimator", "FixedPolicy",
     "GreedyPolicy", "Policy", "RandomPolicy", "ThompsonBandit",
     "LOG_COLUMNS", "run_trial",
     "total_recovery", "estimate_dose_response", "evaluate_recovery",
-    "recovered_best_arms",
+    "recovered_best_arms", "per_patient_dose_response", "patient_best_arms",
+    "evaluate_against_truth",
 ]
