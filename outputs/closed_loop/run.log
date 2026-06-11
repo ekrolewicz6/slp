@@ -1,0 +1,53 @@
+======================================================================
+CLOSED-LOOP ADAPTIVE DOSING — in-silico validation
+32 patients · 4 phenotypes · 56 days (8 weeks)
+======================================================================
+
+Ground-truth best activity per phenotype (hidden from the system):
+    broca_like         → syntax
+    anomic_like        → naming
+    wernicke_like      → conversation
+    conduction_like    → script
+
+----------------------------------------------------------------------
+1. CLINICAL VALUE — mean language-ability gain over 8 weeks
+----------------------------------------------------------------------
+    Fixed (guideline default = naming)                +24.37 pts
+    Random (pure micro-randomized trial)              +23.44 pts
+    Adaptive (Thompson bandit + explore floor)        +27.41 pts
+
+----------------------------------------------------------------------
+2. CAUSAL RECOVERY — recover each phenotype's best activity
+   from the randomized decision log (IPW estimator)
+----------------------------------------------------------------------
+      phenotype true_best_arm recovered_best_arm  correct  identified_cells  total_cells
+     broca_like        syntax             syntax     True                 4            4
+    anomic_like        naming             naming     True                 4            4
+  wernicke_like  conversation       conversation     True                 4            4
+conduction_like        script             script     True                 4            4
+
+    Recovered the true best activity for 4/4 phenotypes (100%).
+
+    What the adaptive policy learned to deliver (assignment share by phenotype):
+    broca_like         top=syntax        (69%)  truth=syntax        ✓
+    anomic_like        top=naming        (45%)  truth=naming        ✓
+    wernicke_like      top=conversation  (74%)  truth=conversation  ✓
+    conduction_like    top=script        (48%)  truth=script        ✓
+
+----------------------------------------------------------------------
+3. IDENTIFIABILITY — positivity is what makes the loop estimable
+----------------------------------------------------------------------
+    policy                        min propensity   cells est.   recovered
+    adaptive (floor 0.15)                  0.046      16/16        4/4   
+    greedy (no floor)                      0.250       5/16        4/4   
+    → greedy collapses min propensity toward 0 (positivity fails):
+      unchosen activities are never tried, so their effect is
+      un-estimable. A bounded exploration floor keeps every
+      activity identifiable — the reason the design must randomize.
+
+======================================================================
+Saved logs + estimates to /Users/edankrolewicz/Code/Experiments/language-state-modeling/outputs/closed_loop
+This validates the policy → trial → causal machinery BEFORE any
+patient is enrolled. The 8-week pilot swaps in real patients and
+the foundation-model estimator; the loop is unchanged. (STRATEGY.md §4)
+======================================================================

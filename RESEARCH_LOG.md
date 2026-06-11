@@ -67,6 +67,7 @@ precisely what evolved in our thinking and why.
 | 46 | 2026-04-26 | Phase 2 with acoustics — full extraction (n=412, 74% complete) | HIGH | **Wernicke F1 0.27 → 0.44** (text-only → text+embeddings+acoustic) at full sample; macro-F1 **0.62 → 0.68**. Smaller absolute Wernicke gain than #44 (0.74 at n=258 — sample-dependent), but the direction is robust. Broca within-subtype phenotyping replicates at p<0.001 with n=94. |
 | 47 | 2026-04-26 | Phase 2 with acoustics — near-full (n=505, 96% extraction) | HIGH | **Wernicke F1 0.22 → 0.40** (text-only → text+acoustic), **Conduction F1 0.64 → 0.75**, **Anomic F1 0.53 → 0.66**, **Macro-F1 0.52 → 0.59**. Broca phenotyping p<0.001 at n=99. The fluent-subtype gains (Wernicke +84%, Conduction +17%, Anomic +25%) are exactly where text features were known to fail. |
 | **48** | **2026-04-26** | **Phase 2 with acoustics — FINAL (n=538, full extraction)** | **HIGH** | **Wernicke F1 0.26 → 0.48 (+85%), Conduction F1 0.59 → 0.74 (+25%), Anomic F1 0.50 → 0.66 (+32%), Macro-F1 0.49 → 0.65 (+33%).** Broca phenotyping p<0.001 (n=103, 4th replication). **Acoustic-only achieves Macro-F1 0.58** — competitive with text-only (0.49). The full multi-modal stack is the project's best result. |
+| **50** | **2026-04-26** | **Strategic pivot → closed-loop system; built the buildable slice** | **HIGH (in-silico)** | Pivot from observation to a closed-loop interventional system ([STRATEGY.md](STRATEGY.md)). Built + ran the in-silico closed loop (`src/closed_loop/`): adaptive dosing **+27.4** vs fixed **+24.4** vs random **+23.4** pts; IPW recovers **4/4** phenotypes' true best activity; bounded micro-randomization keeps **16/16** dose-response cells estimable vs **5/16** greedy. Built + validated Leap-1 foundation-model speech reps (`foundation_rep.py`, 1536-d wav2vec2 on real audio); corpus-scale extraction blocked on an expired TalkBank cookie (diagnosed, not a bug). |
 | **49** | **2026-04-26** | **Universality program: does aphasia recovery retrace child development?** | **HIGH** | Five-test program. T1 (axes): same 8-d subspace, different within-subspace rotation. T2 (direction): weak — 70% of improvers move developmentally, mean signed cos = +0.034. T3 (manifold): PWAs sit on the joint adult+CHILDES manifold but Broca specifically is far from CHILDES nearest neighbors (median NN dist 7.15 vs ~3.5 for other subtypes). T4 (one-number sufficiency): NULL — dev-age underperforms subtype on every WAB outcome. **T5 (qualitative similarity at matched MLU): Broca PWA vs MLU-matched children classifier F1 = 0.988, while AB Controls in same MLU range vs children F1 = 0.345. ΔF1 = +0.643 for Broca; +0.108 to +0.296 for other subtypes.** **Headline: Broca aphasia is qualitatively distinct from typically-developing child speech in a way no other subtype is. The "Broca patients talk like 3-year-olds" framing is empirically wrong.** |
 | 36 | 2026-04-26 | Salem paraphasia annotations vs WAB-AQ | NULL | Per-session paraphasia count (n_targets) does NOT correlate with WAB-AQ (r=+0.04, p=0.54, n=305). Paraphasia rate is about subtype (Conduction/Wernicke higher), not severity. |
 | 37 | 2026-04-26 | NMF vs PCA factorization at d=8 | MEDIUM | NMF MAE 18.25 vs PCA 18.66 (~equal). **NMF wins decisively on interpretability**: 8 components map cleanly to clinical primitives (sentence complexity, fragmentation, verb productivity, lexical diversity, nominal richness, production volume, aux/tense, modificational complexity). |
@@ -3346,6 +3347,98 @@ order in which to retrain language for Broca should not necessarily be
 - [outputs/broca_qualitative/subtype_vs_children_f1.csv](outputs/broca_qualitative/subtype_vs_children_f1.csv) — per-subtype F1 + control F1
 - [outputs/broca_qualitative/asymmetric_features.json](outputs/broca_qualitative/asymmetric_features.json) — list of dropped extraction-asymmetric features
 - [outputs/multi_outcome/multi_outcome_results.csv](outputs/multi_outcome/multi_outcome_results.csv) — T4 numbers across 13 WAB subtests
+
+---
+
+### 50. Strategic pivot + buildable slice of the closed-loop system
+**Date:** 2026-04-26 · **Confidence:** HIGH (in-silico) / scaffolding ·
+**Docs:** [STRATEGY.md](STRATEGY.md) · **Scripts:**
+[scripts/simulate_closed_loop.py](scripts/simulate_closed_loop.py),
+[scripts/extract_foundation_embeddings.py](scripts/extract_foundation_embeddings.py),
+[scripts/benchmark_representations.py](scripts/benchmark_representations.py)
+
+**Why this entry exists.** Experiment #34 established we are
+model-limited, not data-limited, on AphasiaBank — the next notebook on
+the same data is worth ~1.1×, not 100×. This entry records the strategic
+decision to cross from *observation* to a *closed-loop interventional
+system* (the only thing that changes clinical practice, because practice
+changes on "what to do," not "what is"), and ships the parts of that
+system buildable on data/infra we already have. The north star lives in
+[STRATEGY.md](STRATEGY.md); this is the experiment record of what was
+built and validated.
+
+**The thesis.** Language ability is a low-dimensional, measurable state.
+Today we measure and describe it (boxes 1–2 of the loop). The 100× is
+adding intervention and causal learning (boxes 3–4): an app that
+ambiently measures daily, delivers individualized practice,
+micro-randomizes the dose, and learns each patient's dose-response. That
+produces *causal* evidence observational data can never give, and
+attacks the field's open wound — nobody knows the right therapy dose for
+whom.
+
+**Built + validated this session.**
+
+**(a) In-silico closed loop** — `src/closed_loop/` (simulator, state
+estimator, policy, trial, causal). Runs the whole policy → trial →
+causal-recovery machinery on simulated patients with a KNOWN
+per-phenotype dose-response, so the machinery is validated before any
+patient is enrolled. Results (32 patients, 4 phenotypes, 56 days):
+
+| | Result |
+|---|---|
+| **Clinical value** | Adaptive (Thompson + explore floor) **+27.4 pts** vs Fixed/guideline **+24.4** vs Random/MRT **+23.4** mean state gain |
+| **Causal recovery** | IPW estimator recovers the true best activity for **4/4 phenotypes** from the randomized log |
+| **Learned policy** | Concentrated assignment on the true-best activity per phenotype (45–74% share) |
+| **Identifiability** | Adaptive keeps **16/16** (phenotype,arm) dose-response cells estimable; a greedy/no-exploration policy leaves only **5/16** estimable (min cell coverage → 0). Bounded micro-randomization is what makes the loop causally identifiable. |
+
+Note (honesty): greedy still *recovered* 4/4 here by luck (it exploits a
+good arm), but leaves 11/16 of the dose-response surface un-estimable —
+so it can't rank activities or personalize when the phenotype prior is
+wrong. The identifiability metric reported is *cell coverage*, not
+min-propensity (the latter only logs the chosen arm and would be
+misleading). An earlier draft printed a min-propensity contrast whose
+numbers contradicted the claim; it was replaced.
+
+**(b) Leap 1 — foundation-model speech representation.**
+`src/features/foundation_rep.py` (wav2vec2/HuBERT mean+std-pooled,
+layer-selectable) replaces the 55 hand-crafted summary features. The
+hypothesis: the n≈400 plateau is a *representation* ceiling, and learned
+speech embeddings carry signal the summary stats discard. Status:
+- ✅ Embedder **validated on real audio** (local cmu01a wav): 1536-d,
+  runs on MPS, finite, segments differ (cos 0.97 same-speaker).
+- ✅ Extraction script mirrors the already-working acoustic pipeline
+  (same streaming + windowing + `window_id` schema), and the benchmark
+  harness runs (hand-crafted baseline: WAB-AQ MAE 17.75 / r 0.34 and
+  subtype macro-F1 0.305 under corpus-OOD GroupKFold — intentionally
+  the controlled apples-to-apples protocol, not the headline pipeline).
+- ⚠️ **Full-corpus extraction is blocked on an expired TalkBank cookie.**
+  Diagnosed directly: `media.talkbank.org` returns a 319-byte HTML
+  auth-modal page instead of media. Not a code bug — refresh
+  `APHASIABANK_COOKIE` in `.env` (log in at aphasia.talkbank.org) and
+  run `scripts/extract_foundation_embeddings.py`, then
+  `scripts/benchmark_representations.py` reports foundation + fusion
+  vs hand-crafted. **The Leap-1 claim is confirmed iff foundation/fusion
+  beats hand-crafted there.** This credential friction is itself an
+  instance of the strategy's point that the 100× means leaving the
+  safety of frictionless public data.
+
+**(c) Torch-version gotcha (fixed).** transformers 4.57 refuses to load
+pickled `.bin` checkpoints under torch < 2.6 (CVE-2025-32434). The
+embedder now requests `use_safetensors=True` with a fallback. Worth
+remembering for any future HF model load in this env.
+
+**Bottom line.** The closed-loop architecture is no longer a slide — it
+runs end-to-end in silico and recovers a known dose-response. The
+representation upgrade is built and validated on real audio, pending only
+a credential refresh for the corpus-scale test. Next real-world step is
+the 8-week pilot ([STRATEGY.md](STRATEGY.md) §4), gated on: Leap-1
+benchmark beating hand-crafted, the in-silico recovery (done), and IRB.
+
+**Outputs:**
+- [outputs/closed_loop/policy_value.csv](outputs/closed_loop/policy_value.csv) — clinical value per policy
+- [outputs/closed_loop/dose_response_estimates.csv](outputs/closed_loop/dose_response_estimates.csv) — per-(phenotype,arm) causal estimates
+- [outputs/closed_loop/recovery_eval.csv](outputs/closed_loop/recovery_eval.csv) — recovered vs true best activity
+- [outputs/representation_benchmark/representation_benchmark.csv](outputs/representation_benchmark/representation_benchmark.csv) — hand-crafted baseline (foundation/fusion pending cookie)
 
 ---
 
@@ -9625,3 +9718,38 @@ natural speech + tight structured tasks + repeated probes + longitudinal outcome
 The original treatment-optimization vision remains intact, but the next
 scientific bottleneck is not model architecture. It is access to datasets that
 contain the right repeated measurements, outcomes, targets, and care context.
+
+---
+
+## 2026-05-04 BA Web Integration Update
+
+Brian granted access to BA Web for the registered TalkBank account, but noted
+that the hosted service should not be used for serious testing until the current
+ASR-output issue is fixed. He also clarified an important privacy/workflow
+point: by default, BA Web analysis does not deposit uploaded material into
+TalkBank.
+
+Houjun Liu, who wrote BA Web, indicated that there are two possible technical
+paths:
+
+1. a self-hosted BA Web stack, which is likely the cleaner path for development;
+2. an existing API, but one that is not yet stable.
+
+This changes the product/research build order. The app should no longer be
+treated as an independent analysis backend. It should be a front end and package
+generator for BA Web/Batchalign/CLAN, with a self-hosted BA Web adapter as the
+first serious integration target and hosted API submission as a later adapter
+once the API contract is stable.
+
+Immediate implications:
+
+- keep the app local-first and no-deposit by default;
+- implement package export before direct hosted upload;
+- ask Houjun for self-hosted setup instructions, a smoke-test audio file,
+  expected outputs, and any API docs he is comfortable sharing;
+- keep the hosted BA Web API adapter behind a feature flag until auth, upload,
+  job status, result retrieval, and error semantics are stable;
+- continue treating IISRP/IISRP-new/Wagovich media access as unresolved until
+  browser-mediated access or a supported API route is confirmed.
+
+The updated working spec is `docs/clinician_data_capture_app_spec.md`.

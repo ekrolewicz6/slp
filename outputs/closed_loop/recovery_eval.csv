@@ -1,0 +1,5 @@
+phenotype,true_best_arm,recovered_best_arm,correct,identified_cells,total_cells
+broca_like,syntax,syntax,True,4,4
+anomic_like,naming,naming,True,4,4
+wernicke_like,conversation,conversation,True,4,4
+conduction_like,script,script,True,4,4

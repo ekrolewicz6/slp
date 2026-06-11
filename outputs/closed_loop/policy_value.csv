@@ -1,0 +1,4 @@
+policy,mean_state_gain
+Fixed (guideline default = naming),24.367762060000707
+Random (pure micro-randomized trial),23.439345654214748
+Adaptive (Thompson bandit + explore floor),27.405354034230385
