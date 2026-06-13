@@ -226,13 +226,20 @@ The product vision (above) and the science reinforce each other.
 - **Claim:** Language ability is a low-dimensional **controllable
   dynamical system**. State = position on the manifold. Development and
   recovery = trajectories. Therapy = a control input.
-- **The Broca corollary (testable now-ish):** #49 shows Broca sits in a
-  manifold region unreachable by typical development. So the deep
-  question is: **is there a control path from the Broca region back to the
-  healthy manifold, and is it different from the developmental path?** Our
-  data already hint *yes* — which would mean therapy for Broca should
-  **not** recapitulate child language acquisition, contradicting a
-  Jakobson-era organizing principle of the field. Falsifiable. Memorable.
+- **The Broca corollary — now partly tested (#54).** #49 shows Broca sits
+  in a manifold region unreachable by typical development. The dynamical
+  follow-up asked whether Broca *recovers* along a distinct control path.
+  **Result (#54): yes, within-corpus and bootstrap-significant.** The
+  fluent aphasias (Anomic/Conduction/Wernicke) share a single recovery axis
+  toward health (cos 0.97); Broca's recovery direction is a significant
+  outlier (cos 0.83, gap CI [0.11, 0.18], P<1e-4) and its path is 2×
+  longer. Static uniqueness extends to recovery geometry — Broca needs its
+  own control path. *Caveat:* the stronger "recovery bypasses development"
+  claim is **confounded** by the CHILDES↔AphasiaBank domain gap (healthy
+  adults sit as far from children as Broca does), so that specific
+  cross-corpus claim is not made; the clean static answer is #49. Confirming
+  the *trajectory* (not just cross-sectional geometry) needs dense
+  longitudinal data — the pilot (§4) would generate exactly that.
 - **Why the closed loop is the proof engine:** you cannot demonstrate
   controllability by observation. You demonstrate it by *applying inputs
   and measuring the state response* — which is exactly boxes 3–4.

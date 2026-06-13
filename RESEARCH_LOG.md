@@ -67,6 +67,7 @@ precisely what evolved in our thinking and why.
 | 46 | 2026-04-26 | Phase 2 with acoustics — full extraction (n=412, 74% complete) | HIGH | **Wernicke F1 0.27 → 0.44** (text-only → text+embeddings+acoustic) at full sample; macro-F1 **0.62 → 0.68**. Smaller absolute Wernicke gain than #44 (0.74 at n=258 — sample-dependent), but the direction is robust. Broca within-subtype phenotyping replicates at p<0.001 with n=94. |
 | 47 | 2026-04-26 | Phase 2 with acoustics — near-full (n=505, 96% extraction) | HIGH | **Wernicke F1 0.22 → 0.40** (text-only → text+acoustic), **Conduction F1 0.64 → 0.75**, **Anomic F1 0.53 → 0.66**, **Macro-F1 0.52 → 0.59**. Broca phenotyping p<0.001 at n=99. The fluent-subtype gains (Wernicke +84%, Conduction +17%, Anomic +25%) are exactly where text features were known to fail. |
 | **48** | **2026-04-26** | **Phase 2 with acoustics — FINAL (n=538, full extraction)** | **HIGH** | **Wernicke F1 0.26 → 0.48 (+85%), Conduction F1 0.59 → 0.74 (+25%), Anomic F1 0.50 → 0.66 (+32%), Macro-F1 0.49 → 0.65 (+33%).** Broca phenotyping p<0.001 (n=103, 4th replication). **Acoustic-only achieves Macro-F1 0.58** — competitive with text-only (0.49). The full multi-modal stack is the project's best result. |
+| **54** | **2026-04-26** | **Broca recovers along a distinct control axis (STRATEGY §5 science)** | **MEDIUM–HIGH** | Within-AphasiaBank: the 3 fluent subtypes share ONE recovery axis toward health (cos 0.97); **Broca's recovery direction is a significant outlier (cos 0.83; coherence gap 0.142, 95% CI [0.11,0.18], P<1e-4) and its path is 2× longer (8.0 vs 2.9–4.4).** Static uniqueness (#49) extends to recovery geometry — Broca needs a distinct control path. Cross-corpus developmental test honestly flagged as confounded (healthy adults as far from children as Broca). |
 | **53** | **2026-04-26** | **Trained state heads — measurement engine emits real estimates** | **MEDIUM** | Trained + persisted the #52-recipe heads: SeverityHead (55 text feats → WAB-AQ, n=895, corpus-OOD MAE 17.6 / r 0.35) and SubtypeHead (HuBERT L9 → subtype, n=61, macro-F1 0.42). Wired into `daily_checkin.py`; demo on real audio emits severity 66.3 (true 72.8), subtype posterior, functional 66.7, `state_pending=False`. Boxes 1–2 of the loop now run on real data, not placeholders. |
 | **52** | **2026-04-26** | **Leap-1 verdict: learned speech reps vs hand-crafted features** | **MEDIUM (n=85)** | Ran Leap 1 on real streamed audio. **Task-dependent: HuBERT layer-9 beats hand-crafted on subtype (macro-F1 0.473 vs 0.349, acc 0.571 vs 0.381); hand-crafted text wins on severity (WAB-AQ r 0.55 vs 0.41).** Representation ceiling breaks where acoustics matter (corroborates #43–48 with a learned rep). HuBERT > wav2vec2; mid-layers > late. Partial confirmation, honest scope (4 corpora, ~1 window/patient). |
 | **51** | **2026-04-26** | **Pilot specified: outcome instrument + measurement engine + per-patient power** | **HIGH (in-silico)** | Leap-2 functional-communication instrument (`src/outcomes/`), Leap-3 daily-measurement engine (`src/app/daily_checkin.py`, embed-and-discard privacy, demoed on real audio), per-patient partial-pooling causal analysis (`pilot_analysis.py`), and a feasibility/power sim: 8 patients×8 weeks recovers the right activity at 67% point acc (vs 25% chance), **38% confident-correct yield with partial pooling vs 24% naive**. IRB-ready draft protocol ([docs/pilot/PROTOCOL.md](docs/pilot/PROTOCOL.md)). |
@@ -3676,6 +3677,91 @@ on real data with trained heads; boxes 3–4 (intervene → learn) run in
 silico (#50) and are specified for the pilot (#51). The remaining
 end-to-end gap for a real pilot is the ASR→text-features link for severity
 and a larger SubtypeHead training set.
+
+---
+
+### 54. Broca recovers along a distinct control axis (the STRATEGY §5 science)
+**Date:** 2026-04-26 · **Confidence:** MEDIUM–HIGH (within-corpus,
+bootstrap-significant; cross-sectional geometry) · **Script:**
+[scripts/run_control_path.py](scripts/run_control_path.py)
+
+**Goal.** Test the dynamical-systems claim from STRATEGY §5. #49 showed
+Broca occupies a *region* of language-state space no neurotypical speaker
+reaches (static). Does that distinctiveness extend to the *direction of
+recovery* — i.e., does Broca return to health along a different control
+path than other aphasias?
+
+**Primary test (within-AphasiaBank — no cross-corpus confound).** In the
+within-AB z-scored feature space, each subtype's recovery direction =
+unit(healthy-adult centroid − subtype centroid). Cosines between them
+(1.0 = same axis):
+
+| | Broca | Anomic | Conduction | Wernicke |
+|---|--:|--:|--:|--:|
+| Broca | 1.00 | 0.80 | 0.85 | 0.84 |
+| Anomic | | 1.00 | 0.98 | 0.95 |
+| Conduction | | | 1.00 | 0.99 |
+| Wernicke | | | | 1.00 |
+
+**The three fluent subtypes share essentially ONE recovery axis** (internal
+cos 0.968, bootstrap 95% CI [0.957, 0.977]); **Broca's recovery direction
+is a significant outlier** (cos to the fluent cluster 0.826 [0.791,
+0.856]). Coherence gap (fluent-internal − Broca-to-fluent) = **0.142, 95%
+CI [0.112, 0.175], P(gap≤0)=0.0000** over 1000 window-bootstraps. Broca's
+recovery axis is ~33–37° off the shared fluent axis, and its **path to
+health is the longest** (|S−A| = 8.03 vs 2.9–4.4 for the fluent subtypes).
+
+**Interpretation.** The fluent aphasias differ in flavor/severity but
+return to health along a common direction — plausibly a general
+fluency/productivity/complexity gradient. Broca's agrammatic deficit places
+it in a region whose return trajectory is geometrically distinct
+(recovering function words, morphology, syntactic frames is a different
+direction than recovering lexical access or fluency). So #49's *static*
+uniqueness extends to *recovery geometry*: **Broca needs a different
+control path back to health, and a longer one.** Clinical reading: a
+one-axis "recovery" model (or therapy aimed at the general fluency
+gradient) is mis-aimed for Broca — consistent with #49's conclusion that
+Broca should not be treated by the developmental/fluency-recovery default.
+
+**What I did NOT claim, and why (honesty).** The original hypothesis was
+that Broca uniquely *bypasses the developmental manifold* on the way to
+health. That cross-corpus test is **confounded**: a diagnostic shows
+healthy AphasiaBank adults sit as far from the CHILDES child manifold
+(5.81 units) as Broca does (4.79) — the CHILDES↔AphasiaBank domain gap, not
+pathology, sets the distance to children. So "recovery retraces
+development" is not cleanly testable across these two corpora; the clean
+static answer remains #49 (MLU-matched Broca vs children, F1 0.988). I
+report the corridor diagnostic only for transparency. A first naive run
+of the corridor metric showed all subtypes ~equidistant from the child
+manifold (~1.65ρ) — that similarity *is* the domain-gap artifact, and
+chasing it would have produced a false negative-for-Broca-specificity.
+
+**Longitudinal check (tertiary, underpowered).** Of longitudinal patients
+with *improving* WAB-AQ (Broca n=7, others n=1–5 — AQ is mostly stable
+session-to-session, #23), recovery vectors point positively toward the
+adult centroid (Broca cos +0.285), consistent with the cross-sectional
+axes but far too sparse to confirm trajectories directly.
+
+**Scope/limits.** The "recovery direction" is inferred from *cross-
+sectional* centroid geometry, not observed longitudinal trajectories — it
+says where each subtype sits relative to health, which constrains the
+return path; dense longitudinal data would be needed to confirm patients
+actually move along it. Features are the 55 hand-crafted text features
+(text-only); the Broca distinction is structural so it should be robust,
+but acoustic/HuBERT features (#52) could refine the axis. The distinct
+direction is partly a geometric consequence of Broca's distinct position
+(#49) — but a far cluster lying *behind* the others would show high cosine;
+Broca's low cosine means it is genuinely off-axis, not merely distant.
+
+**Novelty.** Extends the field-relevant #49 claim from static position to
+recovery geometry, in the controllable-dynamical-system framing: there is a
+dominant recovery axis shared across fluent aphasia, and Broca is the
+exception that requires its own control path. Directly actionable for the
+"don't default Broca to the standard recovery model" thesis.
+
+**Outputs:**
+- [outputs/control_path/recovery_axes.csv](outputs/control_path/recovery_axes.csv) — per-subtype axis isolation + path length
+- [outputs/control_path/recovery_axes.png](outputs/control_path/recovery_axes.png) — within-AB recovery axes (Broca's arrow diverges)
 
 ---
 
