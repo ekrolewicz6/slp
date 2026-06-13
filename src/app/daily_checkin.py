@@ -30,7 +30,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Callable
 
 import numpy as np
 
@@ -43,13 +42,15 @@ from src.outcomes.functional_communication import (composite_fco,
 class DailyRecord:
     patient_id: str
     day: int
-    language_state: float | None       # 0–100, None until a trained head exists
-    state_pending: bool
+    language_state: float | None       # 0–100 WAB-AQ estimate (severity head)
+    state_pending: bool                # True if no severity estimate produced
     functional_daily: float            # 0–100
     functional_weekly: float | None    # 0–100
     functional_composite: float        # 0–100
     embedding_dim: int
     embedding_norm: float              # summary only; raw embedding kept in-memory
+    subtype_pred: str | None = None    # argmax subtype (subtype head, from audio)
+    subtype_probs: dict | None = None  # full subtype posterior
     audio_retained: bool = False       # always False — audio is discarded
     embedding: np.ndarray | None = field(default=None, repr=False)
 
@@ -75,12 +76,23 @@ def run_daily_checkin(patient_id: str, day: int,
                       ema_responses: dict[str, int],
                       weekly_responses: dict[str, int] | None = None,
                       embedder=None,
-                      state_head: Callable[[np.ndarray], float] | None = None
+                      subtype_head=None,
+                      severity_head=None,
+                      text_features: dict | None = None,
                       ) -> DailyRecord:
     """Run one daily check-in and return a privacy-preserving DailyRecord.
 
-    `embedder` is a FoundationEmbedder (lazy-loaded). If `audio_path` is
-    None (EMA-only day), the embedding is skipped.
+    Representations → estimates follow the Leap-1 recipe (#52):
+      - audio → HuBERT embedding → `subtype_head` → subtype posterior
+      - `text_features` (from the day's transcript) → `severity_head` →
+        language-state (WAB-AQ 0–100)
+
+    `embedder` is a FoundationEmbedder (lazy-loaded), ideally the encoder
+    the subtype head was trained on. If `audio_path` is None (EMA-only
+    day) the embedding/subtype step is skipped. If `text_features` is None
+    the severity estimate is left pending (it needs the ASR transcript;
+    the audio embedding alone does not predict severity well — that's the
+    whole point of #52).
     """
     emb_vec = None
     emb_dim = 0
@@ -98,10 +110,15 @@ def run_daily_checkin(patient_id: str, day: int,
               if weekly_responses else None)
     composite = composite_fco(daily, weekly)
 
+    subtype_pred = subtype_probs = None
+    if subtype_head is not None and emb_vec is not None:
+        subtype_probs = subtype_head.predict_proba(emb_vec)
+        subtype_pred = max(subtype_probs, key=subtype_probs.get)
+
     state = None
     pending = True
-    if state_head is not None and emb_vec is not None:
-        state = float(np.clip(state_head(emb_vec), 0.0, 100.0))
+    if severity_head is not None and text_features is not None:
+        state = float(severity_head.predict(text_features))
         pending = False
 
     return DailyRecord(
@@ -109,4 +126,5 @@ def run_daily_checkin(patient_id: str, day: int,
         state_pending=pending, functional_daily=daily,
         functional_weekly=weekly, functional_composite=composite,
         embedding_dim=emb_dim, embedding_norm=emb_norm,
+        subtype_pred=subtype_pred, subtype_probs=subtype_probs,
         audio_retained=False, embedding=emb_vec)

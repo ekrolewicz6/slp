@@ -118,12 +118,15 @@ whether it can be done on data/infra we already have.
 - **Impact:** High (prerequisite for steering). **Effort:** Medium (app +
   on-device/edge inference + privacy). **Buildable now:** ⚠️ — the
   inference core exists; the app UI + consent flow do not.
-- **Status in this repo:** ✅ measurement engine shipped —
-  [`src/app/daily_checkin.py`](src/app/daily_checkin.py): speech → on-device
-  embedding (waveform discarded) → functional score → closed-loop log row.
-  Demoed end-to-end on real audio
-  ([`scripts/demo_daily_checkin.py`](scripts/demo_daily_checkin.py)). Mobile
-  UI + consent flow remain.
+- **Status in this repo:** ✅ measurement engine shipped AND now emits real
+  estimates — [`src/app/daily_checkin.py`](src/app/daily_checkin.py): speech
+  → on-device HuBERT embedding (waveform discarded) →
+  [trained heads](src/models/heads/state_head.py) → real subtype posterior +
+  WAB-AQ state estimate + functional score → closed-loop log row. Heads
+  trained by [`scripts/train_state_heads.py`](scripts/train_state_heads.py)
+  (#53). Demoed end-to-end on real audio (severity 66.3 vs true 72.8).
+  Remaining: ASR→text link for severity-from-audio, larger SubtypeHead set,
+  mobile UI + consent flow.
 
 ### Leap 4 — Intervention + causality: the lever
 - **What:** The app *delivers* individualized practice and

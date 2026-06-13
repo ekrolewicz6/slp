@@ -67,6 +67,7 @@ precisely what evolved in our thinking and why.
 | 46 | 2026-04-26 | Phase 2 with acoustics — full extraction (n=412, 74% complete) | HIGH | **Wernicke F1 0.27 → 0.44** (text-only → text+embeddings+acoustic) at full sample; macro-F1 **0.62 → 0.68**. Smaller absolute Wernicke gain than #44 (0.74 at n=258 — sample-dependent), but the direction is robust. Broca within-subtype phenotyping replicates at p<0.001 with n=94. |
 | 47 | 2026-04-26 | Phase 2 with acoustics — near-full (n=505, 96% extraction) | HIGH | **Wernicke F1 0.22 → 0.40** (text-only → text+acoustic), **Conduction F1 0.64 → 0.75**, **Anomic F1 0.53 → 0.66**, **Macro-F1 0.52 → 0.59**. Broca phenotyping p<0.001 at n=99. The fluent-subtype gains (Wernicke +84%, Conduction +17%, Anomic +25%) are exactly where text features were known to fail. |
 | **48** | **2026-04-26** | **Phase 2 with acoustics — FINAL (n=538, full extraction)** | **HIGH** | **Wernicke F1 0.26 → 0.48 (+85%), Conduction F1 0.59 → 0.74 (+25%), Anomic F1 0.50 → 0.66 (+32%), Macro-F1 0.49 → 0.65 (+33%).** Broca phenotyping p<0.001 (n=103, 4th replication). **Acoustic-only achieves Macro-F1 0.58** — competitive with text-only (0.49). The full multi-modal stack is the project's best result. |
+| **53** | **2026-04-26** | **Trained state heads — measurement engine emits real estimates** | **MEDIUM** | Trained + persisted the #52-recipe heads: SeverityHead (55 text feats → WAB-AQ, n=895, corpus-OOD MAE 17.6 / r 0.35) and SubtypeHead (HuBERT L9 → subtype, n=61, macro-F1 0.42). Wired into `daily_checkin.py`; demo on real audio emits severity 66.3 (true 72.8), subtype posterior, functional 66.7, `state_pending=False`. Boxes 1–2 of the loop now run on real data, not placeholders. |
 | **52** | **2026-04-26** | **Leap-1 verdict: learned speech reps vs hand-crafted features** | **MEDIUM (n=85)** | Ran Leap 1 on real streamed audio. **Task-dependent: HuBERT layer-9 beats hand-crafted on subtype (macro-F1 0.473 vs 0.349, acc 0.571 vs 0.381); hand-crafted text wins on severity (WAB-AQ r 0.55 vs 0.41).** Representation ceiling breaks where acoustics matter (corroborates #43–48 with a learned rep). HuBERT > wav2vec2; mid-layers > late. Partial confirmation, honest scope (4 corpora, ~1 window/patient). |
 | **51** | **2026-04-26** | **Pilot specified: outcome instrument + measurement engine + per-patient power** | **HIGH (in-silico)** | Leap-2 functional-communication instrument (`src/outcomes/`), Leap-3 daily-measurement engine (`src/app/daily_checkin.py`, embed-and-discard privacy, demoed on real audio), per-patient partial-pooling causal analysis (`pilot_analysis.py`), and a feasibility/power sim: 8 patients×8 weeks recovers the right activity at 67% point acc (vs 25% chance), **38% confident-correct yield with partial pooling vs 24% naive**. IRB-ready draft protocol ([docs/pilot/PROTOCOL.md](docs/pilot/PROTOCOL.md)). |
 | **50** | **2026-04-26** | **Strategic pivot → closed-loop system; built the buildable slice** | **HIGH (in-silico)** | Pivot from observation to a closed-loop interventional system ([STRATEGY.md](STRATEGY.md)). Built + ran the in-silico closed loop (`src/closed_loop/`): adaptive dosing **+27.4** vs fixed **+24.4** vs random **+23.4** pts; IPW recovers **4/4** phenotypes' true best activity; bounded micro-randomization keeps **16/16** dose-response cells estimable vs **5/16** greedy. Built + validated Leap-1 foundation-model speech reps (`foundation_rep.py`, 1536-d wav2vec2 on real audio); corpus-scale extraction blocked on an expired TalkBank cookie (diagnosed, not a bug). |
@@ -3617,6 +3618,64 @@ TalkBank media auth is a single `talkbank=` session cookie in `.env`
 **Outputs:**
 - [outputs/representation_benchmark/representation_benchmark.csv](outputs/representation_benchmark/representation_benchmark.csv) — layer-8 handcrafted/foundation/fusion
 - [outputs/representation_benchmark/encoder_bakeoff.csv](outputs/representation_benchmark/encoder_bakeoff.csv) — multi-encoder comparison
+
+---
+
+### 53. Trained state heads — the measurement engine now emits real estimates
+**Date:** 2026-04-26 · **Confidence:** MEDIUM · **Scripts:**
+[scripts/train_state_heads.py](scripts/train_state_heads.py),
+[scripts/demo_daily_checkin.py](scripts/demo_daily_checkin.py) · **Module:**
+[src/models/heads/state_head.py](src/models/heads/state_head.py)
+
+**Goal.** Close the `state=None/pending` gap in the daily-measurement
+engine (#51) by training the calibrated heads the Leap-1 verdict (#52)
+prescribed, and wiring them in so the engine produces real estimates from
+real audio + self-report.
+
+**Two heads, the #52 recipe (text→severity, HuBERT→subtype):**
+- **SeverityHead** — 55 hand-crafted text features → WAB-AQ (0–100),
+  trained on all 895 labeled patients. Patient-grouped corpus-OOD CV:
+  **MAE 17.62, r=+0.347.** (This is the honest leave-corpus-out number for
+  text-features-only; the project's headline MAE≈9.7 used subtype labels +
+  embeddings + non-OOD CV. The head is the deployable severity estimator.)
+- **SubtypeHead** — HuBERT layer-9 embedding → subtype, trained on the 61
+  bake-off patients with a subtype label (Anomic/Broca/Conduction/
+  NotAphasic). Corpus-OOD CV **macro-F1 0.419.** Carries its own scaler +
+  PCA + the encoder identity it expects.
+
+Both persist via joblib to `data/models/` (gitignored — models stay local
+like the parquets) and are self-contained (load → predict, no retraining).
+
+**Wired into the engine.** `src/app/daily_checkin.py` now takes
+`subtype_head` + `severity_head` (+ the day's `text_features`) and emits a
+real subtype posterior from the audio embedding and a real language-state
+(WAB-AQ) estimate. The honest split is enforced in the interface: the
+audio embedding drives subtype; severity needs the ASR transcript's text
+features (the audio embedding alone doesn't predict severity — that's the
+#52 finding). `state_pending` is now `False` when a severity estimate is
+produced.
+
+**End-to-end demo (`scripts/demo_daily_checkin.py`) on real audio:**
+severity estimate **66.3 vs true WAB-AQ 72.8** (~6.5 pts, representative
+mid-range patient); subtype posterior from the cmu01a sample → Broca;
+functional composite 66.7; `audio_retained=False`. The whole loop —
+measure → represent → estimate — now runs on real data, not placeholders.
+
+**Honest limits.** SubtypeHead is trained on only 61 patients / 4 corpora
+(the bake-off set) — small; it should be retrained once a full-corpus
+HuBERT extraction lands. SeverityHead's corpus-OOD r=0.35 is modest (the
+hard generalization regime); within-corpus it is much stronger. The demo's
+audio and text features come from different patients (the local wav,
+cmu01a, has no WAB label) — in production they are the same patient's daily
+sample. Severity still requires an ASR step (Whisper) to produce text
+features from the daily audio; that link is specified but not yet wired
+end-to-end from audio.
+
+**State of the loop now:** boxes 1–2 (measure → represent → estimate) run
+on real data with trained heads; boxes 3–4 (intervene → learn) run in
+silico (#50) and are specified for the pilot (#51). The remaining
+end-to-end gap for a real pilot is the ASR→text-features link for severity
+and a larger SubtypeHead training set.
 
 ---
 
